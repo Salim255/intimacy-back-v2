@@ -73,12 +73,9 @@ describe('UsersService', () => {
   });
 
   it('should count the number of users', async () => {
-    mockUserRepository.count.mockResolvedValue({
-      userCount: 1,
-    });
-
-    const {userCount} = await service.countUsers();
+    mockUserRepository.count.mockResolvedValue(1);
+    const userCount = await service.countUsers();
     expect(userCount).toEqual(1);
     expect(mockUserRepository.count).toHaveBeenCalled();
-  })
+  });
 });

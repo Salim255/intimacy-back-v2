@@ -58,7 +58,7 @@ export class UserRepository {
     return rows[0];
   }
 
-  static async count(): Promise<number> {
+  async count(): Promise<number> {
     const query = `SELECT COUNT(*) FROM users;`;
     const { rows } = (await pool.query(query)) as QueryResult<{
       count: string;

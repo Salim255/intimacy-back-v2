@@ -44,4 +44,13 @@ export class UsersService {
       throw new Error(`Error get user: ${error}`);
     }
   }
+
+  async countUsers() {
+    try {
+      const count = await this.userRepository.count();
+      return count;
+    } catch (error) {
+      throw new Error(`Error in count users: ${error}`);
+    }
+  }
 }
