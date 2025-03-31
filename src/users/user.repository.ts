@@ -12,11 +12,11 @@ export type UserWithKeys = User & {
 export class UserRepository {
   constructor() {}
 
-  static async insert(data: {
+  async insert(data: {
     firstName: string;
     lastName: string;
     email: string;
-    hashedPassword: string;
+    password: string;
     isStaff: boolean;
   }): Promise<User> {
     const query = `
@@ -28,7 +28,7 @@ export class UserRepository {
       data.firstName,
       data.lastName,
       data.email,
-      data.hashedPassword,
+      data.password,
       data.isStaff,
     ];
 

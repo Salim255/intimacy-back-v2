@@ -21,9 +21,9 @@ describe('UsersService', () => {
     service = module.get<UsersService>(UsersService);
   });
 
-  it('should create user successful', () => {
+  it('should create user successful', async () => {
     mockUserRepository.getUser.mockResolvedValue(null);
-    mockUserRepository.insert.mockRejectedValue({
+    mockUserRepository.insert.mockResolvedValue({
       id: 1,
       firstName: 'John',
       lastName: 'Doe',
@@ -32,7 +32,7 @@ describe('UsersService', () => {
       isStaff: false,
     });
 
-    const result = service.createUser({
+    const result = await service.createUser({
       firstName: 'John',
       lastName: 'Doe',
       email: 'test@example.com',
