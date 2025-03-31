@@ -8,6 +8,7 @@ const mockUserRepository = {
   insert: jest.fn(),
   count: jest.fn(),
   disableUser: jest.fn(),
+  updateUser: jest.fn(),
 };
 
 describe('UsersService', () => {
@@ -94,5 +95,20 @@ describe('UsersService', () => {
     expect(disabledUser).toHaveProperty('id', 1);
     expect(disabledUser.is_active).toEqual(false);
     expect(mockUserRepository.disableUser).toHaveBeenCalled();
+  });
+
+  it('should update user ', async () => {
+    mockUserRepository.updateUser.mockResolvedValue({
+      id: 1,
+      firstName: 'UpdatedName',
+      lastName: 'Doe',
+      email: 'test@example.com',
+      password: 'hashedpassword',
+      isStaff: false,
+    });
+    const updatedUser = await service.updateUser();
+    expect(updatedUser).toHaveProperty('id', 1);
+    expect(updatedUser.firstName).toEqual('UpdatedName');
+    expect(mockUserRepository.updateUser).toHaveBeenCalled();
   });
 });
