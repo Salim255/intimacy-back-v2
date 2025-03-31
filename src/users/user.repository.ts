@@ -36,7 +36,7 @@ export class UserRepository {
     return rows[0];
   }
 
-  static async getUserById(userId: number): Promise<User> {
+  async getUserById(userId: number): Promise<User> {
     const query = `SELECT * FROM users WHERE id = $1;`;
     const { rows } = (await pool.query(query, [userId])) as QueryResult<User>;
     return rows[0];

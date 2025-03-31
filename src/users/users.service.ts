@@ -36,4 +36,12 @@ export class UsersService {
       throw new Error(`Error get user: ${error}`);
     }
   }
+  async getUserById(userId: number): Promise<User> {
+    try {
+      const user = await this.userRepository.getUserById(userId);
+      return user;
+    } catch (error) {
+      throw new Error(`Error get user: ${error}`);
+    }
+  }
 }

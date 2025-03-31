@@ -4,7 +4,9 @@ import { UserRepository } from './user.repository';
 
 const mockUserRepository = {
   getUser: jest.fn(),
+  getUserById: jest.fn(),
   insert: jest.fn(),
+  count: jest.fn(),
 };
 
 describe('UsersService', () => {
@@ -56,4 +58,27 @@ describe('UsersService', () => {
     expect(user).toHaveProperty('id', 1);
     expect(mockUserRepository.getUser).toHaveBeenCalled();
   });
+
+  it('should fetch user by user id', async () => {
+    mockUserRepository.getUserById.mockResolvedValue({
+      id: 1,
+      firstName: 'John',
+      lastName: 'Doe',
+      isStaff: false,
+    });
+    const userId = 1;
+    const user = await service.getUserById(userId);
+    expect(user).toHaveProperty('id', 1);
+    expect(mockUserRepository.getUserById).toHaveBeenCalled();
+  });
+
+  it('should count the number of users', async () => {
+    mockUserRepository.count.mockResolvedValue({
+      userCount: 1,
+    });
+
+    const {userCount} = await service.countUsers();
+    expect(userCount).toEqual(1);
+    expect(mockUserRepository.count).toHaveBeenCalled();
+  })
 });
