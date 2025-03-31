@@ -54,5 +54,6 @@ describe('UsersService', () => {
 
     const user = await service.getUser('email');
     expect(user).toHaveProperty('id', 1);
+    expect(mockUserRepository.getUser).toHaveBeenCalled();
   });
 });
