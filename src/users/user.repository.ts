@@ -77,9 +77,9 @@ export class UserRepository {
     return rows[0];
   }
 
-  static async updateUser(query: string, values: any[]): Promise<User> {
+  async updateUser(query: string, values: any[]): Promise<User> {
     const { rows } = (await pool.query(query, values)) as QueryResult<User>;
-    return rows[0] || null;
+    return rows[0];
   }
 
   static async updateUserConnectionStatus(

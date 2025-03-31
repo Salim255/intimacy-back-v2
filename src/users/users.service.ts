@@ -61,4 +61,16 @@ export class UsersService {
       throw new Error(`Error in disable user: ${error}`);
     }
   }
+
+  async updateUser(
+    query: string,
+    values: (string | number | boolean | null)[],
+  ): Promise<User> {
+    try {
+      const updatedUser = await this.userRepository.updateUser(query, values);
+      return updatedUser;
+    } catch (error) {
+      throw new Error(`Error in update user: ${error}`);
+    }
+  }
 }

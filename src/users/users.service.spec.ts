@@ -9,6 +9,7 @@ const mockUserRepository = {
   count: jest.fn(),
   disableUser: jest.fn(),
   updateUser: jest.fn(),
+  updateUserConnectionStatus: jest.fn(),
 };
 
 describe('UsersService', () => {
@@ -98,17 +99,34 @@ describe('UsersService', () => {
   });
 
   it('should update user ', async () => {
+    const query = 'UPDATE users SET first_name = $1 WHERE id = $2 RETURNING *;';
+    const values = ['UpdatedName', 1];
     mockUserRepository.updateUser.mockResolvedValue({
       id: 1,
-      firstName: 'UpdatedName',
-      lastName: 'Doe',
+      first_name: 'UpdatedName',
+      last_name: 'Doe',
       email: 'test@example.com',
       password: 'hashedpassword',
       isStaff: false,
     });
-    const updatedUser = await service.updateUser();
+    const updatedUser = await service.updateUser(query, values);
     expect(updatedUser).toHaveProperty('id', 1);
-    expect(updatedUser.firstName).toEqual('UpdatedName');
+    expect(updatedUser.first_name).toEqual('UpdatedName');
     expect(mockUserRepository.updateUser).toHaveBeenCalled();
   });
+
+  it('should update user connection status',async () => {
+    mockUserRepository.updateUserConnectionStatus.mockResolvedValue({
+      id: 1,
+      first_name: 'UpdatedName',
+      last_name: 'Doe',
+      avatar: null,
+      connection_status: true,
+    }),
+
+    const result = await service.updateUserConnectionStatus(1, 'offline');
+    expect(result).toHaveProperty('id', 1);
+    expect(result.connection_status).toEqual(true);
+    expect(mockUserRepository.updateUserConnectionStatus).toHaveBeenCalled();
+  } )
 });
