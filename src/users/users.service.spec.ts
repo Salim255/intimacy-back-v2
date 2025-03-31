@@ -40,5 +40,19 @@ describe('UsersService', () => {
       isStaff: false,
     });
     expect(result).toHaveProperty('id', 1);
+    expect(result).toHaveProperty('email', 'test@example.com');
+    expect(mockUserRepository.insert).toHaveBeenCalled();
+  });
+
+  it('should get user with email and password', async () => {
+    mockUserRepository.getUser.mockResolvedValue({
+      id: 1,
+      firstName: 'John',
+      lastName: 'Doe',
+      isStaff: false,
+    });
+
+    const user = await service.getUser({email, password});
+    expect(user).toHaveProperty('id', 1);
   });
 });

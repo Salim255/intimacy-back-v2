@@ -24,7 +24,7 @@ export class UsersService {
       });
       return createdUser;
     } catch (error) {
-      throw new Error('Error creating user', error);
+      throw new Error(`Error creating user: ${error}`);
     }
   }
 }
