@@ -42,7 +42,7 @@ export class UserRepository {
     return rows[0];
   }
 
-  static async getUser(email: string): Promise<UserWithKeys> {
+  async getUser(email: string): Promise<UserWithKeys> {
     const query = `
       SELECT 
         u.*, 

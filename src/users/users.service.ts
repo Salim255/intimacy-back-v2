@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
-import { UserRepository } from './user.repository';
+import { UserRepository, UserWithKeys } from './user.repository';
 
 export type insertUserType = {
   firstName: string;
@@ -25,6 +25,15 @@ export class UsersService {
       return createdUser;
     } catch (error) {
       throw new Error(`Error creating user: ${error}`);
+    }
+  }
+
+  async getUser(email: string): Promise<UserWithKeys> {
+    try {
+      const user = await this.userRepository.getUser(email);
+      return user;
+    } catch (error) {
+      throw new Error(`Error get user: ${error}`);
     }
   }
 }

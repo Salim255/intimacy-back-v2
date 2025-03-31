@@ -52,7 +52,7 @@ describe('UsersService', () => {
       isStaff: false,
     });
 
-    const user = await service.getUser({email, password});
+    const user = await service.getUser('email');
     expect(user).toHaveProperty('id', 1);
   });
 });
