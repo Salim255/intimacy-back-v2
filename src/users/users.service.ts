@@ -45,12 +45,20 @@ export class UsersService {
     }
   }
 
-  async countUsers() {
+  async countUsers(): Promise<number> {
     try {
       const count = await this.userRepository.count();
       return count;
     } catch (error) {
       throw new Error(`Error in count users: ${error}`);
+    }
+  }
+  async disableUser(userId: number) {
+    try {
+      const disabledUser = await this.userRepository.disableUser(userId);
+      return disabledUser;
+    } catch (error) {
+      throw new Error(`Error in disable user: ${error}`);
     }
   }
 }

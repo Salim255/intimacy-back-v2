@@ -7,6 +7,7 @@ const mockUserRepository = {
   getUserById: jest.fn(),
   insert: jest.fn(),
   count: jest.fn(),
+  disableUser: jest.fn(),
 };
 
 describe('UsersService', () => {
@@ -77,5 +78,21 @@ describe('UsersService', () => {
     const userCount = await service.countUsers();
     expect(userCount).toEqual(1);
     expect(mockUserRepository.count).toHaveBeenCalled();
+  });
+
+  it('should disable user', async () => {
+    mockUserRepository.disableUser.mockResolvedValue({
+      id: 1,
+      firstName: 'John',
+      lastName: 'Doe',
+      isStaff: false,
+      is_active: false,
+    });
+
+    const userId = 1;
+    const disabledUser = await service.disableUser(userId);
+    expect(disabledUser).toHaveProperty('id', 1);
+    expect(disabledUser.is_active).toEqual(false);
+    expect(mockUserRepository.disableUser).toHaveBeenCalled();
   });
 });
