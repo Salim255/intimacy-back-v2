@@ -73,4 +73,18 @@ export class UsersService {
       throw new Error(`Error in update user: ${error}`);
     }
   }
+  async updateUserConnectionStatus(
+    userId: number,
+    connectionStatus: string,
+  ): Promise<User> {
+    try {
+      const updatedUser = await this.userRepository.updateUserConnectionStatus(
+        userId,
+        connectionStatus,
+      );
+      return updatedUser;
+    } catch (error) {
+      throw new Error(`Error in update user connection status: ${error}`);
+    }
+  }
 }

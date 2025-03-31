@@ -115,18 +115,18 @@ describe('UsersService', () => {
     expect(mockUserRepository.updateUser).toHaveBeenCalled();
   });
 
-  it('should update user connection status',async () => {
+  it('should update user connection status', async () => {
     mockUserRepository.updateUserConnectionStatus.mockResolvedValue({
       id: 1,
       first_name: 'UpdatedName',
       last_name: 'Doe',
       avatar: null,
       connection_status: true,
-    }),
+    });
 
     const result = await service.updateUserConnectionStatus(1, 'offline');
     expect(result).toHaveProperty('id', 1);
     expect(result.connection_status).toEqual(true);
     expect(mockUserRepository.updateUserConnectionStatus).toHaveBeenCalled();
-  } )
+  });
 });

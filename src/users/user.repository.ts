@@ -82,7 +82,7 @@ export class UserRepository {
     return rows[0];
   }
 
-  static async updateUserConnectionStatus(
+  async updateUserConnectionStatus(
     userId: number,
     connectionStatus: string,
   ): Promise<User> {
