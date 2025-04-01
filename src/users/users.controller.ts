@@ -5,11 +5,15 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @Post()
-  signup() {
+  async signup() {
+    const result = await this.usersService.countUsers();
+    console.log(result);
     return 'hello from signup';
   }
   @Get()
-  getHello(): string {
-    return 'Hello world!, comment ca va, are you okay , where fuck you ?';
+  async getHello() {
+    const result = await this.usersService.countUsers();
+    console.log(result);
+    return `Hello world!, comment ca va, are you okay , where fuck you ?: ${result}`;
   }
 }

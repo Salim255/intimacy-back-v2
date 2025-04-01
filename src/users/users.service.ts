@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { User } from './entities/user.entity';
 import { UserRepository, UserWithKeys } from './user.repository';
-import { InjectRepository } from '@nestjs/typeorm';
 
 export type insertUserType = {
   firstName: string;
@@ -14,10 +13,7 @@ export type insertUserType = {
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(UserRepository)
-    private readonly userRepository: UserRepository,
-  ) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
   async createUser(data: insertUserType): Promise<User> {
     try {
