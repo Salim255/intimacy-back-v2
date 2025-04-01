@@ -17,10 +17,12 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "allowJs": true
+    "allowJs": true,
   },  
   "include": [
-    "src/**/*", "migrations/**/*.js",
+    "src/**/*", 
+    "test/**/*.ts",
+    "migrations/**/*.js",
     "test/context.ts"
  ]
 }
