@@ -10,7 +10,6 @@ async function bootstrap() {
     .setTitle('API Documentation') // Set the title of your API
     .setDescription('API description') // Provide a short description
     .setVersion('1.0') // Set the version of your API
-    .addTag('users') // You can add tags here to group endpoints
     .build(); // Create the document options
 
   // Generate the Swagger document
