@@ -1,9 +1,16 @@
 import { Controller, Get, Patch, Post, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateUserDto } from './user-dto/create-user-dto';
 import { CreateUserResponseDto } from './user-dto/create-user-response-dto';
 import { LoginUserDto } from './user-dto/login-user-dto';
+import { UpdateUserDto } from './user-dto/update-user-dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -36,19 +43,40 @@ export class UsersController {
     return 'hello login';
   }
 
-  @Get()
-  async getHello() {
-    const result = await this.usersService.countUsers();
-    console.log(result);
-    return `Hello world!, comment ca va, are you okay , where fuck you ?: ${result}`;
+  @Get(':userId')
+  @ApiOperation({ summary: `Get user with it's id` })
+  @ApiParam({ name: 'userId', description: `User's to fetch id` })
+  @ApiResponse({
+    status: 200,
+    description: 'Fetched user with success',
+    type: UpdateUserDto,
+  })
+  getUser() {
+    return 'Hello from get user by Id';
   }
 
   @Patch('update-me')
+  @ApiOperation({ summary: 'Update user' })
+  @ApiBody({ type: UpdateUserDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated successfully',
+    type: UpdateUserDto,
+  })
   updateMe() {
     return 'Hello update me';
   }
 
-  @Put(':userId/disable')
+  @Put(':userId/')
+  @ApiOperation({ summary: 'Disable user' })
+  @ApiParam({ name: 'userId', description: `User's to disable id` })
+  @ApiResponse({
+    status: 201,
+    description: 'User disabled with success',
+    schema: {
+      example: { is_active: false },
+    },
+  })
   disable() {
     return 'Hello from disable';
   }
