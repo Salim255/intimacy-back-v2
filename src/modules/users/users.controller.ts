@@ -3,6 +3,7 @@ import { UsersService } from './users.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './user-dto/create-user-dto';
 import { CreateUserResponseDto } from './user-dto/create-user-response-dto';
+import { LoginUserDto } from './user-dto/login-user-dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -24,6 +25,13 @@ export class UsersController {
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Login a user' })
+  @ApiBody({ type: LoginUserDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User logged successfully',
+    type: CreateUserResponseDto,
+  })
   login() {
     return 'hello login';
   }
