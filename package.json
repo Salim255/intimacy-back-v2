@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:integration": "jest --config jest.config.js",
     "migrate-up": "node-pg-migrate up",
-    "migrate": "node-pg-migrate"
+    "create-table": "node-pg-migrate create"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
