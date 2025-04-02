@@ -5,7 +5,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../src/users/entities/user.entity';
+import { User } from '../src/modules/users/entities/user.entity';
 
 describe('user e2e (e2e)', () => {
   let context: TestContext;
