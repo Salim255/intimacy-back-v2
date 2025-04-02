@@ -23,6 +23,7 @@
     "src/**/*", 
     "test/**/*.ts",
     "migrations/**/*.js",
-    "test/context.ts"
+    "test/context.ts",
+    "jest.config.js"
  ]
 }
