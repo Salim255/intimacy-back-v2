@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
-import { UserRepository } from './user.repository';
+import { UserRepository } from '../repository/user.repository';
 
 const mockUserRepository = {
   getUser: jest.fn(),

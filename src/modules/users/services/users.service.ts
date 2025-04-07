@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { User } from './entities/user.entity';
-import { UserRepository, UserWithKeys } from './user.repository';
+import { User } from '../entities/user.entity';
+import { UserRepository, UserWithKeys } from '../repository/user.repository';
 
 export type insertUserType = {
   firstName: string;

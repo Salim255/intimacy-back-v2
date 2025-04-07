@@ -24,6 +24,6 @@
     "test/**/*.ts",
     "migrations/**/*.js",
     "test/context.ts",
-    "jest.config.js"
+    "jest.integration.config.js",
  ]
 }

@@ -1,5 +1,5 @@
 import { Controller, Get, Patch, Post, Put } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UsersService } from '../services/users.service';
 import {
   ApiBody,
   ApiOperation,
@@ -7,10 +7,10 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CreateUserDto } from './user-dto/create-user-dto';
-import { CreateUserResponseDto } from './user-dto/create-user-response-dto';
-import { LoginUserDto } from './user-dto/login-user-dto';
-import { UpdateUserDto } from './user-dto/update-user-dto';
+import { CreateUserDto } from '../user-dto/create-user-dto';
+import { CreateUserResponseDto } from '../user-dto/create-user-response-dto';
+import { LoginUserDto } from '../user-dto/login-user-dto';
+import { UpdateUserDto } from '../user-dto/update-user-dto';
 
 @ApiTags('users')
 @Controller('users')
