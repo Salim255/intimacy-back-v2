@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
 
 export type UserWithKeys = User & {
   private_key: string;
@@ -13,8 +13,6 @@ export class UserRepository {
   constructor(
     @InjectDataSource()
     private readonly dataSource: DataSource,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
   ) {}
 
   async insert(data: {

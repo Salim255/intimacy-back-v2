@@ -3,7 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './modules/users/entities/user.entity';
 import { UserKeysModule } from './modules/user-keys/user-keys.module';
 import { ConfigModule } from '@nestjs/config';
 
@@ -18,12 +17,11 @@ import { ConfigModule } from '@nestjs/config';
       url: process.env.DATABASE_URL, // Use environment variable or a local connection string
       autoLoadEntities: true, // Automatically load entities
       synchronize: true, // Be careful using this in production
-      entities: [User],
     }),
     UsersModule,
-    UserKeysModule, // Import UsersModule
+    UserKeysModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController], // Controller to handle incoming requests
   providers: [AppService],
 })
 export class AppModule {}

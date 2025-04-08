@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserKeys } from '../entities/user-keys.entity';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 export type UserKeysType = {
   user_id: number;
@@ -11,8 +11,6 @@ export type UserKeysType = {
 @Injectable()
 export class UserKeysRepository {
   constructor(
-    @InjectRepository(UserKeys)
-    private readonly userKeysRepository: Repository<UserKeys>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
   ) {}
