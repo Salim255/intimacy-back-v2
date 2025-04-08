@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
-import { UserKeysService } from './user-keys.service';
-import { UserKeysController } from './user-keys.controller';
+import { UserKeysService } from './services/user-keys.service';
+import { UserKeysController } from './controllers/user-keys.controller';
+import { UserKeysRepository } from './repository/user-keys.repository';
 
 @Module({
-  providers: [UserKeysService],
-  controllers: [UserKeysController]
+  controllers: [UserKeysController],
+  providers: [UserKeysService, UserKeysRepository],
+  exports: [UserKeysService],
 })
 export class UserKeysModule {}

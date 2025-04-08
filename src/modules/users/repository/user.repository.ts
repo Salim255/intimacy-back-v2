@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
 export type UserWithKeys = User & {
   private_key: string;
@@ -19,24 +18,17 @@ export class UserRepository {
   ) {}
 
   async insert(data: {
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
     email: string;
     password: string;
-    isStaff: boolean;
   }): Promise<User> {
     const query = `
-      INSERT INTO users (first_name, last_name, email, password, is_staff)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO users (first_name, last_name, email, password)
+      VALUES ($1, $2, $3, $4)
       RETURNING *;
     `;
-    const values = [
-      data.firstName,
-      data.lastName,
-      data.email,
-      data.password,
-      data.isStaff,
-    ];
+    const values = [data.first_name, data.last_name, data.email, data.password];
     const result: User[] = await this.dataSource.query(query, values);
     // const { rows } = (await pool.query(query, values)) ;
     return result[0];

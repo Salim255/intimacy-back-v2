@@ -30,19 +30,19 @@ describe('UsersService', () => {
     mockUserRepository.getUser.mockResolvedValue(null);
     mockUserRepository.insert.mockResolvedValue({
       id: 1,
-      firstName: 'John',
-      lastName: 'Doe',
+      first_name: 'John',
+      last_name: 'Doe',
       email: 'test@example.com',
       password: 'hashedpassword',
-      isStaff: false,
     });
 
     const result = await service.createUser({
-      firstName: 'John',
-      lastName: 'Doe',
+      first_name: 'John',
+      last_name: 'Doe',
       email: 'test@example.com',
       password: 'plaintextpassword',
-      isStaff: false,
+      public_key: 'publicKey',
+      private_key: 'encryptedPrivateKey',
     });
     expect(result).toHaveProperty('id', 1);
     expect(result).toHaveProperty('email', 'test@example.com');
@@ -52,9 +52,8 @@ describe('UsersService', () => {
   it('should get user with email and password', async () => {
     mockUserRepository.getUser.mockResolvedValue({
       id: 1,
-      firstName: 'John',
-      lastName: 'Doe',
-      isStaff: false,
+      first_name: 'John',
+      last_name: 'Doe',
     });
 
     const user = await service.getUser('email');
@@ -65,9 +64,8 @@ describe('UsersService', () => {
   it('should fetch user by user id', async () => {
     mockUserRepository.getUserById.mockResolvedValue({
       id: 1,
-      firstName: 'John',
-      lastName: 'Doe',
-      isStaff: false,
+      first_name: 'John',
+      last_name: 'Doe',
     });
     const userId = 1;
     const user = await service.getUserById(userId);
@@ -85,8 +83,8 @@ describe('UsersService', () => {
   it('should disable user', async () => {
     mockUserRepository.disableUser.mockResolvedValue({
       id: 1,
-      firstName: 'John',
-      lastName: 'Doe',
+      first_name: 'John',
+      last_name: 'Doe',
       isStaff: false,
       is_active: false,
     });

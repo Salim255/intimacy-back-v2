@@ -2,10 +2,11 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
 import { UserRepository, UserWithKeys } from '../repository/user.repository';
+import { CreateUserDto } from '../user-dto/create-user-dto';
 
 export type insertUserType = {
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email: string;
   password: string;
   isStaff: boolean;
@@ -15,13 +16,14 @@ export type insertUserType = {
 export class UsersService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async createUser(data: insertUserType): Promise<User> {
+  async createUser(data: CreateUserDto): Promise<User> {
     try {
       const hashedPassword: string = await bcrypt.hash(data.password, 10);
       const createdUser = await this.userRepository.insert({
         ...data,
         password: hashedPassword,
       });
+
       return createdUser;
     } catch (error) {
       throw new Error(`Error creating user: ${error}`);

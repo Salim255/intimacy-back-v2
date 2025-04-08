@@ -12,4 +12,10 @@ export class CreateUserDto {
 
   @ApiProperty({ description: 'The last name of the user' })
   last_name: string;
+
+  @ApiProperty({ description: 'The public key of the user' })
+  public_key: string;
+
+  @ApiProperty({ description: 'The private key of the user' })
+  private_key: string;
 }
