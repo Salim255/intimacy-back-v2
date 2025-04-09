@@ -10,7 +10,7 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // Make the config globally available
-      envFilePath: '.env', // Path to your .env file
+      envFilePath: '.env', // Path to .env file
     }),
     TypeOrmModule.forRoot({
       type: 'postgres', // Change this to your database type

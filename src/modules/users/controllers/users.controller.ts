@@ -1,12 +1,13 @@
 import {
+  Body,
   Controller,
   Get,
-  Next,
+  HttpCode,
+  HttpException,
+  HttpStatus,
   Patch,
   Post,
   Put,
-  Req,
-  Res,
 } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import * as validator from 'validator';
@@ -21,8 +22,6 @@ import { CreateUserDto } from '../user-dto/create-user-dto';
 import { CreateUserResponseDto } from '../user-dto/create-user-response-dto';
 import { LoginUserDto } from '../user-dto/login-user-dto';
 import { UpdateUserDto } from '../user-dto/update-user-dto';
-import { NextFunction, Response, Request } from 'express';
-import { AppError } from '../../../utils/appError';
 import * as passwordHandler from '../../../utils/password-handler';
 import { UserKeysService } from '../../user-keys/services/user-keys.service';
 import {
@@ -40,68 +39,80 @@ export class UsersController {
   ) {}
 
   @Post('signup')
+  @HttpCode(201)
   @ApiOperation({ summary: 'Create a new you user' })
   @ApiBody({ type: CreateUserDto })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'User created successfully',
     type: CreateUserResponseDto,
   })
-  async signup(
-    @Res() res: Response,
-    @Req() req: Request,
-    @Next() next: NextFunction,
-  ) {
-    const { email, password, first_name, last_name, private_key, public_key } =
-      req.body as CreateUserDto;
-    // Validate the input data
-    if (
-      !email ||
-      !validator.isEmail(email) ||
-      !password ||
-      !first_name ||
-      !last_name ||
-      !private_key ||
-      !public_key
-    ) {
-      // Check if all required fields are provided
-      // return 'Please provide all required fields';
-      return next(new AppError('Please provide all required fields', 400));
+  async signup(@Body() body: CreateUserDto) {
+    try {
+      const {
+        email,
+        password,
+        first_name,
+        last_name,
+        private_key,
+        public_key,
+      } = body;
+
+      // Validate the input data
+      if (
+        !email ||
+        !validator.isEmail(email) ||
+        !password ||
+        !first_name ||
+        !last_name ||
+        !private_key ||
+        !public_key
+      ) {
+        // Check if all required fields are provided
+        // return 'Please provide all required fields';
+        //return next(new AppError('Please provide all required fields', 400));
+      }
+
+      const hashedPassword = await passwordHandler.hashedPassword(password);
+      const createdUser = await this.usersService.createUser({
+        email,
+        password: hashedPassword,
+        first_name,
+        last_name,
+      });
+
+      // Create usr keys
+      const userKeys = await this.userKeysService.createUserKeys({
+        user_id: createdUser.id,
+        public_key,
+        encrypted_private_key: private_key,
+      });
+      const token = this.jwtTokenService.createToken(createdUser.id);
+      const tokenDetails: JwtTokenPayload =
+        this.jwtTokenService.verifyToken(token);
+
+      return {
+        status: 'success',
+        data: {
+          token,
+          id: tokenDetails.id,
+          expireIn: tokenDetails.exp,
+          privateKey: userKeys.encrypted_private_key,
+          publicKey: userKeys.public_key,
+          email: createdUser.email,
+        },
+      };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'User creation failed: ' + errorMessage,
+          code: 'USER_CREATE_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
-
-    const hashedPassword = await passwordHandler.hashedPassword(password);
-
-    const createdUser = await this.usersService.createUser({
-      email,
-      password: hashedPassword,
-      first_name,
-      last_name,
-      public_key,
-      private_key,
-    });
-
-    // Create usr keys
-    const userKeys = await this.userKeysService.createUserKeys({
-      user_id: createdUser.id,
-      public_key,
-      encrypted_private_key: private_key,
-    });
-
-    const token = this.jwtTokenService.createToken(createdUser.id);
-    const tokenDetails: JwtTokenPayload =
-      this.jwtTokenService.verifyToken(token);
-
-    res.status(200).json({
-      status: 'success',
-      data: {
-        token,
-        id: tokenDetails.id,
-        expireIn: tokenDetails.exp,
-        privateKey: userKeys.encrypted_private_key,
-        publicKey: userKeys.public_key,
-        email: createdUser.email,
-      },
-    });
   }
 
   @Post('login')
