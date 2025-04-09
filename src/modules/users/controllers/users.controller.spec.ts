@@ -3,7 +3,6 @@ import { UsersController } from './users.controller';
 import { UsersService } from '../services/users.service';
 import { CreateUserDto } from '../user-dto/create-user-dto';
 import { CreateUserResponseDto } from '../user-dto/create-user-response-dto';
-import { NextFunction, Response, Request } from 'express';
 import { UserKeysService } from '../../user-keys/services/user-keys.service';
 import { JwtTokenService } from '../../../utils/jws-token-service';
 import * as passwordHandler from '../../../utils/password-handler';
@@ -74,19 +73,6 @@ describe('UsersController', () => {
         },
       };
 
-      const req = {
-        body: createUserDto,
-      } as unknown as Request;
-
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      } as unknown as Response & {
-        status: jest.Mock;
-        json: jest.Mock;
-      };
-
-      const next = jest.fn() as NextFunction;
       // Mock the request and response objects
       // Act: Call the method being tested
       mockUsersService.createUser.mockResolvedValue({
@@ -118,33 +104,24 @@ describe('UsersController', () => {
       });
 
       // Call the controller method
-      await controller.signup(res, req, next);
+      const result = await controller.signup(createUserDto);
 
       // Assert: Check the result
       expect(mockUsersService.createUser).toHaveBeenCalledWith({
         email: createUserDto.email,
         first_name: createUserDto.first_name,
         last_name: createUserDto.last_name,
-        public_key: createUserDto.public_key,
-        private_key: createUserDto.private_key,
         password: mockedHashedPassword,
       });
       expect(mockUsersService.createUser).toHaveBeenCalledTimes(1);
-      expect(res.json.mock.calls[0][0]).toEqual(createdUserResponse);
-      expect(res.json.mock.calls[0][0].status).toBe('success');
-      expect(res.json).toHaveBeenCalledWith(createdUserResponse);
-      expect(res.status).toHaveBeenCalledWith(200);
+      expect(result).toEqual(createdUserResponse);
+      expect(result.status).toBe('success');
       expect(mockUserKeysService.createUserKeys).toHaveBeenCalledWith({
         user_id: createdUserResponse.data.id,
         public_key: createUserDto.public_key,
         encrypted_private_key: createUserDto.private_key,
       });
 
-      // Verify that the user service was called with the correct data
-      expect(mockUsersService.createUser).toHaveBeenCalledWith({
-        ...createUserDto,
-        password: mockedHashedPassword,
-      });
       expect(mockUserKeysService.createUserKeys).toHaveBeenCalledTimes(1);
       expect(mockJwtTokenService.createToken).toHaveBeenCalledWith(
         createdUserResponse.data.id,

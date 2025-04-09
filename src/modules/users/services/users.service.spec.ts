@@ -41,8 +41,6 @@ describe('UsersService', () => {
       last_name: 'Doe',
       email: 'test@example.com',
       password: 'plaintextpassword',
-      public_key: 'publicKey',
-      private_key: 'encryptedPrivateKey',
     });
     expect(result).toHaveProperty('id', 1);
     expect(result).toHaveProperty('email', 'test@example.com');
