@@ -2,9 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { console } from 'inspector';
-
 import { InsertUserType } from '../services/users.service';
+
 export type UserWithKeys = User & {
   private_key: string;
   public_key: string;
@@ -18,6 +17,8 @@ export class UserRepository {
   ) {}
 
   async insert(data: InsertUserType): Promise<User> {
+    const ds = this.dataSource; // inject it
+    console.log('🧪 Current DB URL', ds.options['url']);
     console.log('Hello from user repository', data);
     const query = `
       INSERT INTO users (first_name, last_name, email, password)

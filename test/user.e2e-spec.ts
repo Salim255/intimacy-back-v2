@@ -6,8 +6,9 @@ import { Test } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../src/modules/users/entities/user.entity';
+import { CreateUserDto } from 'src/modules/users/user-dto/create-user-dto';
 
-describe('user e2e (e2e)', () => {
+describe('User e2e test (e2e)', () => {
   let context: TestContext;
   let app: INestApplication;
 
@@ -16,7 +17,6 @@ describe('user e2e (e2e)', () => {
     context = await TestContext.build();
     // Dynamically configure the database connection for this test
     const databaseUrl = context.getConnectionString();
-    console.log(databaseUrl, 'Hello database url');
     // Dynamically configure the database connection in the NestJS app
     const moduleRef = await Test.createTestingModule({
       imports: [
@@ -29,17 +29,33 @@ describe('user e2e (e2e)', () => {
           entities: [User],
         }),
       ],
-    }).compile();
+    })
+      .overrideProvider(DataSource)
+      .useFactory({
+        factory: () => {
+          const dataSource = new DataSource({
+            type: 'postgres',
+            url: databaseUrl,
+            synchronize: true,
+            entities: [User],
+          });
+          return dataSource;
+        },
+      })
+      .compile();
     app = moduleRef.createNestApplication();
     await app.init();
 
     // Fetch TypeORM DataSource to verify the database connection
     const dataSource = app.get(DataSource);
-    console.log('Database Connection Options:', dataSource.options);
+
+    await dataSource.initialize(); // Ensures that the connection is established
+
+    // Log the DataSource URL for confirmation
+    console.log('✅ Final DB URL in app context:', dataSource.options['url']);
   });
 
   afterAll(async () => {
-    console.log(context, 'hello context');
     await context.close(); // Clean up test database
 
     // Properly close the NestJS application to ensure all connections shut down
@@ -48,7 +64,32 @@ describe('user e2e (e2e)', () => {
     }
   });
 
-  it('should', () => {
-    expect(1).toEqual(1);
+  it('should respond to /ping', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await request(app.getHttpServer()).get('/ping').expect(200);
+  });
+
+  it('should create user', async () => {
+    const createUserDto: CreateUserDto = {
+      email: 'jane.doe@example.com',
+      password: 'supersecure123!',
+      first_name: 'Jane',
+      last_name: 'Doe',
+      private_key: 'fake-private-key',
+      public_key: 'fake-public-key',
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const response = await request(app.getHttpServer())
+      .post('/users/signup')
+      .send(createUserDto)
+      .expect(201);
+
+    expect(response.body).toHaveProperty('data');
+    expect(response.body).toHaveProperty('status');
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    expect(response.body.status).toEqual('success');
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    expect(response.body.data.id).toEqual(1);
   });
 });

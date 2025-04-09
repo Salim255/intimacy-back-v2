@@ -28,6 +28,7 @@ import {
   JwtTokenService,
   JwtTokenPayload,
 } from '../../../utils/jws-token-service';
+import { DataSource } from 'typeorm';
 
 @ApiTags('users')
 @Controller('users')
@@ -36,7 +37,10 @@ export class UsersController {
     private readonly userKeysService: UserKeysService,
     private readonly usersService: UsersService,
     private readonly jwtTokenService: JwtTokenService,
-  ) {}
+    private readonly dataSource: DataSource, // Inject the DataSource here
+  ) {
+    console.log('UsersController initialized'); // Log controller initialization
+  }
 
   @Post('signup')
   @HttpCode(201)
@@ -48,6 +52,8 @@ export class UsersController {
     type: CreateUserResponseDto,
   })
   async signup(@Body() body: CreateUserDto) {
+    //const ds = this.dataSource; // inject it
+    //console.log('🧪 Current DB URL', ds.options['url']);
     try {
       const {
         email,
@@ -88,6 +94,7 @@ export class UsersController {
         encrypted_private_key: private_key,
       });
       const token = this.jwtTokenService.createToken(createdUser.id);
+
       const tokenDetails: JwtTokenPayload =
         this.jwtTokenService.verifyToken(token);
 
@@ -103,6 +110,7 @@ export class UsersController {
         },
       };
     } catch (err) {
+      console.log(err, 'Error creating user');
       const errorMessage = err instanceof Error ? err.message : '';
       throw new HttpException(
         {

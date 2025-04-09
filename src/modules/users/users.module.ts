@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserRepository } from './repository/user.repository';
 import { UserKeysModule } from '../user-keys/user-keys.module';
 import { User } from './entities/user.entity';
-import { JwtTokenService } from 'src/utils/jws-token-service';
+import { JwtTokenService } from '../../utils/jws-token-service';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 

@@ -6,6 +6,7 @@ import { CreateUserResponseDto } from '../user-dto/create-user-response-dto';
 import { UserKeysService } from '../../user-keys/services/user-keys.service';
 import { JwtTokenService } from '../../../utils/jws-token-service';
 import * as passwordHandler from '../../../utils/password-handler';
+import { DataSource } from 'typeorm';
 
 // Ensure this path is correct and TestContext is properly exported and typed
 const mockUsersService = {
@@ -19,6 +20,11 @@ const mockUserKeysService = {
 const mockJwtTokenService = {
   createToken: jest.fn(),
   verifyToken: jest.fn(),
+};
+
+const mockDataSource = {
+  options: { url: 'mock-db-url' },
+  query: jest.fn(),
 };
 
 describe('UsersController', () => {
@@ -40,6 +46,10 @@ describe('UsersController', () => {
           provide: JwtTokenService,
           useValue: mockJwtTokenService,
         },
+        {
+          provide: DataSource,
+          useValue: mockDataSource,
+        },
       ],
     }).compile();
 
@@ -51,7 +61,7 @@ describe('UsersController', () => {
   });
 
   describe('signup', () => {
-    it('should return created suer response', async () => {
+    it('should return created user response', async () => {
       // Arrange: Set up the necessary data and mocks
       const createUserDto: CreateUserDto = {
         first_name: 'John',

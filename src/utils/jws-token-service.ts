@@ -13,7 +13,6 @@ export class JwtTokenService {
   }
 
   createToken(userId: number): string {
-    console.log('JWT_SECRET:', process.env.JWT_SECRET, userId);
     return this.jwtService.sign({ id: userId });
   }
 
