@@ -5,7 +5,10 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { InsertUserType } from '../services/users.service';
 
 export type UserWithKeys = User & {
-  private_key: string;
+  id: number;
+  email: string;
+  password: string;
+  encrypted_private_key: string;
   public_key: string;
 };
 
@@ -36,11 +39,16 @@ export class UserRepository {
     const result: User[] = await this.dataSource.query(query, [userId]);
     return result[0];
   }
+  // Get user by email
+  // This method retrieves a user from the database based on their email address.
+  // to use in the login process
 
   async getUser(email: string): Promise<UserWithKeys> {
     const query = `
       SELECT 
-        u.*, 
+        u.id, 
+        u.email,
+        u.password,
         uk.encrypted_private_key, 
         uk.public_key
       FROM users u

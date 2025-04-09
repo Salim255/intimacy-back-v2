@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as morgan from 'morgan';
 import { ExceptionsErrorsFilter } from './utils/exceptions-errors-filter';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   // NestFactory is a class provided by NestJS to create an application instance.
@@ -22,6 +23,19 @@ async function bootstrap() {
 
   app.use(morgan('dev')); // Use the Morgan middleware for logging
   // Morgan is a middleware for logging HTTP requests in Node.js applications.
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+  // ValidationPipe is a built-in pipe in NestJS that validates incoming requests.
+  // It uses class-validator and class-transformer libraries to validate and transform the incoming data.
+  // The whitelist option removes properties that do not have decorators in the DTO.
+  // The forbidNonWhitelisted option throws an error if non-whitelisted properties are found.
+  // The transform option automatically transforms the incoming data to the DTO class type.
 
   app.useGlobalFilters(new ExceptionsErrorsFilter()); // Use a global filter for handling exceptions
   // ExceptionsErrorsFilter is a custom filter that handles exceptions globally.

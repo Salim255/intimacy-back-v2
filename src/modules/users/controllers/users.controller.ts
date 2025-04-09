@@ -10,7 +10,6 @@ import {
   Put,
 } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
-import * as validator from 'validator';
 import {
   ApiBody,
   ApiOperation,
@@ -29,6 +28,7 @@ import {
   JwtTokenPayload,
 } from '../../../utils/jws-token-service';
 import { DataSource } from 'typeorm';
+import { PasswordComparisonPayload } from '../../../utils/password-handler';
 
 @ApiTags('users')
 @Controller('users')
@@ -64,21 +64,6 @@ export class UsersController {
         public_key,
       } = body;
 
-      // Validate the input data
-      if (
-        !email ||
-        !validator.isEmail(email) ||
-        !password ||
-        !first_name ||
-        !last_name ||
-        !private_key ||
-        !public_key
-      ) {
-        // Check if all required fields are provided
-        // return 'Please provide all required fields';
-        //return next(new AppError('Please provide all required fields', 400));
-      }
-
       const hashedPassword = await passwordHandler.hashedPassword(password);
       const createdUser = await this.usersService.createUser({
         email,
@@ -110,7 +95,6 @@ export class UsersController {
         },
       };
     } catch (err) {
-      console.log(err, 'Error creating user');
       const errorMessage = err instanceof Error ? err.message : '';
       throw new HttpException(
         {
@@ -131,8 +115,62 @@ export class UsersController {
     description: 'User logged successfully',
     type: CreateUserResponseDto,
   })
-  login() {
-    return 'hello login';
+  async login(@Body() body: LoginUserDto): Promise<CreateUserResponseDto> {
+    try {
+      const { email, password } = body;
+      const user = await this.usersService.getUser(email);
+      if (!user) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'User not found',
+            code: 'USER_NOT_FOUND',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      const passwords: PasswordComparisonPayload = {
+        plainPassword: password,
+        hashedPassword: user.password,
+      };
+      const isPasswordValid = await passwordHandler.correctPassword(passwords);
+
+      if (!isPasswordValid) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'Invalid password',
+            code: 'INVALID_PASSWORD',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+      const token = this.jwtTokenService.createToken(user.id);
+      const tokenDetails: JwtTokenPayload =
+        this.jwtTokenService.verifyToken(token);
+
+      return {
+        status: 'success',
+        data: {
+          token,
+          id: Number(tokenDetails.id),
+          expireIn: tokenDetails.exp,
+          privateKey: user.encrypted_private_key,
+          publicKey: user.public_key,
+          email: user.email,
+        },
+      };
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'User login failed' + errorMessage,
+          code: 'USER_LOGIN_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Get(':userId')
