@@ -29,10 +29,6 @@ const mockDataSource = {
   query: jest.fn(),
 };
 
-const mockPassword = {
-  verifyPassword: jest.fn(),
-};
-
 describe('UsersController', () => {
   let controller: UsersController;
 
