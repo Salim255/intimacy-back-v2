@@ -92,4 +92,26 @@ describe('User e2e test (e2e)', () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(response.body.data.id).toEqual(1);
   });
+
+  it('should login user', async () => {
+    // Arrange
+    const user = {
+      email: 'jane.doe@example.com',
+      password: 'supersecure123!',
+    };
+    // Act
+    const response = await request(app.getHttpServer())
+      .post('/users/login')
+      .send(user)
+      .expect(200);
+
+    // Assert
+    console.log(response.body);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    expect(response.body.data.id).toEqual(1);
+    expect(response.body).toHaveProperty('data');
+    expect(response.body).toHaveProperty('status');
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    expect(response.body.status).toEqual('success');
+  });
 });

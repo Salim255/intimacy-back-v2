@@ -107,6 +107,7 @@ export class UsersController {
     }
   }
 
+  @HttpCode(200)
   @Post('login')
   @ApiOperation({ summary: 'Login a user' })
   @ApiBody({ type: LoginUserDto })
