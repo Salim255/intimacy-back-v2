@@ -7,10 +7,12 @@ import { UserKeysService } from '../../user-keys/services/user-keys.service';
 import { JwtTokenService } from '../../../utils/jws-token-service';
 import * as passwordHandler from '../../../utils/password-handler';
 import { DataSource } from 'typeorm';
+import { LoginUserDto } from '../user-dto/login-user-dto';
 
 // Ensure this path is correct and TestContext is properly exported and typed
 const mockUsersService = {
   createUser: jest.fn(),
+  getUser: jest.fn(),
 };
 
 const mockUserKeysService = {
@@ -25,6 +27,10 @@ const mockJwtTokenService = {
 const mockDataSource = {
   options: { url: 'mock-db-url' },
   query: jest.fn(),
+};
+
+const mockPassword = {
+  verifyPassword: jest.fn(),
 };
 
 describe('UsersController', () => {
@@ -131,7 +137,6 @@ describe('UsersController', () => {
         public_key: createUserDto.public_key,
         encrypted_private_key: createUserDto.private_key,
       });
-
       expect(mockUserKeysService.createUserKeys).toHaveBeenCalledTimes(1);
       expect(mockJwtTokenService.createToken).toHaveBeenCalledWith(
         createdUserResponse.data.id,
@@ -140,5 +145,54 @@ describe('UsersController', () => {
         'your.jwt.token.here',
       );
     });
+  });
+
+  it('should log a user in and return logged user', async () => {
+    // arrange
+    const userLoginRequest: LoginUserDto = {
+      email: 's@gmail.com',
+      password: '123',
+    };
+
+    const user = {
+      id: 1,
+      email: 's@gmail.com',
+      password: 'hashedPassword',
+      encrypted_private_key: 'encryptedPrivateKeyHere',
+      public_key: 'publicKeyHere',
+    };
+
+    const userLoggingResponse: CreateUserResponseDto = {
+      status: 'success',
+      data: {
+        token: 'your.jwt.token.here',
+        id: 1,
+        expireIn: 1609459200,
+        privateKey: 'encryptedPrivateKeyHere',
+        publicKey: 'publicKeyHere',
+        email: 's@gmail.com',
+      },
+    };
+
+    mockUsersService.getUser.mockResolvedValue(user);
+    // Spy password verification
+    jest.spyOn(passwordHandler, 'correctPassword').mockResolvedValue(true);
+
+    // Mock token verification
+    mockJwtTokenService.verifyToken.mockReturnValue({
+      id: 1,
+      exp: 1609459200,
+    });
+
+    // Act
+    const result = await controller.login(userLoginRequest);
+
+    // Assert
+    expect(mockUsersService.getUser).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(userLoggingResponse);
+    expect(result.status).toEqual('success');
+    expect(mockJwtTokenService.verifyToken).toHaveBeenCalledWith(
+      'your.jwt.token.here',
+    );
   });
 });
