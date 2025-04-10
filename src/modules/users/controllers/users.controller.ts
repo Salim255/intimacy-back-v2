@@ -7,7 +7,6 @@ import {
   HttpStatus,
   Patch,
   Post,
-  Put,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -21,7 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { CreateUserDto } from '../user-dto/create-user-dto';
 import { CreateUserResponseDto } from '../user-dto/create-user-response-dto';
-import { LoginUserDto } from '../user-dto/login-user-dto';
+import { GetUserResponseDto, LoginUserDto } from '../user-dto/login-user-dto';
 import {
   UpdateUserDto,
   UpdatedUserResponseDto,
@@ -184,15 +183,54 @@ export class UsersController {
   }
 
   @Get(':userId')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: `Get user with it's id` })
   @ApiParam({ name: 'userId', description: `User's to fetch id` })
   @ApiResponse({
     status: 200,
     description: 'Fetched user with success',
-    type: UpdateUserDto,
+    type: GetUserResponseDto,
   })
-  getUser() {
-    return 'Hello from get user by Id';
+  async getUser(@Req() req: Request): Promise<GetUserResponseDto> {
+    try {
+      const userId = req.user as { id: number };
+      // Fetch the current user from the database
+      const savedUser: UserDto = await this.usersService.getUserById(userId.id);
+      if (!savedUser) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'User not found or no longer exists.',
+            code: 'USER_NOT_FOUND',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      return {
+        status: 'success',
+        data: {
+          user: {
+            id: savedUser.id,
+            first_name: savedUser.first_name,
+            last_name: savedUser.last_name,
+            connection_status: savedUser.connection_status,
+            avatar: savedUser.avatar,
+          },
+        },
+      };
+    } catch (error) {
+      console.log(error);
+      const errorMessage = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'fail to fetch user ' + errorMessage,
+          code: 'FETCH_USER_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Patch('update-me')
@@ -250,7 +288,13 @@ export class UsersController {
         return {
           status: 'success',
           data: {
-            user: savedUser,
+            user: {
+              id: savedUser.id,
+              first_name: savedUser.first_name,
+              last_name: savedUser.last_name,
+              connection_status: savedUser.connection_status,
+              avatar: savedUser.avatar,
+            },
           },
         }; // No changes, return existing data
       }
@@ -268,7 +312,13 @@ export class UsersController {
       return {
         status: 'success',
         data: {
-          user: updatedUser,
+          user: {
+            id: updatedUser.id,
+            first_name: updatedUser.first_name,
+            last_name: updatedUser.last_name,
+            connection_status: updatedUser.connection_status,
+            avatar: updatedUser.avatar,
+          },
         },
       };
     } catch (err) {
@@ -285,7 +335,7 @@ export class UsersController {
     }
   }
 
-  @Put(':userId/')
+  @Patch(':userId/')
   @ApiOperation({ summary: 'Disable user' })
   @ApiParam({ name: 'userId', description: `User's to disable id` })
   @ApiResponse({

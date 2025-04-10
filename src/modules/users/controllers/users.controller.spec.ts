@@ -220,6 +220,7 @@ describe('UsersController', () => {
 
     // Act
     const result = await controller.updateMe(userInput, req);
+
     // Assert
     expect(mockUsersService.updateUser).toHaveBeenCalledTimes(1);
     expect(mockUsersService.getUserById).toHaveBeenCalledTimes(1);
