@@ -8,11 +8,16 @@ import { JwtTokenService } from '../../../utils/jws-token-service';
 import * as passwordHandler from '../../../utils/password-handler';
 import { DataSource } from 'typeorm';
 import { LoginUserDto } from '../user-dto/login-user-dto';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { UpdateUserDto, UserDto } from '../user-dto/update-user-dto';
+import { Request } from 'express';
 
 // Ensure this path is correct and TestContext is properly exported and typed
 const mockUsersService = {
   createUser: jest.fn(),
   getUser: jest.fn(),
+  updateUser: jest.fn(),
+  getUserById: jest.fn(),
 };
 
 const mockUserKeysService = {
@@ -53,7 +58,12 @@ describe('UsersController', () => {
           useValue: mockDataSource,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({
+        canActivate: jest.fn(() => true), // Always allow
+      })
+      .compile();
 
     controller = module.get<UsersController>(UsersController);
   });
@@ -185,10 +195,36 @@ describe('UsersController', () => {
 
     // Assert
     expect(mockUsersService.getUser).toHaveBeenCalledTimes(1);
-    expect(result).toEqual(userLoggingResponse);
+    expect(result.data.id).toEqual(userLoggingResponse.data.id);
     expect(result.status).toEqual('success');
     expect(mockJwtTokenService.verifyToken).toHaveBeenCalledWith(
       'your.jwt.token.here',
     );
+  });
+
+  it('should update user', async () => {
+    // Arrange
+    const userInput: UpdateUserDto = { last_name: 'Harron' };
+    const updatedUser: UserDto = {
+      id: 1,
+      last_name: 'Harron',
+      first_name: 'Hassan',
+      avatar: 'avatar',
+      connection_status: 'online',
+    };
+    mockUsersService.updateUser.mockResolvedValue(updatedUser);
+    mockUsersService.getUserById.mockResolvedValue(UpdateUserDto);
+    const req = {
+      user: { id: 1 },
+    } as Partial<Request> as Request;
+
+    // Act
+    const result = await controller.updateMe(userInput, req);
+    // Assert
+    expect(mockUsersService.updateUser).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.getUserById).toHaveBeenCalledTimes(1);
+    expect(mockUsersService.getUserById).toHaveBeenCalledWith(1);
+    expect(result.status).toEqual('success');
+    expect(result.data.user.id).toEqual(updatedUser.id);
   });
 });

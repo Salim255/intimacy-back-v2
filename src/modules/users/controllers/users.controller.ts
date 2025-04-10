@@ -35,8 +35,8 @@ import {
 } from '../../../utils/jws-token-service';
 import { DataSource } from 'typeorm';
 import { PasswordComparisonPayload } from '../../../utils/password-handler';
-import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
-import { filterObj } from 'src/utils/object-filter';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { filterObj } from '../../../utils/object-filter';
 import { Request } from 'express';
 
 @ApiTags('users')
@@ -271,11 +271,13 @@ export class UsersController {
           user: updatedUser,
         },
       };
-    } catch {
+    } catch (err) {
+      console.log(err);
+      const errorMessage = err instanceof Error ? err.message : '';
       throw new HttpException(
         {
-          status: fail,
-          message: 'fail to update',
+          status: 'fail',
+          message: 'fail to update ' + errorMessage,
           code: 'UPDATE_ME_ERROR',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
