@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import {
@@ -29,6 +30,7 @@ import {
 } from '../../../utils/jws-token-service';
 import { DataSource } from 'typeorm';
 import { PasswordComparisonPayload } from '../../../utils/password-handler';
+import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
 
 @ApiTags('users')
 @Controller('users')
@@ -187,6 +189,7 @@ export class UsersController {
   }
 
   @Patch('update-me')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Update user' })
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({
@@ -194,8 +197,19 @@ export class UsersController {
     description: 'User updated successfully',
     type: UpdateUserDto,
   })
-  updateMe() {
-    return 'Hello update me';
+  updateMe(@Body() body: UpdateUserDto) {
+    try {
+      console.log(body);
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: fail,
+          message: 'fail to update',
+          code: 'UPDATE_ME_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Put(':userId/')
