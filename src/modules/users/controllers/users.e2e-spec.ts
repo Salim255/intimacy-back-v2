@@ -9,6 +9,7 @@ import { User } from '../entities/user.entity';
 import { CreateUserDto } from 'src/modules/users/user-dto/create-user-dto';
 import { CreateUserResponseDto } from '../user-dto/create-user-response-dto';
 import { UpdatedUserResponseDto } from '../user-dto/update-user-dto';
+import { GetUserResponseDto } from '../user-dto/login-user-dto';
 
 describe('User e2e test (e2e)', () => {
   let context: TestContext;
@@ -55,15 +56,6 @@ describe('User e2e test (e2e)', () => {
 
     // Log the DataSource URL for confirmation
     console.log('✅ Final DB URL in app context:', dataSource.options['url']);
-  });
-
-  afterAll(async () => {
-    await context.close(); // Clean up test database
-
-    // Properly close the NestJS application to ensure all connections shut down
-    if (app) {
-      await app.close();
-    }
   });
 
   it('should respond to /ping', async () => {
@@ -124,6 +116,7 @@ describe('User e2e test (e2e)', () => {
   it('should update user', async () => {
     // Arrange
     const userInput = { last_name: 'Salim' };
+
     // Act
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const response = await request(app.getHttpServer())
@@ -136,5 +129,28 @@ describe('User e2e test (e2e)', () => {
     expect(
       (response.body as UpdatedUserResponseDto).data.user.last_name,
     ).toEqual('Salim');
+  });
+
+  it('should fetch user by id', async () => {
+    // Arrange
+    // Act
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const response = await request(app.getHttpServer())
+      .get('/users/1')
+      .set('Authorization', `Bearer ${userToken}`)
+      .expect(200);
+
+    // Assert
+    expect((response.body as GetUserResponseDto).data.user.id).toEqual(1);
+    expect((response.body as GetUserResponseDto).status).toEqual('success');
+  });
+
+  afterAll(async () => {
+    await context.close(); // Clean up test database
+    userToken = '';
+    // Properly close the NestJS application to ensure all connections shut down
+    if (app) {
+      await app.close();
+    }
   });
 });
