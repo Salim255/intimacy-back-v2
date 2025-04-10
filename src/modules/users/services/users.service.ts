@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '../entities/user.entity';
 import { UserRepository, UserWithKeys } from '../repository/user.repository';
-import { console } from 'inspector';
+import { UserDto } from '../user-dto/update-user-dto';
 
 export type InsertUserType = {
   first_name: string;
@@ -32,7 +32,7 @@ export class UsersService {
       throw new Error(`Error get user: ${error}`);
     }
   }
-  async getUserById(userId: number): Promise<User> {
+  async getUserById(userId: number): Promise<UserDto> {
     try {
       const user = await this.userRepository.getUserById(userId);
       return user;
@@ -61,7 +61,7 @@ export class UsersService {
   async updateUser(
     query: string,
     values: (string | number | boolean | null)[],
-  ): Promise<User> {
+  ): Promise<UserDto> {
     try {
       const updatedUser = await this.userRepository.updateUser(query, values);
       return updatedUser;

@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { InsertUserType } from '../services/users.service';
+import { UserDto } from '../user-dto/update-user-dto';
 
 export type UserWithKeys = User & {
   id: number;
@@ -34,9 +35,9 @@ export class UserRepository {
     return result[0];
   }
 
-  async getUserById(userId: number): Promise<User> {
+  async getUserById(userId: number): Promise<UserDto> {
     const query = `SELECT * FROM users WHERE id = $1;`;
-    const result: User[] = await this.dataSource.query(query, [userId]);
+    const result: UserDto[] = await this.dataSource.query(query, [userId]);
     return result[0];
   }
   // Get user by email
@@ -77,8 +78,9 @@ export class UserRepository {
   }
 
   async updateUser(query: string, values: any[]): Promise<User> {
-    const result: User[] = await this.dataSource.query(query, values);
-    return result[0];
+    const result: User[][] = await this.dataSource.query(query, values);
+    console.log(result, 'from repo');
+    return result[0][0];
   }
 
   async updateUserConnectionStatus(

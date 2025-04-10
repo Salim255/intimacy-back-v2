@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Put,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
@@ -21,7 +22,11 @@ import {
 import { CreateUserDto } from '../user-dto/create-user-dto';
 import { CreateUserResponseDto } from '../user-dto/create-user-response-dto';
 import { LoginUserDto } from '../user-dto/login-user-dto';
-import { UpdateUserDto } from '../user-dto/update-user-dto';
+import {
+  UpdateUserDto,
+  UpdatedUserResponseDto,
+  UserDto,
+} from '../user-dto/update-user-dto';
 import * as passwordHandler from '../../../utils/password-handler';
 import { UserKeysService } from '../../user-keys/services/user-keys.service';
 import {
@@ -31,6 +36,8 @@ import {
 import { DataSource } from 'typeorm';
 import { PasswordComparisonPayload } from '../../../utils/password-handler';
 import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
+import { filterObj } from 'src/utils/object-filter';
+import { Request } from 'express';
 
 @ApiTags('users')
 @Controller('users')
@@ -195,12 +202,76 @@ export class UsersController {
   @ApiResponse({
     status: 200,
     description: 'User updated successfully',
-    type: UpdateUserDto,
+    type: UpdatedUserResponseDto,
   })
-  updateMe(@Body() body: UpdateUserDto) {
+  async updateMe(
+    @Body() body: UpdateUserDto,
+    @Req() req: Request,
+  ): Promise<UpdatedUserResponseDto> {
     try {
-      console.log(body);
-    } catch (error) {
+      const filteredBody = filterObj(
+        body,
+        'first_name',
+        'last_name',
+        'avatar',
+        'connection_status',
+      );
+
+      const userId = req.user as { id: number };
+      // Fetch the current user from the database
+      const savedUser: UserDto = await this.usersService.getUserById(userId.id);
+
+      if (!savedUser) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'User not found or no longer exists.',
+            code: 'USER_NOT_FOUND',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      // Dynamically construct the update query clause
+      const values: (string | number)[] = [];
+      const fields: string[] = [];
+      let query = 'UPDATE users SET ';
+      Object.keys(filteredBody).forEach((key, index) => {
+        // Exclude id key from being updated
+        if (key !== 'id' && filteredBody[key] !== undefined) {
+          fields.push(`${key} = $${index + 1}`);
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          values.push(filteredBody[key]);
+        }
+      });
+
+      // If no fields to update, return early
+      if (fields.length === 0) {
+        return {
+          status: 'success',
+          data: {
+            user: savedUser,
+          },
+        }; // No changes, return existing data
+      }
+
+      // Build and Add WHERE clause and append ID to the values
+      query += `${fields.join(', ')} WHERE id = $${values.length + 1} RETURNING *;`;
+      values.push(savedUser.id);
+
+      // 3) Update user document
+      const updatedUser: UserDto = await this.usersService.updateUser(
+        query,
+        values,
+      );
+
+      return {
+        status: 'success',
+        data: {
+          user: updatedUser,
+        },
+      };
+    } catch {
       throw new HttpException(
         {
           status: fail,
