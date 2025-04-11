@@ -2,16 +2,21 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Match } from '../entities/match.entity';
 
-export type MatchInput = {
+export type InitiateMatchInput = {
   toUserId: number;
   fromUserId: number;
+};
+
+export type acceptMatchInput = {
+  matchId: number;
+  userId: number;
 };
 
 @Injectable()
 export class MatchRepository {
   constructor(private readonly dataSource: DataSource) {}
 
-  async insert(data: MatchInput): Promise<Match> {
+  async InitiateMatch(data: InitiateMatchInput): Promise<Match> {
     const query = `INSERT INTO 
     matches (to_user_id, from_user_id)
     VALUES ($1, $2) RETURNING *;`;
@@ -53,5 +58,17 @@ export class MatchRepository {
     const values = [userId];
     const result: Match[] = await this.dataSource.query(query, values);
     return result;
+  }
+
+  async acceptMatch(data: acceptMatchInput): Promise<Match> {
+    const query = `
+    UPDATE matches
+    SET status = 2
+    WHERE id = $1 AND to_user_id = $2 RETURNING *;
+    `;
+
+    const values = [data.matchId, data.userId];
+    const match: Match[] = await this.dataSource.query(query, values);
+    return match[0];
   }
 }
