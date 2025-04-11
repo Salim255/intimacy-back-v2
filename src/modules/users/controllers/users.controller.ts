@@ -39,10 +39,10 @@ import { PasswordComparisonPayload } from '../../../utils/password-handler';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { filterObj } from '../../../utils/object-filter';
 import { Request } from 'express';
-import { FileUploadService } from 'src/common/file-upload/file-upload.service';
+import { FileUploadService } from '../../../common/file-upload/file-upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ResizePhotoInterceptor } from 'src/common/file-upload/interceptors/resize-photo.interceptor';
-import { UploadToS3Interceptor } from 'src/common/file-upload/interceptors/upload-to-s3.interceptor';
+import { ResizePhotoInterceptor } from '../../../common/file-upload/interceptors/resize-photo.interceptor';
+import { UploadToS3Interceptor } from '../../../common/file-upload/interceptors/upload-to-s3.interceptor';
 
 @ApiTags('users')
 @Controller('users')
