@@ -5,6 +5,7 @@ import { UsersModule } from './modules/users/users.module';
 import { UserKeysModule } from './modules/user-keys/user-keys.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
+import { MatchesModule } from './modules/matches/matches.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { DatabaseModule } from './database/database.module';
     DatabaseModule,
     UsersModule,
     UserKeysModule,
+    MatchesModule,
   ],
   controllers: [AppController], // Controller to handle incoming requests
   providers: [AppService],

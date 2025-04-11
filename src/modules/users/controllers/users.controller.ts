@@ -108,7 +108,6 @@ export class UsersController {
         },
       };
     } catch (err) {
-      console.log(err, '😍😍😍');
       const errorMessage = err instanceof Error ? err.message : '';
       throw new HttpException(
         {
