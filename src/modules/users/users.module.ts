@@ -6,9 +6,15 @@ import { UserRepository } from './repository/user.repository';
 import { UserKeysModule } from '../user-keys/user-keys.module';
 import { User } from './entities/user.entity';
 import { AuthModule } from '../auth/auth.module';
+import { FileUploadModule } from '../../common/file-upload/file-upload.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), UserKeysModule, AuthModule],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    UserKeysModule,
+    AuthModule,
+    FileUploadModule,
+  ],
   controllers: [UsersController],
   providers: [UsersService, UserRepository],
   exports: [UsersService, UserRepository],

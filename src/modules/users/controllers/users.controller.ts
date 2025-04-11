@@ -8,7 +8,9 @@ import {
   Patch,
   Post,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import {
@@ -37,6 +39,9 @@ import { PasswordComparisonPayload } from '../../../utils/password-handler';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { filterObj } from '../../../utils/object-filter';
 import { Request } from 'express';
+import { FileUploadService } from 'src/common/file-upload/file-upload.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ResizePhotoInterceptor } from 'src/common/file-upload/interceptors/resize-photo.interceptor';
 
 @ApiTags('users')
 @Controller('users')
@@ -46,6 +51,7 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly jwtTokenService: JwtTokenService,
     private readonly dataSource: DataSource, // Inject the DataSource here
+    private readonly fileUploadService: FileUploadService,
   ) {
     console.log('UsersController initialized'); // Log controller initialization
   }
@@ -235,6 +241,10 @@ export class UsersController {
 
   @Patch('update-me')
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('photo', new FileUploadService().getMulterOptions()),
+    ResizePhotoInterceptor,
+  )
   @ApiOperation({ summary: 'Update user' })
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({
@@ -244,6 +254,7 @@ export class UsersController {
   })
   async updateMe(
     @Body() body: UpdateUserDto,
+    @UploadedFile() file: Express.Multer.File,
     @Req() req: Request,
   ): Promise<UpdatedUserResponseDto> {
     try {
@@ -255,6 +266,9 @@ export class UsersController {
         'connection_status',
       );
 
+      if (req.file) {
+        filteredBody.avatar = req.file.filename;
+      }
       const userId = req.user as { id: number };
       // Fetch the current user from the database
       const savedUser: UserDto = await this.usersService.getUserById(userId.id);
