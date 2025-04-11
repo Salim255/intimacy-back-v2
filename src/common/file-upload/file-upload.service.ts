@@ -1,8 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { NextFunction, Request } from 'express';
-import multer, { memoryStorage, Options } from 'multer';
-import * as crypto from 'crypto';
-import sharp from 'sharp';
+import { Request } from 'express';
+import { memoryStorage, Options } from 'multer';
 
 @Injectable()
 export class FileUploadService {
@@ -35,43 +33,4 @@ export class FileUploadService {
   getMulterOptions(): Options {
     return this.multerOptions;
   }
-
-  // Expecting a single file with the field name 'photo'
-  getUploadSingle(fieldName: string) {
-    return multer(this.multerOptions).single(fieldName);
-  }
-
-  // Image resizing logic using Sharp
-  public resizeUserPhoto = (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ) => {
-    if (!req.file) return next();
-
-    const uniqueSuffix = crypto.randomBytes(8).toString('hex');
-    req.file.filename = `user-${uniqueSuffix}-${Date.now()}.jpg`;
-
-    // Here we get the image buffer (temp)
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    sharp(req.file.buffer)
-      // This sharp function will create an object on which
-      // We can chain multiple methods
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      .resize(500, 500)
-      // Resize takes the width and the height
-      // As we need square images, then the height need to be the same
-      // as the width, so this resize will crop the image
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      .toFormat('jpeg')
-      // Convert the image to jpeg
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      .jpeg({ quality: 90 }); // .jpeg() to compress the image
-
-    /*  .toFile(
-        path.resolve(__dirname, `../../public/img/users/${req.file.filename}`),
-      ); // To Finally write the image into our disk if needed */
-
-    next();
-  };
 }

@@ -42,6 +42,7 @@ import { Request } from 'express';
 import { FileUploadService } from 'src/common/file-upload/file-upload.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ResizePhotoInterceptor } from 'src/common/file-upload/interceptors/resize-photo.interceptor';
+import { UploadToS3Interceptor } from 'src/common/file-upload/interceptors/upload-to-s3.interceptor';
 
 @ApiTags('users')
 @Controller('users')
@@ -244,6 +245,7 @@ export class UsersController {
   @UseInterceptors(
     FileInterceptor('photo', new FileUploadService().getMulterOptions()),
     ResizePhotoInterceptor,
+    UploadToS3Interceptor,
   )
   @ApiOperation({ summary: 'Update user' })
   @ApiBody({ type: UpdateUserDto })
