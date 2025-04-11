@@ -1,26 +1,16 @@
-import { ConfigService } from '@nestjs/config';
 import { S3Client, HeadBucketCommand } from '@aws-sdk/client-s3';
-import { Test, TestingModule } from '@nestjs/testing';
-import { AppModule } from '../../src/app.module';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 describe('S3 Connectivity (Real Connection)', () => {
   let s3Client: S3Client;
-  let configService: ConfigService;
-  let app: TestingModule; // NestJS TestingModule
 
-  beforeAll(async () => {
-    app = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    // Access ConfigService from the module
-    configService = app.get<ConfigService>(ConfigService);
-
+  beforeAll(() => {
     s3Client = new S3Client({
-      region: configService.get<string>('REGION')!,
+      region: process.env.REGION || '',
       credentials: {
-        accessKeyId: configService.get<string>('AWS_ACCESS_KEY_ID')!,
-        secretAccessKey: configService.get<string>('AWS_SECRET_ACCESS_KEY')!,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
       },
     });
   });
@@ -38,11 +28,6 @@ describe('S3 Connectivity (Real Connection)', () => {
     // Assert the response
     expect(data.$metadata).toBeDefined();
     expect(data.$metadata.httpStatusCode).toEqual(200);
-    expect(data.BucketRegion).toEqual(configService.get<string>('REGION'));
-  });
-
-  afterAll(async () => {
-    // Clean up resources if necessary
-    // No explicit close method is required for S3Client
+    expect(data.BucketRegion).toEqual(process.env.REGION);
   });
 });

@@ -53,9 +53,7 @@ export class UsersController {
     private readonly jwtTokenService: JwtTokenService,
     private readonly dataSource: DataSource, // Inject the DataSource here
     private readonly fileUploadService: FileUploadService,
-  ) {
-    console.log('UsersController initialized'); // Log controller initialization
-  }
+  ) {}
 
   @Post('signup')
   @HttpCode(201)
@@ -110,6 +108,7 @@ export class UsersController {
         },
       };
     } catch (err) {
+      console.log(err, '😍😍😍');
       const errorMessage = err instanceof Error ? err.message : '';
       throw new HttpException(
         {

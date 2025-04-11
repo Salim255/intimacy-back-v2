@@ -11,6 +11,8 @@ import { LoginUserDto } from '../user-dto/login-user-dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { UpdateUserDto, UserDto } from '../user-dto/update-user-dto';
 import { Request } from 'express';
+import { FileUploadModule } from '../../../common/file-upload/file-upload.module';
+import { UploadToS3Interceptor } from '../../../common/file-upload/interceptors/upload-to-s3.interceptor';
 
 // Ensure this path is correct and TestContext is properly exported and typed
 const mockUsersService = {
@@ -36,9 +38,12 @@ const mockDataSource = {
 
 describe('UsersController', () => {
   let controller: UsersController;
-
+  beforeAll(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+  });
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [FileUploadModule],
       controllers: [UsersController],
       providers: [
         {
@@ -63,6 +68,11 @@ describe('UsersController', () => {
       .useValue({
         canActivate: jest.fn(() => true), // Always allow
       })
+      .overrideInterceptor(UploadToS3Interceptor)
+      .useValue({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        intercept: jest.fn((ctx, next) => next.handle()), // simply passes through
+      }) // simply passes through)
       .compile();
 
     controller = module.get<UsersController>(UsersController);
@@ -218,8 +228,9 @@ describe('UsersController', () => {
       user: { id: 1 },
     } as Partial<Request> as Request;
 
+    const file = undefined as unknown as Express.Multer.File;
     // Act
-    const result = await controller.updateMe(userInput, req);
+    const result = await controller.updateMe(userInput, file, req);
 
     // Assert
     expect(mockUsersService.updateUser).toHaveBeenCalledTimes(1);
