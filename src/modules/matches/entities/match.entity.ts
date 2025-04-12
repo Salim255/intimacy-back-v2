@@ -14,7 +14,7 @@ export enum MatchStatus {
   Accepted = 2, // Request accepted
 }
 
-@Entity('users')
+@Entity('matches')
 export class Match {
   @PrimaryGeneratedColumn()
   id: number;

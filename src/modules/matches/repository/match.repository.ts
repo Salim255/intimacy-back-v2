@@ -72,7 +72,7 @@ export class MatchRepository {
     return match[0];
   }
 
-  async getNonMatches(userId: number): Promise<Match[]> {
+  async fetchNonMatches(userId: number): Promise<Match[]> {
     const query = `
         SELECT
         u.id AS user_id, 
@@ -100,7 +100,7 @@ export class MatchRepository {
                 OR (mtc.to_user_id = u.id AND mtc.from_user_id = $1)
                 ) 
                 AND mtc.status = 2 --- Only exclude accepted friends
-                OR (mtc.from_user_id = $1 AND fr.to_user_id = u.id AND mtc.status = 1) -- Exclude sent requests
+                OR (mtc.from_user_id = $1 AND mtc.to_user_id = u.id AND mtc.status = 1) -- Exclude sent requests
             )
         `;
     const values = [userId];

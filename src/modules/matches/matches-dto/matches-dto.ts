@@ -11,7 +11,7 @@ export class MatchDto {
   id: number;
 
   @IsNumber()
-  from_usee_id: number;
+  from_user_id: number;
 
   @IsNumber()
   to_user_id: number;
