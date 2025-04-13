@@ -9,7 +9,7 @@
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "npm run migrate-up && nest start",
-    "start:dev": "nest start --watch",
+    "start:dev": "npm run migrate-up && nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -20,6 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "test:integration": "jest --config  jest.integration.config.js",
     "migrate-up": "node-pg-migrate up",
+    "migrate-down": "node-pg-migrate down",
     "create-table": "node-pg-migrate create"
   },
   "dependencies": {

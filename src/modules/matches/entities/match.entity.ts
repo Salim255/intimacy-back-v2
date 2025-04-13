@@ -9,11 +9,6 @@ import {
   JoinColumn,
 } from 'typeorm';
 
-export enum MatchStatus {
-  Pending = 1, // Request sent
-  Accepted = 2, // Request accepted
-}
-
 @Entity('matches')
 export class Match {
   @PrimaryGeneratedColumn()
@@ -39,11 +34,6 @@ export class Match {
   @ManyToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'from_user_id' })
   from_user_id: number;
-  @Column({
-    type: 'enum',
-    enum: MatchStatus,
-    default: MatchStatus.Pending,
-    name: 'status',
-  })
-  status: MatchStatus;
+  @Column({ type: 'integer', name: 'status' })
+  status: number;
 }

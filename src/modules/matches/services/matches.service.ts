@@ -1,7 +1,12 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { MatchRepository } from '../repository/match.repository';
+import {
+  AcceptMatchPayload,
+  MatchRepository,
+} from '../repository/match.repository';
 import { InitiateMatchInput } from '../repository/match.repository';
 import { UserRepository } from 'src/modules/users/repository/user.repository';
+import { Match } from '../entities/match.entity';
+
 @Injectable()
 export class MatchesService {
   constructor(
@@ -9,7 +14,7 @@ export class MatchesService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async initiateMatch(input: InitiateMatchInput) {
+  async initiateMatch(input: InitiateMatchInput): Promise<Match> {
     try {
       // Check the potential match user is exist
       const existUser = await this.userRepository.getUserById(input.toUserId);
@@ -24,15 +29,34 @@ export class MatchesService {
           HttpStatus.BAD_REQUEST,
         );
       }
-      const match = await this.matchRepository.InitiateMatch(input);
+      const match: Match = await this.matchRepository.InitiateMatch(input);
       return match;
       //return match;
+    } catch (error) {
+      console.log(error);
+      const errorMessage = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: '',
+          message: 'Error in initiate match ' + errorMessage,
+          code: '',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async acceptMatch(acceptMatchPayload: AcceptMatchPayload): Promise<Match> {
+    try {
+      const match: Match =
+        await this.matchRepository.acceptMatch(acceptMatchPayload);
+      return match;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '';
       throw new HttpException(
         {
           status: '',
-          message: 'Error in initiate match' + errorMessage,
+          message: 'Error in accept match ' + errorMessage,
           code: '',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,

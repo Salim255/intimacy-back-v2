@@ -34,3 +34,18 @@ export class InitiateMatchResponseDto {
     match: MatchDto;
   };
 }
+
+export class AcceptMatchRequestResponseDto {
+  @ApiProperty({
+    description: 'Status accepted match request response',
+    example: 'success',
+  })
+  status: 'Success';
+  @ApiProperty({
+    description: 'Accepted match details',
+    type: Object,
+  })
+  data: {
+    match: MatchDto;
+  };
+}
