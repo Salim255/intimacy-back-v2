@@ -2,8 +2,8 @@
  * @param {import('node-pg-migrate').MigrationBuilder} pgm
  */
 exports.up = (pgm) => {
-  pgm.sql(
-    `CREATE TABLE users (
+  pgm.sql(`
+    CREATE TABLE users (
         id SERIAL PRIMARY KEY,
     
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -25,8 +25,7 @@ exports.up = (pgm) => {
         is_active BOOLEAN DEFAULT TRUE,
     
         connection_status VARCHAR(50) NOT NULL DEFAULT 'offline' CHECK (connection_status IN ('offline', 'online', 'away'))
-    )`,
-  );
+    );`);
 };
 
 /**

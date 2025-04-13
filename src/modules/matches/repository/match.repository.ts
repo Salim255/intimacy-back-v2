@@ -70,40 +70,4 @@ export class MatchRepository {
     const match: Match[] = await this.dataSource.query(query, values);
     return match[0];
   }
-
-  async fetchNonMatches(userId: number): Promise<Match[]> {
-    const query = `
-        SELECT
-        u.id AS user_id, 
-        u.created_at,
-        u.updated_at,
-        u.first_name,
-        u.last_name,
-        u.avatar,
-        u.connection_status,
-        u.is_staff,
-        uk.public_key 
-        
-        FROM users u
-
-        LEFT JOIN user_keys uk ON uk.user_id = u.id
-
-        WHERE u.id != $1  AND 
-            NOT EXISTS (
-            -- Exclude the users in a friendship with the current user (with status 2)
-            SELECT 1
-            FROM matches mtc
-            WHERE 
-                (
-                (mtc.from_user_id = u.id AND mtc.to_user_id = $1)
-                OR (mtc.to_user_id = u.id AND mtc.from_user_id = $1)
-                ) 
-                AND mtc.status = 2 --- Only exclude accepted friends
-                OR (mtc.from_user_id = $1 AND mtc.to_user_id = u.id AND mtc.status = 1) -- Exclude sent requests
-            )
-        `;
-    const values = [userId];
-    const matches: Match[] = await this.dataSource.query(query, values);
-    return matches;
-  }
 }

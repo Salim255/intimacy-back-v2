@@ -35,7 +35,7 @@ export class InitiateMatchResponseDto {
   };
 }
 
-export class AcceptMatchRequestResponseDto {
+export class AcceptMatchResponseDto {
   @ApiProperty({
     description: 'Status accepted match request response',
     example: 'success',
@@ -47,5 +47,20 @@ export class AcceptMatchRequestResponseDto {
   })
   data: {
     match: MatchDto;
+  };
+}
+
+export class FetchMatchesResponseDto {
+  @ApiProperty({
+    description: `Status fetched user's matches response`,
+    example: 'success',
+  })
+  status: 'Success';
+  @ApiProperty({
+    description: 'Fetched matches details',
+    type: Object,
+  })
+  data: {
+    matches: MatchDto[];
   };
 }

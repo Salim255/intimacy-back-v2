@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Param,
   Patch,
@@ -10,7 +11,8 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
-  AcceptMatchRequestResponseDto,
+  AcceptMatchResponseDto,
+  FetchMatchesResponseDto,
   InitiateMatchDto,
   InitiateMatchResponseDto,
 } from '../matches-dto/matches-dto';
@@ -46,6 +48,7 @@ export class MatchesController {
       toUserId,
       fromUserId,
     };
+
     const match: Match =
       await this.matchesService.initiateMatch(initiateMatchPayload);
     return {
@@ -58,12 +61,8 @@ export class MatchesController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
   @ApiOperation({ description: 'Accepted match request' })
-  @ApiResponse({ type: AcceptMatchRequestResponseDto })
-  async acceptMatch(
-    @Param('toUserId') toUserId: number,
-    @Param('matchId') matchId: number,
-    @Req() req: Request,
-  ) {
+  @ApiResponse({ type: AcceptMatchResponseDto })
+  async acceptMatch(@Param('matchId') matchId: number, @Req() req: Request) {
     const { id: userId } = req.user as { id: number };
     const acceptMatchPayload: AcceptMatchPayload = {
       matchId,
@@ -74,6 +73,20 @@ export class MatchesController {
     return {
       status: 'Success',
       data: { match },
+    };
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @ApiOperation({ description: `Fetch all current user's matches` })
+  @ApiResponse({ type: FetchMatchesResponseDto })
+  async fetchMatches(@Req() req: Request) {
+    const { id: userId } = req.user as { id: number };
+    const matches: Match[] = await this.matchesService.getMatches(userId);
+    return {
+      status: 'Success',
+      data: { matches },
     };
   }
 }

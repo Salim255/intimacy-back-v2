@@ -10,18 +10,18 @@ exports.shorthands = undefined;
  */
 exports.up = (pgm) => {
   pgm.sql(`
-    CREATE TABLE matches (
-      id SERIAL PRIMARY KEY,
+    CREATE TABLE chats (
+        id SERIAL PRIMARY KEY,
+        
+        type VARCHAR(25) DEFAULT 'dual',
 
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
-      to_user_id INTEGER NOT NULL,
+        last_message_id INTEGER,
 
-      from_usee_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-
-      status INTEGER DEFAULT 1 CHECK (status IN (1, 2))
+        no_read_messages INTEGER DEFAULT 0
     );`);
 };
 
@@ -31,5 +31,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  pgm.sql(`DROP TABLE matches;`);
+  pgm.sql(`DROP TABLE chats;`);
 };

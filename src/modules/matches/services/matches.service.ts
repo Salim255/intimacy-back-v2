@@ -16,6 +16,16 @@ export class MatchesService {
 
   async initiateMatch(input: InitiateMatchInput): Promise<Match> {
     try {
+      if (input.fromUserId === input.toUserId) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'Cannot initiate match: users conflict.',
+            code: 'USERS_CONFLICT',
+          },
+          HttpStatus.CONFLICT,
+        );
+      }
       // Check the potential match user is exist
       const existUser = await this.userRepository.getUserById(input.toUserId);
       console.log(existUser, input.toUserId);
@@ -37,9 +47,9 @@ export class MatchesService {
       const errorMessage = error instanceof Error ? error.message : '';
       throw new HttpException(
         {
-          status: '',
-          message: 'Error in initiate match ' + errorMessage,
-          code: '',
+          status: 'fail',
+          message: 'Error in initiate match: ' + errorMessage,
+          code: 'INITIATE_MATCH_ERROR',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
@@ -55,9 +65,26 @@ export class MatchesService {
       const errorMessage = error instanceof Error ? error.message : '';
       throw new HttpException(
         {
-          status: '',
-          message: 'Error in accept match ' + errorMessage,
-          code: '',
+          status: 'fail',
+          message: 'Error in accept match: ' + errorMessage,
+          code: 'ACCEPT_MATCH_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getMatches(userId: number): Promise<Match[]> {
+    try {
+      const matches: Match[] = await this.matchRepository.fetchMatches(userId);
+      return matches;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: `Error in fetch user's matches: ` + errorMessage,
+          code: 'GET_MATCHES_ERROR',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
