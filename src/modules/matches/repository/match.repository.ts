@@ -16,7 +16,7 @@ export type AcceptMatchPayload = {
 export class MatchRepository {
   constructor(private readonly dataSource: DataSource) {}
 
-  async InitiateMatch(data: InitiateMatchInput): Promise<Match> {
+  async initiateMatch(data: InitiateMatchInput): Promise<Match> {
     const values = [data.toUserId, data.fromUserId, 1];
     const query = `INSERT INTO matches (to_user_id, from_user_id, status)
     VALUES ($1, $2, $3) RETURNING *;`;

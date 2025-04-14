@@ -4,8 +4,8 @@ import { UsersService } from '../services/users.service';
 import { CreateUserDto } from '../user-dto/create-user-dto';
 import { CreateUserResponseDto } from '../user-dto/create-user-response-dto';
 import { UserKeysService } from '../../user-keys/services/user-keys.service';
-import { JwtTokenService } from '../../../utils/jws-token-service';
-import * as passwordHandler from '../../../utils/password-handler';
+import { JwtTokenService } from '../../auth/jws-token-service';
+import * as passwordHandler from '../../auth/password-handler';
 import { DataSource } from 'typeorm';
 import { LoginUserDto } from '../user-dto/login-user-dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -38,9 +38,6 @@ const mockDataSource = {
 
 describe('UsersController', () => {
   let controller: UsersController;
-  beforeAll(() => {
-    jest.spyOn(console, 'log').mockImplementation(() => {});
-  });
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [FileUploadModule],
@@ -238,5 +235,9 @@ describe('UsersController', () => {
     expect(mockUsersService.getUserById).toHaveBeenCalledWith(1);
     expect(result.status).toEqual('success');
     expect(result.data.user.id).toEqual(updatedUser.id);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 });

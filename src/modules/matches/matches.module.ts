@@ -11,5 +11,6 @@ import { UserRepository } from '../users/repository/user.repository';
   imports: [TypeOrmModule.forFeature([Match]), AuthModule],
   controllers: [MatchesController],
   providers: [MatchesService, MatchRepository, UserRepository],
+  exports: [MatchRepository, MatchesService],
 })
 export class MatchesModule {}

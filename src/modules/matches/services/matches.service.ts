@@ -4,7 +4,7 @@ import {
   MatchRepository,
 } from '../repository/match.repository';
 import { InitiateMatchInput } from '../repository/match.repository';
-import { UserRepository } from 'src/modules/users/repository/user.repository';
+import { UserRepository } from '../../users/repository/user.repository';
 import { Match } from '../entities/match.entity';
 
 @Injectable()
@@ -28,7 +28,6 @@ export class MatchesService {
       }
       // Check the potential match user is exist
       const existUser = await this.userRepository.getUserById(input.toUserId);
-      console.log(existUser, input.toUserId);
       if (!existUser) {
         throw new HttpException(
           {
@@ -39,7 +38,7 @@ export class MatchesService {
           HttpStatus.BAD_REQUEST,
         );
       }
-      const match: Match = await this.matchRepository.InitiateMatch(input);
+      const match: Match = await this.matchRepository.initiateMatch(input);
       return match;
       //return match;
     } catch (error) {

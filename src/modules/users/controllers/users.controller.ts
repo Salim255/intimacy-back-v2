@@ -28,14 +28,14 @@ import {
   UpdatedUserResponseDto,
   UserDto,
 } from '../user-dto/update-user-dto';
-import * as passwordHandler from '../../../utils/password-handler';
+import * as passwordHandler from '../../auth/password-handler';
 import { UserKeysService } from '../../user-keys/services/user-keys.service';
 import {
   JwtTokenService,
   JwtTokenPayload,
-} from '../../../utils/jws-token-service';
+} from '../../auth/jws-token-service';
 import { DataSource } from 'typeorm';
-import { PasswordComparisonPayload } from '../../../utils/password-handler';
+import { PasswordComparisonPayload } from '../../auth/password-handler';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { filterObj } from '../../../utils/object-filter';
 import { Request } from 'express';

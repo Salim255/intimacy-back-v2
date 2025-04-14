@@ -16,7 +16,6 @@ export class UsersService {
 
   async createUser(data: InsertUserType): Promise<User> {
     try {
-      console.log(data);
       const createdUser = await this.userRepository.insert(data);
       return createdUser;
     } catch (error) {

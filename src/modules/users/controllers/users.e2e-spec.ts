@@ -6,7 +6,7 @@ import { Test } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
-import { CreateUserDto } from 'src/modules/users/user-dto/create-user-dto';
+import { CreateUserDto } from '../user-dto/create-user-dto';
 import { CreateUserResponseDto } from '../user-dto/create-user-response-dto';
 import { UpdatedUserResponseDto } from '../user-dto/update-user-dto';
 import { GetUserResponseDto } from '../user-dto/login-user-dto';

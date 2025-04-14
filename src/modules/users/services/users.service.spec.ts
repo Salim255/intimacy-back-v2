@@ -26,6 +26,10 @@ describe('UsersService', () => {
     service = module.get<UsersService>(UsersService);
   });
 
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
   it('should create user successful', async () => {
     mockUserRepository.getUser.mockResolvedValue(null);
     mockUserRepository.insert.mockResolvedValue({
@@ -124,5 +128,9 @@ describe('UsersService', () => {
     expect(result).toHaveProperty('id', 1);
     expect(result.connection_status).toEqual(true);
     expect(mockUserRepository.updateUserConnectionStatus).toHaveBeenCalled();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 });
