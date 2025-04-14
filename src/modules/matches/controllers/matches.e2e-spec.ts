@@ -6,7 +6,11 @@ import { DataSource } from 'typeorm';
 import { CreateUserDto } from 'src/modules/users/user-dto/create-user-dto';
 import * as request from 'supertest';
 import { CreateUserResponseDto } from 'src/modules/users/user-dto/create-user-response-dto';
-import { AcceptMatchResponseDto, InitiateMatchResponseDto } from '../matches-dto/matches-dto';
+import {
+  AcceptMatchResponseDto,
+  FetchMatchesResponseDto,
+  InitiateMatchResponseDto,
+} from '../matches-dto/matches-dto';
 
 describe('Match e2e test (e2e)', () => {
   let context: TestContext;
@@ -128,6 +132,34 @@ describe('Match e2e test (e2e)', () => {
       (acceptMatchResponse.body as AcceptMatchResponseDto).data.match.status,
     ).toEqual(2);
   });
+
+  it('should fetch matches by user', async () => {
+    // Arrange
+    // Act
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const matches = await request(app.getHttpServer())
+      .get('/matches/')
+      .set('Authorization', `Bearer ${user1Token}`)
+      .expect(200);
+
+    // Assert
+    expect(matches.body).toHaveProperty('data');
+    expect(matches.body).toHaveProperty('status');
+    expect((matches.body as FetchMatchesResponseDto).status).toEqual('Success');
+    expect((matches.body as FetchMatchesResponseDto).data).toHaveProperty(
+      'matches',
+    );
+    expect((matches.body as FetchMatchesResponseDto).data.matches).toHaveLength(
+      1,
+    );
+    expect(
+      (matches.body as FetchMatchesResponseDto).data.matches[0].match_id,
+    ).toEqual(1);
+    expect(
+      (matches.body as FetchMatchesResponseDto).data.matches[0].match_status,
+    ).toEqual(2);
+  });
+
   afterAll(async () => {
     await context.close();
     if (app) {

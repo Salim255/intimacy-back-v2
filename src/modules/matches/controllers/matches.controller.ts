@@ -22,9 +22,9 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import {
   AcceptMatchPayload,
   InitiateMatchInput,
+  PartnerMatchDetails,
 } from '../repository/match.repository';
 import { Request } from 'express';
-import { Match } from '../entities/match.entity';
 
 @ApiTags('matches')
 @Controller('matches')
@@ -87,7 +87,8 @@ export class MatchesController {
   @ApiResponse({ type: FetchMatchesResponseDto })
   async fetchMatches(@Req() req: Request) {
     const { id: userId } = req.user as { id: number };
-    const matches: Match[] = await this.matchesService.getMatches(userId);
+    const matches: PartnerMatchDetails[] =
+      await this.matchesService.getMatches(userId);
     return {
       status: 'Success',
       data: { matches },
