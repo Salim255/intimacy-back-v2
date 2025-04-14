@@ -6,11 +6,10 @@ import { Request } from 'express';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { InitiateMatchResponseDto, MatchDto } from '../matches-dto/matches-dto';
 
-
 const mockMatchService = {
   initiateMatch: jest.fn(),
   acceptMatch: jest.fn(),
-  fetchMatches: jest.fn(),
+  getMatches: jest.fn(),
 };
 
 const mockJwtTokenService = {
@@ -119,6 +118,38 @@ describe('MatchesController', () => {
     });
     expect(result).toEqual(acceptMatchResponse);
   });
+
+  it('should fetch matches', async () => {
+    // Arrange
+    const req = {
+      user: { id: 2 },
+    } as Partial<Request> as Request;
+    const fetchMatchesResult = [
+      {
+        id: 1,
+        to_user_id: 1,
+        from_user_id: 2,
+        status: 2,
+      },
+    ];
+    const fetchedMatchesResponse = {
+      status: 'Success',
+      data: {
+        matches: fetchMatchesResult,
+      },
+    };
+    mockMatchService.getMatches.mockResolvedValue(fetchMatchesResult);
+
+    // Act
+    const result = await controller.fetchMatches(req);
+
+    // Assert
+    expect(mockMatchService.getMatches).toHaveBeenCalledTimes(1);
+    expect(mockMatchService.getMatches).toHaveBeenCalledWith(2);
+    expect(result).toEqual(fetchedMatchesResponse);
+    expect(result.data.matches).toEqual(fetchMatchesResult);
+  });
+
   afterEach(() => {
     jest.restoreAllMocks();
   });
