@@ -1,11 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MatchesService } from './matches.service';
-import { AcceptMatchPayload, InitiateMatchInput } from '../repository/match.repository';
+import {
+  AcceptMatchPayload,
+  InitiateMatchInput,
+} from '../repository/match.repository';
 import { Match } from '../entities/match.entity';
 
 const mockMatchService = {
   initiateMatch: jest.fn(),
   acceptMatch: jest.fn(),
+  getMatches: jest.fn(),
 };
 
 describe('MatchesService', () => {
@@ -79,6 +83,36 @@ describe('MatchesService', () => {
     );
     expect(mockMatchService.acceptMatch).toHaveBeenCalledTimes(1);
     expect(result).toEqual(initiateMatchResult);
+  });
+
+  it('should fetch all matches by user', async () => {
+    // Arrange
+    const getMatchesResult: Match[] = [
+      {
+        id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
+        to_user_id: 1,
+        from_user_id: 2,
+        status: 2,
+      },
+      {
+        id: 1,
+        created_at: new Date(),
+        updated_at: new Date(),
+        to_user_id: 1,
+        from_user_id: 2,
+        status: 2,
+      },
+    ];
+
+    mockMatchService.getMatches.mockResolvedValue(getMatchesResult);
+    // Act
+    const result = await service.getMatches(1);
+    // Assert
+    expect(mockMatchService.getMatches).toHaveBeenCalledWith(1);
+    expect(mockMatchService.getMatches).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(getMatchesResult);
   });
 
   afterEach(() => {
