@@ -1,10 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MatchesService } from './matches.service';
-import { InitiateMatchInput } from '../repository/match.repository';
+import { AcceptMatchPayload, InitiateMatchInput } from '../repository/match.repository';
 import { Match } from '../entities/match.entity';
 
 const mockMatchService = {
   initiateMatch: jest.fn(),
+  acceptMatch: jest.fn(),
 };
 
 describe('MatchesService', () => {
@@ -52,6 +53,31 @@ describe('MatchesService', () => {
       initiateMatchPayload,
     );
     expect(mockMatchService.initiateMatch).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(initiateMatchResult);
+  });
+
+  it('should accept a match request', async () => {
+    // Arrange
+    const acceptMatchPayload: AcceptMatchPayload = {
+      matchId: 1,
+      userId: 1,
+    };
+    const initiateMatchResult: Match = {
+      id: 1,
+      created_at: new Date(),
+      updated_at: new Date(),
+      to_user_id: 1,
+      from_user_id: 2,
+      status: 2,
+    };
+    mockMatchService.acceptMatch.mockResolvedValue(initiateMatchResult);
+    // Act
+    const result = await service.acceptMatch(acceptMatchPayload);
+    // Assert
+    expect(mockMatchService.acceptMatch).toHaveBeenCalledWith(
+      acceptMatchPayload,
+    );
+    expect(mockMatchService.acceptMatch).toHaveBeenCalledTimes(1);
     expect(result).toEqual(initiateMatchResult);
   });
 
