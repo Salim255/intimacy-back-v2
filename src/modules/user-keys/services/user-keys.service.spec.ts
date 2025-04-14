@@ -1,7 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserKeysService } from './user-keys.service';
 import { UserKeysType } from '../repository/user-keys.repository';
-//import { UserKeysRepository } from '../repository/user-keys.repository';
 
 const mockUserKeysService = {
   createUserKeys: jest.fn(),
