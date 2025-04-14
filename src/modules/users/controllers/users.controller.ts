@@ -30,10 +30,7 @@ import {
 } from '../user-dto/update-user-dto';
 import * as passwordHandler from '../../auth/password-handler';
 import { UserKeysService } from '../../user-keys/services/user-keys.service';
-import {
-  JwtTokenService,
-  JwtTokenPayload,
-} from '../../auth/jws-token-service';
+import { JwtTokenService, JwtTokenPayload } from '../../auth/jws-token-service';
 import { DataSource } from 'typeorm';
 import { PasswordComparisonPayload } from '../../auth/password-handler';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -44,7 +41,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ResizePhotoInterceptor } from '../../../common/file-upload/interceptors/resize-photo.interceptor';
 import { UploadToS3Interceptor } from '../../../common/file-upload/interceptors/upload-to-s3.interceptor';
 
-@ApiTags('users')
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(

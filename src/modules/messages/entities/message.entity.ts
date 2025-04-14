@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Chat } from '../../chats/entities/chat.entity';
 
-@Entity('messages')
+@Entity('message')
 export class Message {
   @PrimaryGeneratedColumn()
   id: number;

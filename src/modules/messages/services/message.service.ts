@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { MessageRepository } from '../repository/message.repository';
 import { Message } from '../entities/message.entity';
+import { CreatedMessageDto } from '../message-dto/message-dto';
 
 export type CreateMessagePayload = {
   content: string;
@@ -17,7 +18,18 @@ export class MessageService {
     try {
       const createdMessage: Message =
         await this.messageRepository.insert(createMessagePayload);
-      return createdMessage;
+
+      const response: CreatedMessageDto = {
+        id: createdMessage.id,
+        content: createdMessage.content,
+        from_user_id: createdMessage.from_user_id,
+        to_user_id: createdMessage.to_user_id,
+        chat_id: createdMessage.chat_id,
+        status: createdMessage.status,
+        created_at: createdMessage.created_at,
+        updated_at: createdMessage.updated_at,
+      };
+      return response;
     } catch (error) {
       const messageError =
         error instanceof Error ? error.message : 'Unknown error';
@@ -30,5 +42,5 @@ export class MessageService {
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
-}
+  }
 }

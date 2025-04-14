@@ -26,7 +26,7 @@ import {
 } from '../repository/match.repository';
 import { Request } from 'express';
 
-@ApiTags('matches')
+@ApiTags('Matches')
 @Controller('matches')
 export class MatchesController {
   constructor(private readonly matchesService: MatchesService) {}
