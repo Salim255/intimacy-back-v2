@@ -60,7 +60,6 @@ export class MatchRepository {
   }
 
   async acceptMatch(data: AcceptMatchPayload): Promise<Match> {
-    console.log(data);
     const query = `
     UPDATE matches
     SET status = 2
@@ -68,7 +67,7 @@ export class MatchRepository {
     `;
 
     const values = [data.matchId, data.userId];
-    const match: Match[] = await this.dataSource.query(query, values);
-    return match[0];
+    const match: Match[][] = await this.dataSource.query(query, values);
+    return match[0][0];
   }
 }

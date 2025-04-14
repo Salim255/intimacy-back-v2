@@ -4,8 +4,6 @@ import { AppModule } from '../../../app.module';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../entities/user.entity';
 import { CreateUserDto } from '../user-dto/create-user-dto';
 import { CreateUserResponseDto } from '../user-dto/create-user-response-dto';
 import { UpdatedUserResponseDto } from '../user-dto/update-user-dto';
@@ -22,16 +20,7 @@ describe('User e2e test (e2e)', () => {
     const databaseUrl = context.getConnectionString();
     // Dynamically configure the database connection in the NestJS app
     const moduleRef = await Test.createTestingModule({
-      imports: [
-        AppModule,
-        TypeOrmModule.forRoot({
-          type: 'postgres', // Change this to your database type
-          url: databaseUrl, // Use environment variable or a local connection string
-          autoLoadEntities: true, // Automatically load entities
-          synchronize: true, // Be careful using this in production
-          entities: [User],
-        }),
-      ],
+      imports: [AppModule],
     })
       .overrideProvider(DataSource)
       .useFactory({
@@ -40,7 +29,6 @@ describe('User e2e test (e2e)', () => {
             type: 'postgres',
             url: databaseUrl,
             synchronize: true,
-            entities: [User],
           });
           return dataSource;
         },
@@ -53,9 +41,10 @@ describe('User e2e test (e2e)', () => {
     const dataSource = app.get(DataSource);
 
     await dataSource.initialize(); // Ensures that the connection is established
+  });
 
-    // Log the DataSource URL for confirmation
-    console.log('✅ Final DB URL in app context:', dataSource.options['url']);
+  it('app should be defined', () => {
+    expect(app).toBeDefined();
   });
 
   it('should respond to /ping', async () => {
@@ -102,7 +91,6 @@ describe('User e2e test (e2e)', () => {
       .expect(200);
 
     // Assert
-    console.log(response.body);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     expect(response.body.data.id).toEqual(1);
     expect(response.body).toHaveProperty('data');

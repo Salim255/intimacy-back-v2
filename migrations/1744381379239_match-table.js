@@ -19,7 +19,7 @@ exports.up = (pgm) => {
 
       to_user_id INTEGER NOT NULL,
 
-      from_usee_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      from_user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 
       status INTEGER DEFAULT 1 CHECK (status IN (1, 2))
     );`);

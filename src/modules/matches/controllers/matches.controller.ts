@@ -69,7 +69,7 @@ export class MatchesController {
   async acceptMatch(@Param('matchId') matchId: number, @Req() req: Request) {
     const { id: userId } = req.user as { id: number };
     const acceptMatchPayload: AcceptMatchPayload = {
-      matchId,
+      matchId: Number(matchId),
       userId,
     };
     const match = await this.matchesService.acceptMatch(acceptMatchPayload);

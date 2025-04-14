@@ -22,7 +22,6 @@ export class UserRepository {
 
   async insert(data: InsertUserType): Promise<User> {
     //const ds = this.dataSource; // inject it
-    console.log('Hello from user repository', data);
     const query = `
       INSERT INTO users (first_name, last_name, email, password)
       VALUES ($1, $2, $3, $4)
@@ -77,7 +76,6 @@ export class UserRepository {
 
   async updateUser(query: string, values: any[]): Promise<User> {
     const result: User[][] = await this.dataSource.query(query, values);
-    console.log(result, 'from repo');
     return result[0][0];
   }
 
