@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Match } from '../entities/match.entity';
+import { MatchDto } from '../matches-dto/matches-dto';
 
 export type InitiateMatchInput = {
   toUserId: number;
@@ -16,11 +17,11 @@ export type AcceptMatchPayload = {
 export class MatchRepository {
   constructor(private readonly dataSource: DataSource) {}
 
-  async initiateMatch(data: InitiateMatchInput): Promise<Match> {
+  async initiateMatch(data: InitiateMatchInput): Promise<MatchDto> {
     const values = [data.toUserId, data.fromUserId, 1];
     const query = `INSERT INTO matches (to_user_id, from_user_id, status)
-    VALUES ($1, $2, $3) RETURNING *;`;
-    const result: Match[] = await this.dataSource.query(query, values);
+    VALUES ($1, $2, $3) RETURNING id, to_user_id, from_user_id, status;`;
+    const result: MatchDto[] = await this.dataSource.query(query, values);
     return result[0];
   }
 

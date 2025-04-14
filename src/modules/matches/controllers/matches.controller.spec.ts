@@ -2,6 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MatchesController } from './matches.controller';
 import { MatchesService } from '../services/matches.service';
 import { JwtTokenService } from '../../auth/jws-token-service';
+import { Request } from 'express';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
+import { InitiateMatchResponseDto, MatchDto } from '../matches-dto/matches-dto';
+
 
 const mockMatchService = {
   initiateMatch: jest.fn(),
@@ -30,7 +34,12 @@ describe('MatchesController', () => {
           useValue: mockJwtTokenService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({
+        canActivate: jest.fn(() => true),
+      })
+      .compile();
 
     controller = module.get<MatchesController>(MatchesController);
   });
@@ -39,6 +48,77 @@ describe('MatchesController', () => {
     expect(controller).toBeDefined();
   });
 
+  it('should initiate match', async () => {
+    // Arrange
+    const body = {
+      to_user_id: 1,
+    };
+    const req = {
+      params: {
+        matchId: '1',
+      },
+      user: { id: 2 },
+    } as Partial<Request> as Request;
+
+    const initiateMatchResult: MatchDto = {
+      id: 1,
+      to_user_id: 1,
+      from_user_id: 2,
+      status: 1,
+    };
+    //
+    const initiateMatchResponse: InitiateMatchResponseDto = {
+      status: 'Success',
+      data: {
+        match: {
+          id: 1,
+          to_user_id: 1,
+          from_user_id: 2,
+          status: 1,
+        },
+      },
+    };
+    mockMatchService.initiateMatch.mockResolvedValue(initiateMatchResult);
+
+    // Act
+    const result = await controller.initiateMatch(req, body);
+    // Assert
+    expect(mockMatchService.initiateMatch).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(initiateMatchResponse);
+  });
+
+  it('should accept match', async () => {
+    // Arrange
+    const req = {
+      user: { id: 2 },
+    } as Partial<Request> as Request;
+    const params = { matchId: 1 };
+
+    const acceptMatchResult: MatchDto = {
+      id: 1,
+      to_user_id: 1,
+      from_user_id: 2,
+      status: 2,
+    };
+    const acceptMatchResponse: InitiateMatchResponseDto = {
+      status: 'Success',
+      data: {
+        match: acceptMatchResult,
+      },
+    };
+    mockMatchService.acceptMatch.mockResolvedValue(acceptMatchResult);
+
+    // Act
+    const result = await controller.acceptMatch(params.matchId, req);
+
+    // Assert
+    expect(mockMatchService.acceptMatch).toHaveBeenCalledTimes(1);
+    expect(mockMatchService.acceptMatch).toHaveBeenCalledWith({
+      matchId: 1,
+      userId: 2,
+    });
+    expect(result).toEqual(acceptMatchResponse);
+  });
   afterEach(() => {
     jest.restoreAllMocks();
   });

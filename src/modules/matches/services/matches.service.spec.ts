@@ -75,8 +75,10 @@ describe('MatchesService', () => {
       status: 2,
     };
     mockMatchService.acceptMatch.mockResolvedValue(initiateMatchResult);
+
     // Act
     const result = await service.acceptMatch(acceptMatchPayload);
+
     // Assert
     expect(mockMatchService.acceptMatch).toHaveBeenCalledWith(
       acceptMatchPayload,

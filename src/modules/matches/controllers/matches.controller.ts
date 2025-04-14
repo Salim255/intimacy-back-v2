@@ -15,6 +15,7 @@ import {
   FetchMatchesResponseDto,
   InitiateMatchDto,
   InitiateMatchResponseDto,
+  MatchDto,
 } from '../matches-dto/matches-dto';
 import { MatchesService } from '../services/matches.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -49,12 +50,15 @@ export class MatchesController {
       fromUserId,
     };
 
-    const match: Match =
+    const match: MatchDto =
       await this.matchesService.initiateMatch(initiateMatchPayload);
-    return {
+    const response: InitiateMatchResponseDto = {
       status: 'Success',
-      data: { match },
+      data: {
+        match,
+      },
     };
+    return response;
   }
 
   @Patch(':matchId/accept')
