@@ -1,8 +1,10 @@
 import { DataSource } from 'typeorm';
 import { Chat } from '../entities/chat.entity';
 import { ChatWithDetailsDto } from '../chat-dto/chat-response.dto';
+import { Injectable } from '@nestjs/common';
 
-export class ChatsRepository {
+@Injectable()
+export class ChatRepository {
   constructor(private readonly dataSource: DataSource) {}
 
   async insert(): Promise<Chat> {
@@ -129,18 +131,17 @@ export class ChatsRepository {
     return chats;
   }
 
-  async getChatDetailsByChatId(
-    userId: number,
-    chatId: number,
-  ): Promise<ChatWithDetailsDto> {
-    const values = [userId, chatId];
+  async getChatDetailsByChatIdUserId(data: {
+    userId: number;
+    chatId: number;
+  }): Promise<ChatWithDetailsDto> {
+    const values = [data.userId, data.chatId];
     const query = `
     SELECT
       chats.id,
       chats.type,
       chats.created_at,
       chats.updated_at,
-      chats.last_message_id,
       chats.no_read_messages,
       
       -- Encrypted session key based on sender_id
@@ -167,21 +168,9 @@ export class ChatsRepository {
             ) AS users
         ) AS users,
  
-    -- Get the last message (should return a single row)
-    (SELECT row_to_json(msg)
-       FROM (
-        SELECT  
-          id, 
-          created_at, 
-          content, 
-          from_user_id,
-          to_user_id,
-          status, 
-          chat_id
-        FROM messages WHERE id = chats.last_message_id
-      ) AS msg 
-    ) AS last_message,
-   
+    ------ End users collection ------- 
+  
+    ------ Get all message ------
     -- Get all messages in the chat
     (SELECT jsonb_agg(msgs)
      FROM 
@@ -206,8 +195,11 @@ export class ChatsRepository {
 
     WHERE uc.user_id = $1 AND chats.id = $2
     `;
-    const chat: ChatWithDetailsDto = await this.dataSource.query(query, values);
-    return chat;
+    const chat: ChatWithDetailsDto[] = await this.dataSource.query(
+      query,
+      values,
+    );
+    return chat[0];
   }
 
   async getChatByUsersIds(userId1: number, userId2: number): Promise<Chat> {

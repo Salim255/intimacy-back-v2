@@ -26,4 +26,31 @@ export class MessageRepository {
     );
     return createdMessage[0];
   }
+
+  // This code used to update messages in room to read once receiver joined a room
+  async markMessagesAsReadFromSender(fromUserId, toUserId) {
+    const value = [fromUserId, toUserId];
+    const query = `UPDATE messages SET status = 'read'
+      WHERE (status = 'delivered' OR  status = 'sent') 
+            AND to_user_id = $1 AND from_user_id = $2
+      RETURNING *;`;
+    const updatedMessages: Message[] = await this.dataSource.query(
+      query,
+      value,
+    );
+    return updatedMessages;
+  }
+  // Here we update messages that were sent to this userId to 'delivered' once they are connected
+  async markAllMessagesAsDeliveredForUser(userId: number): Promise<Message[]> {
+    const value = [userId];
+    const query = `UPDATE messages msg
+      SET status = 'delivered'
+      WHERE msg.to_user_id = $1
+      RETURNING *;`;
+    const updatedMessages: Message[] = await this.dataSource.query(
+      query,
+      value,
+    );
+    return updatedMessages;
+  }
 }

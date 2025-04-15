@@ -15,13 +15,10 @@ export class Chat {
   type: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
-  created_at: Date;
+  created_at: string;
 
   @UpdateDateColumn({ type: 'timestamptz' })
-  updated_at: Date;
-
-  @Column({ type: 'integer', nullable: true })
-  last_message_id: number | null;
+  updated_at: string;
 
   @Column({ type: 'integer', default: 0 })
   no_read_messages: number;

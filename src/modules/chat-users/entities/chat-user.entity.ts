@@ -11,9 +11,9 @@ import {
 import { User } from '../../users/entities/user.entity';
 import { Chat } from '../../chats/entities/chat.entity';
 
-@Entity('user_chats')
+@Entity('chat_users')
 @Unique(['user_id', 'chat_id']) // Matches: UNIQUE(user_id, chat_id)
-export class UserChat {
+export class ChatUser {
   @PrimaryGeneratedColumn()
   id: number;
 

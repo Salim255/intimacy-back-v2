@@ -7,6 +7,8 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { MatchesModule } from './modules/matches/matches.module';
 import { MessagesModule } from './modules/messages/messages.module';
+import { ChatsModule } from './modules/chats/chats.module';
+import { ChatUsersModule } from './modules/chat-users/chat-users.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { MessagesModule } from './modules/messages/messages.module';
     UsersModule,
     UserKeysModule,
     MatchesModule,
+    ChatsModule,
+    ChatUsersModule,
     MessagesModule,
   ],
   controllers: [AppController], // Controller to handle incoming requests

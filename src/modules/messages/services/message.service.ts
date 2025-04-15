@@ -14,12 +14,14 @@ export type CreateMessagePayload = {
 @Injectable()
 export class MessageService {
   constructor(private readonly messageRepository: MessageRepository) {}
-  async createMessage(createMessagePayload: CreateMessagePayload) {
+  async createMessage(
+    createMessagePayload: CreateMessagePayload,
+  ): Promise<Message> {
     try {
       const createdMessage: Message =
         await this.messageRepository.insert(createMessagePayload);
 
-      const response: CreatedMessageDto = {
+     /*  const response: CreatedMessageDto = {
         id: createdMessage.id,
         content: createdMessage.content,
         from_user_id: createdMessage.from_user_id,
@@ -28,9 +30,10 @@ export class MessageService {
         status: createdMessage.status,
         created_at: createdMessage.created_at,
         updated_at: createdMessage.updated_at,
-      };
-      return response;
+      }; */
+      return createdMessage;
     } catch (error) {
+      console.error('Error creating message:', error);
       const messageError =
         error instanceof Error ? error.message : 'Unknown error';
       throw new HttpException(

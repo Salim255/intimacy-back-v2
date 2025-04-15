@@ -19,8 +19,6 @@ exports.up = (pgm) => {
 
         updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
 
-        last_message_id INTEGER,
-
         no_read_messages INTEGER DEFAULT 0
     );`);
 };

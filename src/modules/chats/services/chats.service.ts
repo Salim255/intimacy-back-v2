@@ -1,17 +1,79 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { ChatsRepository } from '../repository/chat.repository';
+import { ChatRepository } from '../repository/chat.repository';
 import { Chat } from '../entities/chat.entity';
 import { ChatWithDetailsDto } from '../chat-dto/chat-response.dto';
+import { MessageService } from 'src/modules/messages/services/message.service';
+import { ChatUsersService } from '../../chat-users/services/chat-users.service';
+import { DataSource } from 'typeorm';
+import { ChatUser } from 'src/modules/chat-users/entities/chat-user.entity';
+
+type CreateChatPayload = {
+  content: string;
+  from_user_id: number;
+  to_user_id: number;
+  session_key_sender: string;
+  session_key_receiver: string;
+};
 
 @Injectable()
 export class ChatsService {
-  constructor(private readonly chatsRepository: ChatsRepository) {}
+  constructor(
+    private readonly chatsRepository: ChatRepository,
+    private readonly chatUsersService: ChatUsersService,
+    private readonly messageService: MessageService,
+    private readonly dataSource: DataSource,
+  ) {}
 
-  async createChat(): Promise<Chat> {
+  async createFullChat(
+    createChatPayload: CreateChatPayload,
+  ): Promise<ChatWithDetailsDto> {
+    const queryRunning = this.dataSource.createQueryRunner();
+    await queryRunning.connect();
+    await queryRunning.startTransaction();
     try {
+      // Step: 1 - Create the chat
+      console.log('Created chat:, just before👹👹');
       const createdChat: Chat = await this.chatsRepository.insert();
-      return createdChat;
+      console.log('Created chat:', createdChat);
+      // Step: 2 - Create the users in the chat
+      const createdChatUsers: ChatUser[] = await Promise.all(
+        [createChatPayload.from_user_id, createChatPayload.to_user_id].map(
+          (userId) => {
+            return this.chatUsersService.addUserToChat({
+              userId,
+              chatId: createdChat.id,
+            });
+          },
+        ),
+      );
+      console.log(createdChatUsers);
+
+      // Step: 3 - Create the message
+      await this.messageService.createMessage({
+        content: createChatPayload.content,
+        fromUserId: createChatPayload.from_user_id,
+        toUserId: createChatPayload.to_user_id,
+        chatId: createdChat.id,
+        status: 'sent',
+      });
+
+      // Step: 4 - Commit the transaction
+      await queryRunning.commitTransaction();
+      // Step: 5 - Release the query runner
+      await queryRunning.release();
+      // Step: 6 - Return the created chat
+      const fetchChatPayload = {
+        chatId: createdChat.id,
+        userId: createChatPayload.from_user_id,
+      };
+      // Fetch the chat with details
+      const chatWithDetails =
+        await this.chatsRepository.getChatDetailsByChatIdUserId({
+          ...fetchChatPayload,
+        });
+      return chatWithDetails;
     } catch (error) {
+      console.error('Error creating chat:', error);
       const messageError =
         error instanceof Error ? error.message : 'Unknown error';
       throw new HttpException(
