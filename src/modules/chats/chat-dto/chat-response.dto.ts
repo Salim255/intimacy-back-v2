@@ -64,7 +64,7 @@ export class ChatWithDetailsDto {
 }
 
 export class CreateChatResponseDto {
-  @ApiProperty({ description: 'Status of the response', example: 'success' })
+  @ApiProperty({ description: 'Status of the response', example: 'Success' })
   @IsNotEmpty()
   status: string;
   @ApiProperty({
@@ -118,5 +118,44 @@ export class ChatResponse {
   status: string;
   data: {
     chat: ChatWithDetailsDto[];
+  };
+}
+
+export class UpdateChatCounterDto {
+  @ApiProperty({ description: 'Chat ID', example: 3 })
+  @IsNotEmpty()
+  chat_id: number;
+
+  @ApiProperty({ description: 'Update type', example: 'increment' })
+  @IsNotEmpty()
+  update_type: 'increment' | 'reset';
+}
+
+export class UpdateChatCounterResponseDto {
+  @ApiProperty({ description: 'Status of the response', example: 'Success' })
+  @IsNotEmpty()
+  status: string;
+  @ApiProperty({
+    description: 'Updated chat details',
+    type: Object,
+    example: {
+      chat: {
+        id: 3,
+        no_read_messages: 1,
+        updated_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        type: 'dual',
+      },
+    },
+  })
+  @IsNotEmpty()
+  data: {
+    chat: {
+      id: number;
+      no_read_messages: number;
+      updated_at: string;
+      created_at: string;
+      type: string;
+    };
   };
 }

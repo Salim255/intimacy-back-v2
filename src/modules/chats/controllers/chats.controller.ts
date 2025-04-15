@@ -1,10 +1,13 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Patch, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   CreateChatDto,
   CreateChatResponseDto,
+  UpdateChatCounterDto,
+  UpdateChatCounterResponseDto,
 } from '../chat-dto/chat-response.dto';
 import { ChatsService } from '../services/chats.service';
+import { Chat } from '../entities/chat.entity';
 
 @ApiTags('Chats')
 @Controller('chats')
@@ -37,9 +40,47 @@ export class ChatsController {
     });
     //2 Return the created chat
     return {
-      status: 'success',
+      status: 'Success',
       data: {
         chat: result,
+      },
+    };
+  }
+
+  @Patch()
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Update chat message counter',
+    description:
+      'This endpoint updates the message counter for a specific chat.',
+  })
+  @ApiBody({
+    description: 'Chat ID and update type',
+    type: UpdateChatCounterDto,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Chat message counter updated successfully.',
+    type: UpdateChatCounterResponseDto,
+  })
+  async updateChatCounter(
+    @Body() updateChatCounterDto: UpdateChatCounterDto,
+  ): Promise<UpdateChatCounterResponseDto> {
+    const { chat_id, update_type } = updateChatCounterDto;
+    const result: Chat = await this.chatsService.updateChatCounter({
+      chatId: chat_id,
+      updateType: update_type,
+    });
+    return {
+      status: 'Success',
+      data: {
+        chat: {
+          id: result.id,
+          no_read_messages: result.no_read_messages,
+          updated_at: result.updated_at,
+          created_at: result.created_at,
+          type: result.type,
+        },
       },
     };
   }

@@ -5,7 +5,6 @@ import { ChatWithDetailsDto } from '../chat-dto/chat-response.dto';
 import { MessageService } from 'src/modules/messages/services/message.service';
 import { ChatUsersService } from '../../chat-users/services/chat-users.service';
 import { DataSource } from 'typeorm';
-import { ChatUser } from 'src/modules/chat-users/entities/chat-user.entity';
 
 type CreateChatPayload = {
   content: string;
@@ -13,6 +12,11 @@ type CreateChatPayload = {
   to_user_id: number;
   session_key_sender: string;
   session_key_receiver: string;
+};
+
+type UpdateChatCounterPayload = {
+  chatId: number;
+  updateType: 'increment' | 'reset';
 };
 
 @Injectable()
@@ -32,11 +36,10 @@ export class ChatsService {
     await queryRunning.startTransaction();
     try {
       // Step: 1 - Create the chat
-      console.log('Created chat:, just before👹👹');
       const createdChat: Chat = await this.chatsRepository.insert();
-      console.log('Created chat:', createdChat);
+
       // Step: 2 - Create the users in the chat
-      const createdChatUsers: ChatUser[] = await Promise.all(
+      await Promise.all(
         [createChatPayload.from_user_id, createChatPayload.to_user_id].map(
           (userId) => {
             return this.chatUsersService.addUserToChat({
@@ -46,7 +49,6 @@ export class ChatsService {
           },
         ),
       );
-      console.log(createdChatUsers);
 
       // Step: 3 - Create the message
       await this.messageService.createMessage({
@@ -57,23 +59,25 @@ export class ChatsService {
         status: 'sent',
       });
 
-      // Step: 4 - Commit the transaction
-      await queryRunning.commitTransaction();
-      // Step: 5 - Release the query runner
-      await queryRunning.release();
-      // Step: 6 - Return the created chat
+      // Step: 4 - Return the created chat
       const fetchChatPayload = {
         chatId: createdChat.id,
         userId: createChatPayload.from_user_id,
       };
+
       // Fetch the chat with details
       const chatWithDetails =
         await this.chatsRepository.getChatDetailsByChatIdUserId({
           ...fetchChatPayload,
         });
+
+      // - Commit the transaction
+      await queryRunning.commitTransaction();
+
       return chatWithDetails;
     } catch (error) {
-      console.error('Error creating chat:', error);
+      // Rollback the transaction in case of error
+      await queryRunning.rollbackTransaction();
       const messageError =
         error instanceof Error ? error.message : 'Unknown error';
       throw new HttpException(
@@ -84,13 +88,37 @@ export class ChatsService {
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    } finally {
+      // Release the query runner
+      await queryRunning.release();
     }
   }
 
-  async resetMessageCounter(chatId: number): Promise<Chat> {
+  async updateChatCounter(
+    updatePayload: UpdateChatCounterPayload,
+  ): Promise<Chat> {
     try {
-      const updatedChat: Chat =
-        await this.chatsRepository.resetMessageCounter(chatId);
+      const { chatId, updateType } = updatePayload;
+      let updatedChat: Chat | null = null;
+
+      if (updateType === 'increment') {
+        updatedChat =
+          await this.chatsRepository.incrementMessageCounter(chatId);
+      } else if (updateType === 'reset') {
+        updatedChat = await this.chatsRepository.resetMessageCounter(chatId);
+      }
+
+      if (!updatedChat) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'Invalid update type provided',
+            code: 'INVALID_UPDATE_TYPE',
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       return updatedChat;
     } catch (error) {
       const messageError =
@@ -98,45 +126,8 @@ export class ChatsService {
       throw new HttpException(
         {
           status: 'fail',
-          message: 'Error resetting message counter: ' + messageError,
-          code: 'CHAT_COUNTER_RESET_ERROR',
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  async incrementMessageCounter(chatId: number): Promise<Chat> {
-    try {
-      const updatedChat: Chat =
-        await this.chatsRepository.incrementMessageCounter(chatId);
-      return updatedChat;
-    } catch (error) {
-      const messageError =
-        error instanceof Error ? error.message : 'Unknown error';
-      throw new HttpException(
-        {
-          status: 'fail',
-          message: 'Error incrementing message counter: ' + messageError,
-          code: 'CHAT_COUNTER_INCREMENTING_ERROR',
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  async getChatById(chatId: number): Promise<Chat> {
-    try {
-      const chat: Chat = await this.chatsRepository.getChatById(chatId);
-      return chat;
-    } catch (error) {
-      const messageError =
-        error instanceof Error ? error.message : 'Unknown error';
-      throw new HttpException(
-        {
-          status: 'fail',
-          message: 'Error getting chat by ID: ' + messageError,
-          code: 'GETTING_CHAT_ERROR',
+          message: 'Error updating chat counter: ' + messageError,
+          code: 'CHAT_COUNTER_UPDATE_ERROR',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );

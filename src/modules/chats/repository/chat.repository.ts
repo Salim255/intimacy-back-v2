@@ -24,8 +24,9 @@ export class ChatRepository {
     SET no_read_messages = $2
     WHERE id = $1
     RETURNING *;`;
-    const updatedChat: Chat[] = await this.dataSource.query(query, values);
-    return updatedChat[0];
+    const updatedChat: Chat[][] = await this.dataSource.query(query, values);
+    console.log('updatedChat', updatedChat);
+    return updatedChat[0][0];
   }
 
   async incrementMessageCounter(chatId: number) {
@@ -34,8 +35,8 @@ export class ChatRepository {
     SET no_read_messages = no_read_messages + 1
     WHERE id = $1
     RETURNING *;`;
-    const updatedChat: Chat[] = await this.dataSource.query(query, values);
-    return updatedChat[0];
+    const updatedChat: Chat[][] = await this.dataSource.query(query, values);
+    return updatedChat[0][0];
   }
 
   async getChatById(chatId: number): Promise<Chat> {
