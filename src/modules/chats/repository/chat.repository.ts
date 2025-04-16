@@ -63,42 +63,24 @@ export class ChatRepository {
         ELSE sk.encrypted_session_for_receiver 
       END AS encrypted_session_base64,
 
-     -- Get the last message (should return a single row)
-    ( SELECT row_to_json (msg )
-       FROM (
-        SELECT  
-          id, 
-          created_at,
-          updated_at,
-          content, 
-          from_user_id, 
-          to_user_id,
-          status, 
-          chat_id
-        FROM messages WHERE id = chats.last_message_id
-      ) AS msg 
-    ) AS last_message,
-    ------------ End  last_message collection ----
-
     -------- Users collection ---------
-    ( SELECT jsonb_agg (users ) FROM 
-      (
-        SELECT
-          u.id AS user_id,
-          u.avatar,
-          u.last_name,
-          u.first_name, 
-          u.connection_status FROM users u
-        WHERE u.id IN 
-          (
-          SELECT
-              uc.user_id
-          FROM user_chats uc
-          WHERE uc.chat_id = cu.chat_id 
-          )
-      ) AS users
+    ( 
+      SELECT jsonb_agg (users_data) 
+        FROM (
+            SELECT
+              u.id AS user_id,
+              u.avatar,
+              u.last_name,
+              u.first_name,
+              chat_users.is_admin, 
+              u.connection_status
+            FROM users AS u
+            JOIN chat_users ON chat_users.user_id = u.id AND chat_users.chat_id = cu.chat_id
+        ) AS users_data
     ) AS users,
+    ------------------End Users collection------------------
 
+    ----------- Message collection -----------
     ( 
       SELECT jsonb_agg (messages )
         FROM 
@@ -108,9 +90,10 @@ export class ChatRepository {
           ORDER BY created_at ASC 
         ) AS messages
     ) AS messages
+    ---------- End message collection ---------
 
     -------- Main table -------
-    FROM user_chats cu
+    FROM chat_users cu
     -----------------------------
 
     ----------- Join chats table -----
@@ -152,22 +135,21 @@ export class ChatRepository {
       END AS encrypted_session_base64,
 
     ------ Get users in the chat ------
-    (SELECT jsonb_agg(users)
-     FROM (
-      SELECT 
-          id, 
-          first_name, 
-          last_name, 
-          avatar, 
-          connection_status 
-        FROM users
-        WHERE id IN (
+    (
+      SELECT jsonb_agg(user_data)
+        FROM (
           SELECT 
-            uc.user_id
-            FROM user_chats uc
-            WHERE uc.chat_id = $2)
-            ) AS users
-        ) AS users,
+            u.id AS user_id, 
+            u.first_name, 
+            u.last_name, 
+            u.avatar, 
+            u.connection_status,
+            cu.is_admin  -- bring the is_admin from chat_users
+          FROM chat_users cu
+          JOIN users u ON u.id = uc.user_id
+          WHERE uc.chat_id = $2
+        ) AS user_data
+      ) AS users,
  
     ------ End users collection ------- 
   
@@ -184,7 +166,7 @@ export class ChatRepository {
     ------ End messages getter ----------
   
     -----------------------Main table ------
-    FROM user_chats uc
+    FROM chat_users uc
     
     ---------------Join chat by chat id-------------
     JOIN chats ON uc.chat_id = chats.id
@@ -219,7 +201,7 @@ export class ChatRepository {
         ( SELECT jsonb_agg(users) FROM (
             SELECT u.id AS user_id, u.avatar, u.last_name , u.first_name , u.connection_status FROM users u
                 WHERE u.id IN (
-                SELECT uc.user_id FROM user_chats uc
+                SELECT uc.user_id FROM chat_users uc
                     WHERE uc.chat_id = c.id)
                     ) AS users
                 ) AS users ,
@@ -237,15 +219,15 @@ export class ChatRepository {
         FROM chats c
         ----------------------------------------------
 
-        --------------------Joining user_chats table----------------------
+        --------------------Joining chat_users table----------------------
         JOIN (
             SELECT chat_id
-            FROM user_chats
+            FROM chat_users
             WHERE user_id IN ($1, $2)
             GROUP BY chat_id
             HAVING COUNT(DISTINCT user_id) = 2
         ) AS cu ON c.id = cu.chat_id
-        ------------------ End joining user_chats -------
+        ------------------ End joining chat_users -------
         
         --------------Join session keys by chat id -------
         LEFT JOIN session_keys sk ON sk.chat_id = c.id

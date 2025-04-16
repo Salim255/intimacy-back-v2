@@ -38,6 +38,7 @@ export class UserInChatDto {
   last_name: string;
   first_name: string;
   connection_status: string;
+  is_admin: boolean;
 }
 
 export class MessageDto {
@@ -157,5 +158,61 @@ export class UpdateChatCounterResponseDto {
       created_at: string;
       type: string;
     };
+  };
+}
+
+export class FetchChatsResponseDto {
+  @ApiProperty({ description: 'Status of the response', example: 'Success' })
+  @IsNotEmpty()
+  status: string;
+  @ApiProperty({
+    description: 'Fetched chats details',
+    type: Object,
+    example: {
+      chats: [
+        {
+          id: 3,
+          type: 'dual',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          no_read_messages: 1,
+          encrypted_session_base64: 'session_key',
+          users: [
+            {
+              id: 1,
+              avatar: null,
+              last_name: 'Doshka',
+              first_name: 'Doshka',
+              connection_status: 'offline',
+              is_admin: false,
+            },
+            {
+              id: 2,
+              avatar: null,
+              last_name: 'Salim',
+              first_name: 'Salim',
+              connection_status: 'offline',
+              is_admin: true,
+            },
+          ],
+          messages: [
+            {
+              id: 4,
+              status: 'sent',
+              chat_id: 3,
+              content: 'Hello',
+              created_at: new Date().toISOString(),
+              to_user_id: 1,
+              updated_at: new Date().toISOString(),
+              from_user_id: 2,
+            },
+          ],
+        },
+      ],
+    },
+  })
+  @IsNotEmpty()
+  data: {
+    chats: ChatWithDetailsDto[];
   };
 }

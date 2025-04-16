@@ -6,11 +6,14 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Chat } from './entities/chat.entity';
 import { ChatUsersModule } from '../chat-users/chat-users.module';
 import { MessagesModule } from '../messages/messages.module';
+import { AuthModule } from '../auth/auth.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Chat]), // Add your entities here
     ChatUsersModule, // Import the ChatUsersModule to use its services and repositories
     MessagesModule, // Import the MessagesModule to use its services and repositories
+    AuthModule, // Import the AuthModule to use its services and repositories
   ],
   controllers: [ChatsController],
   providers: [ChatsService, ChatRepository],

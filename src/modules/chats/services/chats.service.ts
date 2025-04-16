@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ChatRepository } from '../repository/chat.repository';
 import { Chat } from '../entities/chat.entity';
 import { ChatWithDetailsDto } from '../chat-dto/chat-response.dto';
-import { MessageService } from 'src/modules/messages/services/message.service';
+import { MessageService } from '../../messages/services/message.service';
 import { ChatUsersService } from '../../chat-users/services/chat-users.service';
 import { DataSource } from 'typeorm';
 
@@ -45,6 +45,7 @@ export class ChatsService {
             return this.chatUsersService.addUserToChat({
               userId,
               chatId: createdChat.id,
+              isAdmin: userId === createChatPayload.from_user_id,
             });
           },
         ),
@@ -140,6 +141,7 @@ export class ChatsService {
         await this.chatsRepository.getAllChatsByUserId(userId);
       return chats;
     } catch (error) {
+      console.error('Error fetching chats:', error);
       const messageError =
         error instanceof Error ? error.message : 'Unknown error';
       throw new HttpException(

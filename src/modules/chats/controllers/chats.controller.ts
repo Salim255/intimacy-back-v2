@@ -1,13 +1,25 @@
-import { Body, Controller, HttpCode, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   CreateChatDto,
   CreateChatResponseDto,
+  FetchChatsResponseDto,
   UpdateChatCounterDto,
   UpdateChatCounterResponseDto,
 } from '../chat-dto/chat-response.dto';
 import { ChatsService } from '../services/chats.service';
 import { Chat } from '../entities/chat.entity';
+import { Request } from 'express';
+import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
 @ApiTags('Chats')
 @Controller('chats')
@@ -81,6 +93,32 @@ export class ChatsController {
           created_at: result.created_at,
           type: result.type,
         },
+      },
+    };
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get all chats by user ID',
+    description:
+      'This endpoint retrieves all chats associated with a specific user ID.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Chats retrieved successfully.',
+    type: FetchChatsResponseDto,
+  })
+  async getAllChatsByUserId(
+    @Req() req: Request,
+  ): Promise<FetchChatsResponseDto> {
+    const user = req.user as { id: number }; // Replace with actual user ID
+    const chats = await this.chatsService.getAllChatsByUserId(user.id);
+    return {
+      status: 'Success',
+      data: {
+        chats,
       },
     };
   }

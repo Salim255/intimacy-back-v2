@@ -1,7 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { UserRepository } from '../repository/user.repository';
+import { DataSource } from 'typeorm';
+import { JwtTokenService } from '../../auth/jws-token-service';
+import { UserKeysService } from '../../user-keys/services/user-keys.service';
 
+const mockQueryRunner = {
+  connect: jest.fn(),
+  startTransaction: jest.fn(),
+  commitTransaction: jest.fn(),
+  rollbackTransaction: jest.fn(),
+  release: jest.fn(),
+};
+
+const mockDataSource = {
+  createQueryRunner: jest.fn(() => mockQueryRunner),
+};
 const mockUserRepository = {
   getUser: jest.fn(),
   getUserById: jest.fn(),
@@ -20,6 +34,20 @@ describe('UsersService', () => {
       providers: [
         UsersService,
         { provide: UserRepository, useValue: mockUserRepository },
+        { provide: DataSource, useValue: mockDataSource },
+        {
+          provide: JwtTokenService,
+          useValue: {
+            createToken: jest.fn(),
+            verifyToken: jest.fn(),
+          },
+        },
+        {
+          provide: UserKeysService,
+          useValue: {
+            createUserKeys: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -40,11 +68,13 @@ describe('UsersService', () => {
       password: 'hashedpassword',
     });
 
-    const result = await service.createUser({
+    const result = await service.signup({
       first_name: 'John',
       last_name: 'Doe',
       email: 'test@example.com',
       password: 'plaintextpassword',
+      public_key: 'publickey',
+      private_key: 'privatekey',
     });
     expect(result).toHaveProperty('id', 1);
     expect(result).toHaveProperty('email', 'test@example.com');
@@ -58,7 +88,7 @@ describe('UsersService', () => {
       last_name: 'Doe',
     });
 
-    const user = await service.getUser('email');
+    const user = await service.login({ email: 'email', password: 'password' });
     expect(user).toHaveProperty('id', 1);
     expect(mockUserRepository.getUser).toHaveBeenCalled();
   });

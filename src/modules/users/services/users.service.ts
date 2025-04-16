@@ -1,40 +1,182 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { User } from '../entities/user.entity';
-import { UserRepository, UserWithKeys } from '../repository/user.repository';
+import { UserRepository } from '../repository/user.repository';
 import { UserDto } from '../user-dto/update-user-dto';
+import { DataSource } from 'typeorm';
+import { UserKeysService } from '../../user-keys/services/user-keys.service';
+import * as passwordHandler from '../../auth/password-handler';
+import { JwtTokenService, JwtTokenPayload } from '../../auth/jws-token-service';
+import { PasswordComparisonPayload } from '../../auth/password-handler';
 
-export type InsertUserType = {
+export type CreateUserPayload = {
   first_name: string;
   last_name: string;
   email: string;
   password: string;
+  private_key: string;
+  public_key: string;
 };
+
+export type LoginUserPayload = {
+  email: string;
+  password: string;
+};
+
+export type CreateUserResponse = {
+  token: string;
+  id: number;
+  expireIn: number;
+  privateKey: string;
+  publicKey: string;
+  email: string;
+};
+
+export type LoginUserResponse = CreateUserResponse;
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly dataSource: DataSource,
+    private readonly userKeysService: UserKeysService,
+    private readonly userRepository: UserRepository,
+    private readonly jwtTokenService: JwtTokenService,
+  ) {}
 
-  async createUser(data: InsertUserType): Promise<User> {
+  async signup(
+    createUserPayload: CreateUserPayload,
+  ): Promise<CreateUserResponse> {
+    const queryRunning = this.dataSource.createQueryRunner();
+    await queryRunning.connect();
+    await queryRunning.startTransaction();
     try {
-      const createdUser = await this.userRepository.insert(data);
-      return createdUser;
+      const hashedPassword = await passwordHandler.hashedPassword(
+        createUserPayload.password,
+      );
+      // Step: 1 - Create the user
+      const createdUser: User = await this.userRepository.insert({
+        first_name: createUserPayload.first_name,
+        last_name: createUserPayload.first_name,
+        email: createUserPayload.email,
+        password: hashedPassword,
+      });
+
+      // Step: 2 - Create the user keys
+      const userKeys = await this.userKeysService.createUserKeys({
+        user_id: createdUser.id,
+        public_key: createUserPayload.public_key,
+        encrypted_private_key: createUserPayload.private_key,
+      });
+
+      // Step: 3 - Prepare token
+      const token = this.jwtTokenService.createToken(createdUser.id);
+      const tokenDetails: JwtTokenPayload =
+        this.jwtTokenService.verifyToken(token);
+
+      // Step: 4 - Commit the transaction
+      await queryRunning.commitTransaction();
+
+      // Step: 5 - Release the query runner
+      await queryRunning.release();
+
+      // Prepare the response
+      const response: CreateUserResponse = {
+        token,
+        id: Number(tokenDetails.id),
+        expireIn: tokenDetails.exp,
+        privateKey: userKeys.encrypted_private_key,
+        publicKey: userKeys.public_key,
+        email: createdUser.email,
+      };
+      return response;
     } catch (error) {
-      throw new Error(`Error creating user: ${error}`);
+      // Rollback the transaction in case of error
+      await queryRunning.rollbackTransaction();
+      // Release the query runner
+      await queryRunning.release();
+
+      const messError = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'User creation failed: ' + messError,
+          code: 'USER_CREATION_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
-  async getUser(email: string): Promise<UserWithKeys> {
+  async login(loginUserPayload: LoginUserPayload): Promise<LoginUserResponse> {
     try {
-      const user = await this.userRepository.getUser(email);
-      return user;
+      // Step: 1 - Check if user exists
+      const user = await this.userRepository.getUser(loginUserPayload.email);
+      if (!user) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'User not found',
+            code: 'USER_NOT_FOUND',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+      // Step: 2 - Check if password is correct
+      const passwords: PasswordComparisonPayload = {
+        plainPassword: loginUserPayload.password,
+        hashedPassword: user.password,
+      };
+      const isPasswordValid = await passwordHandler.correctPassword(passwords);
+      if (!isPasswordValid) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'Invalid password',
+            code: 'INVALID_PASSWORD',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+      // Step: 3 - Prepare token
+      const token = this.jwtTokenService.createToken(user.id);
+      const tokenDetails: JwtTokenPayload =
+        this.jwtTokenService.verifyToken(token);
+
+      // Step: 4 - Prepare the response
+      const response: CreateUserResponse = {
+        token,
+        id: Number(tokenDetails.id),
+        expireIn: tokenDetails.exp,
+        privateKey: user.encrypted_private_key,
+        publicKey: user.public_key,
+        email: user.email,
+      };
+      // Step: 5 - Return the response
+      return response;
     } catch (error) {
       throw new Error(`Error get user: ${error}`);
     }
   }
   async getUserById(userId: number): Promise<UserDto> {
     try {
-      const user = await this.userRepository.getUserById(userId);
-      return user;
+      const user: User = await this.userRepository.getUserById(userId);
+      if (!user) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'User not found or no longer exists.',
+            code: 'USER_NOT_FOUND',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+      const userDto: UserDto = {
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        connection_status: user.connection_status,
+        avatar: user.avatar,
+      };
+      return userDto;
     } catch (error) {
       throw new Error(`Error get user: ${error}`);
     }

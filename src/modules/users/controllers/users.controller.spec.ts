@@ -16,7 +16,7 @@ import { UploadToS3Interceptor } from '../../../common/file-upload/interceptors/
 
 // Ensure this path is correct and TestContext is properly exported and typed
 const mockUsersService = {
-  createUser: jest.fn(),
+  signup: jest.fn(),
   getUser: jest.fn(),
   updateUser: jest.fn(),
   getUserById: jest.fn(),
@@ -104,7 +104,7 @@ describe('UsersController', () => {
 
       // Mock the request and response objects
       // Act: Call the method being tested
-      mockUsersService.createUser.mockResolvedValue({
+      mockUsersService.signup.mockResolvedValue({
         id: 1,
         first_name: 'John',
         last_name: 'Doe',
@@ -136,13 +136,13 @@ describe('UsersController', () => {
       const result = await controller.signup(createUserDto);
 
       // Assert: Check the result
-      expect(mockUsersService.createUser).toHaveBeenCalledWith({
+      expect(mockUsersService.signup).toHaveBeenCalledWith({
         email: createUserDto.email,
         first_name: createUserDto.first_name,
         last_name: createUserDto.last_name,
         password: mockedHashedPassword,
       });
-      expect(mockUsersService.createUser).toHaveBeenCalledTimes(1);
+      expect(mockUsersService.signup).toHaveBeenCalledTimes(1);
       expect(result).toEqual(createdUserResponse);
       expect(result.status).toBe('success');
       expect(mockUserKeysService.createUserKeys).toHaveBeenCalledWith({

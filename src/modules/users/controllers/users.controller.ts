@@ -21,18 +21,17 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateUserDto } from '../user-dto/create-user-dto';
-import { CreateUserResponseDto } from '../user-dto/create-user-response-dto';
+import {
+  CreateUserResponseDto,
+  LoginUserResponseDto,
+} from '../user-dto/create-user-response-dto';
 import { GetUserResponseDto, LoginUserDto } from '../user-dto/login-user-dto';
 import {
   UpdateUserDto,
   UpdatedUserResponseDto,
   UserDto,
 } from '../user-dto/update-user-dto';
-import * as passwordHandler from '../../auth/password-handler';
-import { UserKeysService } from '../../user-keys/services/user-keys.service';
-import { JwtTokenService, JwtTokenPayload } from '../../auth/jws-token-service';
-import { DataSource } from 'typeorm';
-import { PasswordComparisonPayload } from '../../auth/password-handler';
+import { JwtTokenService } from '../../auth/jws-token-service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { filterObj } from '../../../utils/object-filter';
 import { Request } from 'express';
@@ -45,11 +44,8 @@ import { UploadToS3Interceptor } from '../../../common/file-upload/interceptors/
 @Controller('users')
 export class UsersController {
   constructor(
-    private readonly userKeysService: UserKeysService,
     private readonly usersService: UsersService,
     private readonly jwtTokenService: JwtTokenService,
-    private readonly dataSource: DataSource, // Inject the DataSource here
-    private readonly fileUploadService: FileUploadService,
   ) {}
 
   @Post('signup')
@@ -62,60 +58,22 @@ export class UsersController {
     type: CreateUserResponseDto,
   })
   async signup(@Body() body: CreateUserDto) {
-    //const ds = this.dataSource; // inject it
-    //console.log('🧪 Current DB URL', ds.options['url']);
-    try {
-      const {
-        email,
-        password,
-        first_name,
-        last_name,
-        private_key,
-        public_key,
-      } = body;
+    const { email, password, first_name, last_name, private_key, public_key } =
+      body;
 
-      const hashedPassword = await passwordHandler.hashedPassword(password);
-      const createdUser = await this.usersService.createUser({
-        email,
-        password: hashedPassword,
-        first_name,
-        last_name,
-      });
+    const response = await this.usersService.signup({
+      email,
+      password,
+      first_name,
+      last_name,
+      private_key,
+      public_key,
+    });
 
-      // Create usr keys
-      const userKeys = await this.userKeysService.createUserKeys({
-        user_id: createdUser.id,
-        public_key,
-        encrypted_private_key: private_key,
-      });
-      const token = this.jwtTokenService.createToken(createdUser.id);
-
-      const tokenDetails: JwtTokenPayload =
-        this.jwtTokenService.verifyToken(token);
-
-      return {
-        status: 'success',
-        data: {
-          token,
-          id: tokenDetails.id,
-          expireIn: tokenDetails.exp,
-          privateKey: userKeys.encrypted_private_key,
-          publicKey: userKeys.public_key,
-          email: createdUser.email,
-        },
-      };
-    } catch (err) {
-      console.log(err);
-      const errorMessage = err instanceof Error ? err.message : '';
-      throw new HttpException(
-        {
-          status: 'fail',
-          message: 'User creation failed: ' + errorMessage,
-          code: 'USER_CREATE_ERROR',
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    return {
+      status: 'success',
+      data: response,
+    };
   }
 
   @HttpCode(200)
@@ -127,62 +85,13 @@ export class UsersController {
     description: 'User logged successfully',
     type: CreateUserResponseDto,
   })
-  async login(@Body() body: LoginUserDto): Promise<CreateUserResponseDto> {
-    try {
-      const { email, password } = body;
-      const user = await this.usersService.getUser(email);
-      if (!user) {
-        throw new HttpException(
-          {
-            status: 'fail',
-            message: 'User not found',
-            code: 'USER_NOT_FOUND',
-          },
-          HttpStatus.NOT_FOUND,
-        );
-      }
-      const passwords: PasswordComparisonPayload = {
-        plainPassword: password,
-        hashedPassword: user.password,
-      };
-      const isPasswordValid = await passwordHandler.correctPassword(passwords);
-
-      if (!isPasswordValid) {
-        throw new HttpException(
-          {
-            status: 'fail',
-            message: 'Invalid password',
-            code: 'INVALID_PASSWORD',
-          },
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-      const token = this.jwtTokenService.createToken(user.id);
-      const tokenDetails: JwtTokenPayload =
-        this.jwtTokenService.verifyToken(token);
-
-      return {
-        status: 'success',
-        data: {
-          token,
-          id: Number(tokenDetails.id),
-          expireIn: tokenDetails.exp,
-          privateKey: user.encrypted_private_key,
-          publicKey: user.public_key,
-          email: user.email,
-        },
-      };
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '';
-      throw new HttpException(
-        {
-          status: 'fail',
-          message: 'User login failed' + errorMessage,
-          code: 'USER_LOGIN_ERROR',
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+  async login(@Body() body: LoginUserDto): Promise<LoginUserResponseDto> {
+    const { email, password } = body;
+    const user = await this.usersService.login({ email, password });
+    return {
+      status: 'success',
+      data: user,
+    };
   }
 
   @Get(':userId')
@@ -195,45 +104,15 @@ export class UsersController {
     type: GetUserResponseDto,
   })
   async getUser(@Req() req: Request): Promise<GetUserResponseDto> {
-    try {
-      const userId = req.user as { id: number };
-      // Fetch the current user from the database
-      const savedUser: UserDto = await this.usersService.getUserById(userId.id);
-      if (!savedUser) {
-        throw new HttpException(
-          {
-            status: 'fail',
-            message: 'User not found or no longer exists.',
-            code: 'USER_NOT_FOUND',
-          },
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-
-      return {
-        status: 'success',
-        data: {
-          user: {
-            id: savedUser.id,
-            first_name: savedUser.first_name,
-            last_name: savedUser.last_name,
-            connection_status: savedUser.connection_status,
-            avatar: savedUser.avatar,
-          },
-        },
-      };
-    } catch (error) {
-      console.log(error);
-      const errorMessage = error instanceof Error ? error.message : '';
-      throw new HttpException(
-        {
-          status: 'fail',
-          message: 'fail to fetch user ' + errorMessage,
-          code: 'FETCH_USER_ERROR',
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    const userId = req.user as { id: number };
+    // Fetch the current user from the database
+    const savedUser: UserDto = await this.usersService.getUserById(userId.id);
+    return {
+      status: 'success',
+      data: {
+        user: savedUser,
+      },
+    };
   }
 
   @Patch('update-me')

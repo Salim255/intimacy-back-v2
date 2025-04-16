@@ -10,6 +10,6 @@ import { ChatUser } from './entities/chat-user.entity';
   ],
   controllers: [ChatUsersController],
   providers: [ChatUsersService, ChatUserRepository],
-  exports: [ChatUsersService], // Export the service and repository if needed in other modules
+  exports: [ChatUsersService, ChatUserRepository], // Export the service and repository if needed in other modules
 })
 export class ChatUsersModule {}

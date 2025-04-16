@@ -10,6 +10,6 @@ import { Message } from './entities/message.entity';
   ],
   controllers: [MessageController],
   providers: [MessageService, MessageRepository],
-  exports: [MessageService], // Export the service and repository if needed in other modules
+  exports: [MessageService, MessageRepository], // Export the service and repository if needed in other modules
 })
 export class MessagesModule {}

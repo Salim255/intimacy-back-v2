@@ -25,3 +25,5 @@ export class CreateUserResponseDto {
     email: string;
   };
 }
+
+export class LoginUserResponseDto extends CreateUserResponseDto {}

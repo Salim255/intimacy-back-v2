@@ -4,6 +4,7 @@ import { ChatUserRepository } from '../repository/chat-user.repository';
 type CreateChatUserPayload = {
   userId: number;
   chatId: number;
+  isAdmin: boolean;
 };
 @Injectable()
 export class ChatUsersService {

@@ -10,7 +10,7 @@ exports.shorthands = undefined;
  */
 exports.up = (pgm) => {
   pgm.sql(`
-        CREATE TABLE user_chats (
+        CREATE TABLE chat_users (
             id SERIAL PRIMARY KEY,
     
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -33,5 +33,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-  pgm.sql(`DROP TABLE user_chats;`);
+  pgm.sql(`DROP TABLE chat_users;`);
 };

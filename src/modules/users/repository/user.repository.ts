@@ -2,9 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { InsertUserType } from '../services/users.service';
-import { UserDto } from '../user-dto/update-user-dto';
 
+export type InsertUserPayload = {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+};
 export type UserWithKeys = User & {
   id: number;
   email: string;
@@ -20,7 +24,7 @@ export class UserRepository {
     private readonly dataSource: DataSource,
   ) {}
 
-  async insert(data: InsertUserType): Promise<User> {
+  async insert(data: InsertUserPayload): Promise<User> {
     //const ds = this.dataSource; // inject it
     const query = `
       INSERT INTO users (first_name, last_name, email, password)
@@ -32,9 +36,9 @@ export class UserRepository {
     return result[0];
   }
 
-  async getUserById(userId: number): Promise<UserDto> {
+  async getUserById(userId: number): Promise<User> {
     const query = `SELECT * FROM users WHERE id = $1;`;
-    const result: UserDto[] = await this.dataSource.query(query, [userId]);
+    const result: User[] = await this.dataSource.query(query, [userId]);
     return result[0];
   }
   // Get user by email
