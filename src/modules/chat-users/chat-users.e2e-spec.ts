@@ -3,11 +3,16 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from '../../app.module';
 import { DataSource } from 'typeorm';
 import { TestContext } from '../../../test/context'; // Import TestContext
+import * as request from 'supertest';
+import { CreateUserDto } from '../users/user-dto/create-user-dto';
 
 describe('ChatUsers e2e test (e2e) ', () => {
   let context: TestContext;
   let app: INestApplication;
-  let userToken: string;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let user1Auth: { token: string; id: number };
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  let user2Auth: { token: string; id: number };
 
   beforeAll(async () => {
     // Initialize test database context
@@ -41,6 +46,49 @@ describe('ChatUsers e2e test (e2e) ', () => {
 
   it('app should be defined', () => {
     expect(app).toBeDefined();
+  });
+
+  it('should create chat users', async () => {
+    // Arrange
+    // Step1: Create users
+    const createUserDto: CreateUserDto = {
+      email: 'user1.doe@example.com',
+      password: 'supersecure123!',
+      first_name: 'Jane',
+      last_name: 'Doe',
+      private_key: 'fake-private-key',
+      public_key: 'fake-public-key',
+    };
+    const createUser2Dto: CreateUserDto = {
+      email: 'user2.doe@example.com',
+      password: 'supersecure123!',
+      first_name: 'Jane',
+      last_name: 'Doe',
+      private_key: 'fake-private-key',
+      public_key: 'fake-public-key',
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await request(app.getHttpServer())
+      .post('/users/signup')
+      .send(createUserDto)
+      .expect(201)
+      .then((response) => {
+        user1Auth = (response.body as { data: { token: string; id: number } })
+          .data;
+      });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    await request(app.getHttpServer())
+      .post('/users/signup')
+      .send(createUser2Dto)
+      .expect(201)
+      .then((response) => {
+        user2Auth = (response.body as { data: { token: string; id: number } })
+          .data;
+      });
+    // Act
+    // Assert
   });
 
   afterAll(async () => {

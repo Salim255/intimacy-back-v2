@@ -7,6 +7,7 @@ import { TestContext } from '../../../test/context'; // Import TestContext
 describe('Message e2e test (e2e) ', () => {
   let context: TestContext;
   let app: INestApplication;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let userToken: string;
 
   beforeAll(async () => {
