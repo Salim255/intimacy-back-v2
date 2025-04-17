@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ChatsService, CreateChatPayload } from './chats.service';
+import { ChatsService, CreateChatPayload, UpdateChatCounterPayload } from './chats.service';
 import { ChatRepository } from '../repository/chat.repository';
 import { MessageService } from '../../messages/services/message.service';
 import { ChatUsersService } from '../../chat-users/services/chat-users.service';
@@ -20,6 +20,7 @@ const mockDataSource = {
 const mockChatsRepository = {
   insert: jest.fn(),
   getChatDetailsByChatIdUserId: jest.fn(),
+  incrementMessageCounter: jest.fn(),
 };
 
 const mockChatUsersService = {
@@ -177,5 +178,30 @@ describe('ChatsService', () => {
       mockChatsRepository.getChatDetailsByChatIdUserId,
     ).toHaveBeenCalledTimes(1);
     expect(createdChatResponse).toEqual(createdChatDetails);
+  });
+
+  it('should update chat counter', async () => {
+    // Arrange
+    const updateChatCounterPayload: UpdateChatCounterPayload = {
+      chatId: 1,
+      updateType: 'increment',
+    };
+    mockChatsRepository.incrementMessageCounter.mockResolvedValue({
+      id: 1,
+      type: 'dual',
+      created_at: 'created_at',
+      updated_at: 'updated_at',
+      no_read_messages: 2,
+    });
+
+    // Act
+    const result = await service.updateChatCounter(updateChatCounterPayload);
+
+    // Assert
+    expect(mockChatsRepository.incrementMessageCounter).toHaveBeenCalledWith(1);
+    expect(mockChatsRepository.incrementMessageCounter).toHaveBeenCalledTimes(
+      1,
+    );
+    expect(result.no_read_messages).toEqual(2);
   });
 });

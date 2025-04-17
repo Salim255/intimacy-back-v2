@@ -14,7 +14,7 @@ export type CreateChatPayload = {
   session_key_receiver: string;
 };
 
-type UpdateChatCounterPayload = {
+export type UpdateChatCounterPayload = {
   chatId: number;
   updateType: 'increment' | 'reset';
 };

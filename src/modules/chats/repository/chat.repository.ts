@@ -25,11 +25,10 @@ export class ChatRepository {
     WHERE id = $1
     RETURNING *;`;
     const updatedChat: Chat[][] = await this.dataSource.query(query, values);
-    console.log('updatedChat', updatedChat);
     return updatedChat[0][0];
   }
 
-  async incrementMessageCounter(chatId: number) {
+  async incrementMessageCounter(chatId: number): Promise<Chat> {
     const values = [chatId];
     const query = `UPDATE chats
     SET no_read_messages = no_read_messages + 1
