@@ -8,6 +8,12 @@ import * as passwordHandler from '../../auth/password-handler';
 import { JwtTokenService, JwtTokenPayload } from '../../auth/jws-token-service';
 import { PasswordComparisonPayload } from '../../auth/password-handler';
 
+export type UpdateUserPayload = {
+  userId: number;
+  query: string;
+  values: (string | number | boolean | null)[];
+};
+
 export type CreateUserPayload = {
   first_name: string;
   last_name: string;
@@ -153,9 +159,19 @@ export class UsersService {
       // Step: 5 - Return the response
       return response;
     } catch (error) {
-      throw new Error(`Error get user: ${error}`);
+      console.error(error);
+      const messageError = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error to log user: ' + messageError,
+          code: 'LOGGING_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
+
   async getUserById(userId: number): Promise<UserDto> {
     try {
       const user: User = await this.userRepository.getUserById(userId);
@@ -178,7 +194,15 @@ export class UsersService {
       };
       return userDto;
     } catch (error) {
-      throw new Error(`Error get user: ${error}`);
+      const messageError = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error with getting user: ' + messageError,
+          code: 'GETTING_USER_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -199,15 +223,47 @@ export class UsersService {
     }
   }
 
-  async updateUser(
-    query: string,
-    values: (string | number | boolean | null)[],
-  ): Promise<UserDto> {
+  async updateUser(updateUserPayload: UpdateUserPayload): Promise<UserDto> {
     try {
-      const updatedUser = await this.userRepository.updateUser(query, values);
+      // 1- Check is user exit
+      const savedUser: UserDto = await this.getUserById(
+        updateUserPayload.userId,
+      );
+
+      if (!savedUser) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'User not found or no longer exists.',
+            code: 'USER_NOT_FOUND',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      // 2- If no fields to update, return early
+      if (updateUserPayload.values.length === 0) {
+        return savedUser;
+        // No changes, return existing data
+      }
+
+      // 3- Update user
+      const updatedUser: User = await this.userRepository.updateUser(
+        updateUserPayload.query,
+        updateUserPayload.values,
+      );
+
       return updatedUser;
     } catch (error) {
-      throw new Error(`Error in update user: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'fail to update ' + errorMessage,
+          code: 'UPDATE_ME_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
   async updateUserConnectionStatus(

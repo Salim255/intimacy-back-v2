@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
-import { AppModule } from '../../../app.module';
-import { TestContext } from '../../../../test/context';
+import { AppModule } from '../../app.module';
+import { TestContext } from '../../../test/context';
 import { DataSource } from 'typeorm';
 import { CreateUserDto } from 'src/modules/users/user-dto/create-user-dto';
 import * as request from 'supertest';
@@ -10,7 +10,7 @@ import {
   AcceptMatchResponseDto,
   FetchMatchesResponseDto,
   InitiateMatchResponseDto,
-} from '../matches-dto/matches-dto';
+} from './matches-dto/matches-dto';
 
 describe('Match e2e test (e2e)', () => {
   let context: TestContext;

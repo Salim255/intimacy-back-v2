@@ -31,7 +31,6 @@ import {
   UpdatedUserResponseDto,
   UserDto,
 } from '../user-dto/update-user-dto';
-import { JwtTokenService } from '../../auth/jws-token-service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { filterObj } from '../../../utils/object-filter';
 import { Request } from 'express';
@@ -43,10 +42,7 @@ import { UploadToS3Interceptor } from '../../../common/file-upload/interceptors/
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly jwtTokenService: JwtTokenService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Post('signup')
   @HttpCode(201)
@@ -147,20 +143,6 @@ export class UsersController {
         filteredBody.avatar = req.file.filename;
       }
       const userId = req.user as { id: number };
-      // Fetch the current user from the database
-      const savedUser: UserDto = await this.usersService.getUserById(userId.id);
-
-      if (!savedUser) {
-        throw new HttpException(
-          {
-            status: 'fail',
-            message: 'User not found or no longer exists.',
-            code: 'USER_NOT_FOUND',
-          },
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-
       // Dynamically construct the update query clause
       const values: (string | number)[] = [];
       const fields: string[] = [];
@@ -174,31 +156,16 @@ export class UsersController {
         }
       });
 
-      // If no fields to update, return early
-      if (fields.length === 0) {
-        return {
-          status: 'success',
-          data: {
-            user: {
-              id: savedUser.id,
-              first_name: savedUser.first_name,
-              last_name: savedUser.last_name,
-              connection_status: savedUser.connection_status,
-              avatar: savedUser.avatar,
-            },
-          },
-        }; // No changes, return existing data
-      }
-
       // Build and Add WHERE clause and append ID to the values
       query += `${fields.join(', ')} WHERE id = $${values.length + 1} RETURNING *;`;
-      values.push(savedUser.id);
+      values.push(userId.id);
 
-      // 3) Update user document
-      const updatedUser: UserDto = await this.usersService.updateUser(
+      // Update user document
+      const updatedUser: UserDto = await this.usersService.updateUser({
+        userId: userId.id,
         query,
         values,
-      );
+      });
 
       return {
         status: 'success',
@@ -213,7 +180,6 @@ export class UsersController {
         },
       };
     } catch (err) {
-      console.log(err);
       const errorMessage = err instanceof Error ? err.message : '';
       throw new HttpException(
         {

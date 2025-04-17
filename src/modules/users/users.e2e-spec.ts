@@ -1,13 +1,13 @@
 import * as request from 'supertest';
-import { TestContext } from '../../../../test/context'; // Import TestContext
-import { AppModule } from '../../../app.module';
+import { TestContext } from '../../../test/context'; // Import TestContext
+import { AppModule } from '../../app.module';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
-import { CreateUserDto } from '../user-dto/create-user-dto';
-import { CreateUserResponseDto } from '../user-dto/create-user-response-dto';
-import { UpdatedUserResponseDto } from '../user-dto/update-user-dto';
-import { GetUserResponseDto } from '../user-dto/login-user-dto';
+import { CreateUserDto } from './user-dto/create-user-dto';
+import { CreateUserResponseDto } from './user-dto/create-user-response-dto';
+import { UpdatedUserResponseDto } from './user-dto/update-user-dto';
+import { GetUserResponseDto } from './user-dto/login-user-dto';
 
 describe('User e2e test (e2e)', () => {
   let context: TestContext;

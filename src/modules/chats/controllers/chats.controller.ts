@@ -27,6 +27,7 @@ export class ChatsController {
   constructor(private readonly chatsService: ChatsService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @HttpCode(201)
   @ApiOperation({
     summary: 'Create a new chat',
@@ -45,7 +46,6 @@ export class ChatsController {
   async createChat(
     @Body() createChatDto: CreateChatDto,
   ): Promise<CreateChatResponseDto> {
-    console.log('Create chat DTO:', createChatDto);
     //1 Create chat Logic to create a new chat
     const result = await this.chatsService.createFullChat({
       ...createChatDto,

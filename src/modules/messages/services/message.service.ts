@@ -16,22 +16,13 @@ export class MessageService {
   constructor(private readonly messageRepository: MessageRepository) {}
   async createMessage(
     createMessagePayload: CreateMessagePayload,
-  ): Promise<Message> {
+  ): Promise<CreatedMessageDto> {
     try {
       const createdMessage: Message =
         await this.messageRepository.insert(createMessagePayload);
 
-     /*  const response: CreatedMessageDto = {
-        id: createdMessage.id,
-        content: createdMessage.content,
-        from_user_id: createdMessage.from_user_id,
-        to_user_id: createdMessage.to_user_id,
-        chat_id: createdMessage.chat_id,
-        status: createdMessage.status,
-        created_at: createdMessage.created_at,
-        updated_at: createdMessage.updated_at,
-      }; */
-      return createdMessage;
+      const response: CreatedMessageDto = { ...createdMessage };
+      return response;
     } catch (error) {
       console.error('Error creating message:', error);
       const messageError =

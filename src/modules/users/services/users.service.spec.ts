@@ -4,7 +4,15 @@ import { UserRepository } from '../repository/user.repository';
 import { DataSource } from 'typeorm';
 import { JwtTokenService } from '../../auth/jws-token-service';
 import { UserKeysService } from '../../user-keys/services/user-keys.service';
+import * as passwordHandler from '../../auth/password-handler';
 
+const mockJwtTokenService = {
+  createToken: jest.fn(),
+  verifyToken: jest.fn(),
+};
+const mockUserKeysService = {
+  createUserKeys: jest.fn(),
+};
 const mockQueryRunner = {
   connect: jest.fn(),
   startTransaction: jest.fn(),
@@ -37,16 +45,11 @@ describe('UsersService', () => {
         { provide: DataSource, useValue: mockDataSource },
         {
           provide: JwtTokenService,
-          useValue: {
-            createToken: jest.fn(),
-            verifyToken: jest.fn(),
-          },
+          useValue: mockJwtTokenService,
         },
         {
           provide: UserKeysService,
-          useValue: {
-            createUserKeys: jest.fn(),
-          },
+          useValue: mockUserKeysService,
         },
       ],
     }).compile();
@@ -59,6 +62,7 @@ describe('UsersService', () => {
   });
 
   it('should create user successful', async () => {
+    // Arrange
     mockUserRepository.getUser.mockResolvedValue(null);
     mockUserRepository.insert.mockResolvedValue({
       id: 1,
@@ -68,6 +72,18 @@ describe('UsersService', () => {
       password: 'hashedpassword',
     });
 
+    mockUserKeysService.createUserKeys.mockResolvedValue({
+      public_key: 'publickey',
+      encrypted_private_key: 'privatekey',
+    });
+
+    // Mock JwtTokenService methods
+    mockJwtTokenService.createToken.mockReturnValue('your.jwt.token.here');
+    mockJwtTokenService.verifyToken.mockReturnValue({
+      id: 1,
+      exp: 1609459200,
+    });
+    // Act
     const result = await service.signup({
       first_name: 'John',
       last_name: 'Doe',
@@ -76,17 +92,29 @@ describe('UsersService', () => {
       public_key: 'publickey',
       private_key: 'privatekey',
     });
+
+    // Assert
     expect(result).toHaveProperty('id', 1);
     expect(result).toHaveProperty('email', 'test@example.com');
     expect(mockUserRepository.insert).toHaveBeenCalled();
+
+    expect(mockDataSource.createQueryRunner).toHaveBeenCalled();
+    expect(mockQueryRunner.connect).toHaveBeenCalled();
+    expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
+    expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
+    expect(mockQueryRunner.release).toHaveBeenCalled();
   });
 
   it('should get user with email and password', async () => {
     mockUserRepository.getUser.mockResolvedValue({
       id: 1,
-      first_name: 'John',
-      last_name: 'Doe',
+      email: 'email',
+      password: 'password',
+      encrypted_private_key: 'private_key',
+      public_key: 'public_key',
     });
+    // Mock password is correct
+    jest.spyOn(passwordHandler, 'correctPassword').mockResolvedValue(true);
 
     const user = await service.login({ email: 'email', password: 'password' });
     expect(user).toHaveProperty('id', 1);
@@ -129,6 +157,7 @@ describe('UsersService', () => {
   });
 
   it('should update user ', async () => {
+    // Arrange
     const query = 'UPDATE users SET first_name = $1 WHERE id = $2 RETURNING *;';
     const values = ['UpdatedName', 1];
     mockUserRepository.updateUser.mockResolvedValue({
@@ -139,7 +168,15 @@ describe('UsersService', () => {
       password: 'hashedpassword',
       isStaff: false,
     });
-    const updatedUser = await service.updateUser(query, values);
+
+    // Act
+    const updatedUser = await service.updateUser({
+      userId: 1,
+      query,
+      values,
+    });
+
+    // Assert
     expect(updatedUser).toHaveProperty('id', 1);
     expect(updatedUser.first_name).toEqual('UpdatedName');
     expect(mockUserRepository.updateUser).toHaveBeenCalled();
