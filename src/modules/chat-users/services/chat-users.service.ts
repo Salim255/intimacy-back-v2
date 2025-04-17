@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ChatUserRepository } from '../repository/chat-user.repository';
+import { ChatUser } from '../entities/chat-user.entity';
 
 type CreateChatUserPayload = {
   userId: number;
@@ -10,8 +11,10 @@ type CreateChatUserPayload = {
 export class ChatUsersService {
   constructor(private readonly chatUserRepository: ChatUserRepository) {}
 
-  async addUserToChat(createChatUserPayload: CreateChatUserPayload) {
-    const createdChatUser = await this.chatUserRepository.insert(
+  async addUserToChat(
+    createChatUserPayload: CreateChatUserPayload,
+  ): Promise<ChatUser> {
+    const createdChatUser: ChatUser = await this.chatUserRepository.insert(
       createChatUserPayload,
     );
     return createdChatUser;

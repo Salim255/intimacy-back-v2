@@ -6,7 +6,7 @@ import { MessageService } from '../../messages/services/message.service';
 import { ChatUsersService } from '../../chat-users/services/chat-users.service';
 import { DataSource } from 'typeorm';
 
-type CreateChatPayload = {
+export type CreateChatPayload = {
   content: string;
   from_user_id: number;
   to_user_id: number;
