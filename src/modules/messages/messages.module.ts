@@ -4,12 +4,16 @@ import { MessageService } from './services/message.service';
 import { MessageRepository } from './repository/message.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Message } from './entities/message.entity';
+import { MessageGateway } from './socket-io/message.gateway';
+import { SocketModule } from '../socket/socket.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([Message]), // Add your entities here
+    SocketModule,
   ],
   controllers: [MessageController],
-  providers: [MessageService, MessageRepository],
-  exports: [MessageService, MessageRepository], // Export the service and repository if needed in other modules
+  providers: [MessageService, MessageRepository, MessageGateway],
+  exports: [MessageService, MessageRepository, MessageGateway], // Export the service and repository if needed in other modules
 })
 export class MessagesModule {}

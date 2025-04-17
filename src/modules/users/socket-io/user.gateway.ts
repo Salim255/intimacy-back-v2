@@ -8,6 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { UsersService } from '../services/users.service';
+import { PresenceGateway } from 'src/modules/socket/presence.gateway';
 
 // Decorator to declare a WebSocket Gateway
 // Declare this class as a WebSocket Gateway
@@ -17,7 +18,10 @@ import { UsersService } from '../services/users.service';
   },
 })
 export class UserGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly presenceGateway: PresenceGateway,
+    private readonly usersService: UsersService,
+  ) {}
   // Inject the WebSocket server so we can emit events from the backend
   @WebSocketServer()
   server: Server;
