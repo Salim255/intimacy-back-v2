@@ -1,11 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ChatsService, CreateChatPayload, UpdateChatCounterPayload } from './chats.service';
+import {
+  ChatsService,
+  CreateChatPayload,
+  UpdateChatCounterPayload,
+} from './chats.service';
 import { ChatRepository } from '../repository/chat.repository';
 import { MessageService } from '../../messages/services/message.service';
 import { ChatUsersService } from '../../chat-users/services/chat-users.service';
 import { DataSource } from 'typeorm';
-import { JwtTokenService } from '../../auth/jws-token-service';
-import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 
 const mockQueryRunner = {
   connect: jest.fn(),
@@ -53,14 +55,6 @@ describe('ChatsService', () => {
         {
           provide: DataSource,
           useValue: mockDataSource,
-        },
-        {
-          provide: JwtTokenService,
-          useValue: {}, // Mock JwtTokenService if needed
-        },
-        {
-          provide: JwtAuthGuard,
-          useValue: {}, // Mock JwtAuthGuard if needed
         },
       ],
     }).compile();
@@ -178,6 +172,11 @@ describe('ChatsService', () => {
       mockChatsRepository.getChatDetailsByChatIdUserId,
     ).toHaveBeenCalledTimes(1);
     expect(createdChatResponse).toEqual(createdChatDetails);
+    expect(mockDataSource.createQueryRunner).toHaveBeenCalled();
+    expect(mockQueryRunner.connect).toHaveBeenCalled();
+    expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
+    expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
+    expect(mockQueryRunner.release).toHaveBeenCalled();
   });
 
   it('should update chat counter', async () => {
