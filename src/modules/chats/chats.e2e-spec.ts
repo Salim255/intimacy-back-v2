@@ -5,13 +5,17 @@ import { DataSource } from 'typeorm';
 import { TestContext } from '../../../test/context'; // Import TestContext
 import * as request from 'supertest';
 import { CreateUserDto } from '../users/user-dto/create-user-dto';
-import { CreateChatResponseDto } from './chat-dto/chat-response.dto';
+import {
+  CreateChatResponseDto,
+  FetchChatsResponseDto,
+  UpdateChatCounterResponseDto,
+} from './chat-dto/chat-response.dto';
 
 describe('Chat e2e test (e2e) ', () => {
   let context: TestContext;
   let app: INestApplication;
-  let user1Auth: { token: string, id: number };
-  let user2Auth: { token: string, id: number };
+  let user1Auth: { token: string; id: number };
+  let user2Auth: { token: string; id: number };
 
   beforeAll(async () => {
     // Initialize test database context
@@ -94,6 +98,7 @@ describe('Chat e2e test (e2e) ', () => {
       session_key_sender: 'sender_key',
       session_key_receiver: 'reciever_key',
     };
+
     // Act
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const createdChat = await request(app.getHttpServer())
@@ -107,6 +112,39 @@ describe('Chat e2e test (e2e) ', () => {
       'Success',
     );
     expect((createdChat.body as CreateChatResponseDto).data.chat.id).toEqual(1);
+  });
+
+  it('should update a chat', async () => {
+    // Arrange
+    // Act
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const updatedChat = await request(app.getHttpServer())
+      .patch('/chats/')
+      .send({ chat_id: 1, update_type: 'increment' })
+      .set('Authorization', `Bearer ${user2Auth.token}`)
+      .expect(200);
+    // Assert
+    expect((updatedChat.body as UpdateChatCounterResponseDto).status).toEqual(
+      'Success',
+    );
+    expect(
+      // eslint-disable-next-line prettier/prettier
+      (updatedChat.body as UpdateChatCounterResponseDto).data.chat.no_read_messages,
+    ).toEqual(2);
+  });
+
+  it('should fetch all chats by userId', async () => {
+    // Arrange
+    // Act
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const chats = await request(app.getHttpServer())
+      .get('/chats')
+      .set('Authorization', `Bearer ${user2Auth.token}`)
+      .expect(200);
+
+    // Assert
+    expect((chats.body as FetchChatsResponseDto).status).toEqual('Success');
+    expect((chats.body as FetchChatsResponseDto).data.chats[0].id).toEqual(1);
   });
 
   afterAll(async () => {
