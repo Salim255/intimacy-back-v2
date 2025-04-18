@@ -7,6 +7,8 @@ import { Chat } from './entities/chat.entity';
 import { ChatUsersModule } from '../chat-users/chat-users.module';
 import { MessagesModule } from '../messages/messages.module';
 import { AuthModule } from '../auth/auth.module';
+import { ChatGateway } from './gateway/chat.gateway';
+import { SocketModule } from '../socket/socket.module';
 
 @Module({
   imports: [
@@ -14,9 +16,10 @@ import { AuthModule } from '../auth/auth.module';
     ChatUsersModule, // Import the ChatUsersModule to use its services and repositories
     MessagesModule, // Import the MessagesModule to use its services and repositories
     AuthModule, // Import the AuthModule to use its services and repositories
+    SocketModule,
   ],
   controllers: [ChatsController],
-  providers: [ChatsService, ChatRepository],
+  providers: [ChatsService, ChatRepository, ChatGateway],
   exports: [ChatsService], // Export the service and repository if needed in other modules
 })
 export class ChatsModule {}

@@ -6,11 +6,13 @@ import { AuthModule } from '../auth/auth.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Match } from './entities/match.entity';
 import { UserRepository } from '../users/repository/user.repository';
+import { MatchGateway } from './gateway/match.gateway';
+import { SocketModule } from '../socket/socket.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Match]), AuthModule],
+  imports: [TypeOrmModule.forFeature([Match]), AuthModule, SocketModule],
   controllers: [MatchesController],
-  providers: [MatchesService, MatchRepository, UserRepository],
+  providers: [MatchesService, MatchRepository, UserRepository, MatchGateway],
   exports: [MatchRepository, MatchesService],
 })
 export class MatchesModule {}

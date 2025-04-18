@@ -7,7 +7,7 @@ import { UserKeysModule } from '../user-keys/user-keys.module';
 import { User } from './entities/user.entity';
 import { AuthModule } from '../auth/auth.module';
 import { FileUploadModule } from '../../common/file-upload/file-upload.module';
-import { UserGateway } from './socket-io/user.gateway';
+import { UserGateway } from './gateway/user.gateway';
 import { SocketModule } from '../socket/socket.module';
 
 @Module({

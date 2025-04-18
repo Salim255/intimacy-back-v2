@@ -4,7 +4,7 @@ import { MessageService } from './services/message.service';
 import { MessageRepository } from './repository/message.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Message } from './entities/message.entity';
-import { MessageGateway } from './socket-io/message.gateway';
+import { MessageGateway } from './gateway/message.gateway';
 import { SocketModule } from '../socket/socket.module';
 
 @Module({
