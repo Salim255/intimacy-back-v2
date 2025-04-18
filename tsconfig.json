@@ -16,6 +16,14 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
-  }
+    "noFallthroughCasesInSwitch": false,
+    "allowJs": true,
+  },  
+  "include": [
+    "src/**/*", 
+    "test/**/*.ts",
+    "migrations/**/*.js",
+    "test/context.ts",
+    "jest.integration.config.js",
+ ]
 }
