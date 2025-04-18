@@ -37,4 +37,23 @@ export class MessageService {
       );
     }
   }
+
+  async updateAllMessagesToDelivered(userId: number): Promise<Message[]> {
+    try {
+      const messages =
+        await this.messageRepository.markAllMessagesAsDeliveredForUser(userId);
+      return messages;
+    } catch (error) {
+      const messageError =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Failed to update messages: ' + messageError,
+          code: 'UPDATE_MESSAGES_TO_DELIVERED_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

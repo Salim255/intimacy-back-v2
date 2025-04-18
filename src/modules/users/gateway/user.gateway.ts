@@ -6,7 +6,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { UsersService } from '../services/users.service';
-import { PresenceGateway } from '../../socket/presence.gateway';
+import { PresenceService } from 'src/modules/socket/presence.service';
 
 // Decorator to declare a WebSocket Gateway
 // Declare this class as a WebSocket Gateway
@@ -17,7 +17,7 @@ import { PresenceGateway } from '../../socket/presence.gateway';
 })
 export class UserGateway {
   constructor(
-    private readonly presenceGateway: PresenceGateway,
+    private readonly presenceService: PresenceService,
     private readonly usersService: UsersService,
   ) {}
   // Inject the WebSocket server so we can emit events from the backend
@@ -29,11 +29,10 @@ export class UserGateway {
 
   // Handle listen to user register
   @SubscribeMessage('register-user')
-  handleRegister(client: Socket, userId: string) {
-    this.presenceGateway.registerUser(userId, client.id);
-    // Update status to online
-    //const result = await this.userService.updateUserStatus(userId, 'online');
-    // Optional: Trigger message service logic (e.g., mark delivered)
-    //await this.messageService.updateAllMessagesWithPartnerReconnect(userId);
+  async handleRegister(client: Socket, userId: number) {
+    if (!userId || !client.id) return;
+    const messages = await this.presenceService.registerUser(userId, client.id);
+    this.logger.log(messages);
+    if (!messages || !messages[0]) return;
   }
 }

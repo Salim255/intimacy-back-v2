@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { UsersController } from './controllers/users.controller';
 import { UsersService } from './services/users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -16,7 +16,7 @@ import { SocketModule } from '../socket/socket.module';
     UserKeysModule,
     AuthModule,
     FileUploadModule,
-    SocketModule,
+    forwardRef(() => SocketModule),
   ],
   controllers: [UsersController],
   providers: [UsersService, UserRepository, UserGateway],

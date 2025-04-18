@@ -269,15 +269,31 @@ export class UsersService {
   async updateUserConnectionStatus(
     userId: number,
     connectionStatus: string,
-  ): Promise<User> {
+  ): Promise<UserDto> {
     try {
-      const updatedUser = await this.userRepository.updateUserConnectionStatus(
-        userId,
-        connectionStatus,
-      );
-      return updatedUser;
+      const updatedUser: User =
+        await this.userRepository.updateUserConnectionStatus(
+          userId,
+          connectionStatus,
+        );
+
+      return {
+        id: updatedUser.id,
+        last_name: updatedUser.last_name,
+        first_name: updatedUser.first_name,
+        connection_status: updatedUser.connection_status,
+        avatar: updatedUser.avatar,
+      } as UserDto;
     } catch (error) {
-      throw new Error(`Error in update user connection status: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error in update user connection status ' + errorMessage,
+          code: 'UPDATE_STATUS_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }

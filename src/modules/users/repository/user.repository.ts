@@ -91,13 +91,13 @@ export class UserRepository {
       UPDATE users 
       SET connection_status = $1 
       WHERE id = $2 
-      RETURNING id AS user_id, first_name, last_name, avatar, connection_status;
+      RETURNING *;
     `;
-    const result: User[] = await this.dataSource.query(query, [
+    const result: User[][] = await this.dataSource.query(query, [
       connectionStatus,
       userId,
     ]);
-    return result[0];
+    return result[0][0];
   }
 
   async deleteUser(userId: number): Promise<User> {

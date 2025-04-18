@@ -45,12 +45,12 @@ export class MessageRepository {
     const value = [userId];
     const query = `UPDATE messages msg
       SET status = 'delivered'
-      WHERE msg.to_user_id = $1
+      WHERE msg.to_user_id = $1 AND status = 'sent'
       RETURNING *;`;
-    const updatedMessages: Message[] = await this.dataSource.query(
+    const updatedMessages: Message[][] = await this.dataSource.query(
       query,
       value,
     );
-    return updatedMessages;
+    return updatedMessages[0];
   }
 }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MessageController } from './controllers/message.controller';
 import { MessageService } from './services/message.service';
 import { MessageRepository } from './repository/message.repository';
@@ -10,7 +10,7 @@ import { SocketModule } from '../socket/socket.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Message]), // Add your entities here
-    SocketModule,
+    forwardRef(() => SocketModule),
   ],
   controllers: [MessageController],
   providers: [MessageService, MessageRepository, MessageGateway],

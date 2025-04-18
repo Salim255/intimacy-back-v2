@@ -1,10 +1,10 @@
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
-import { PresenceGateway } from 'src/modules/socket/presence.gateway';
+import { PresenceService } from 'src/modules/socket/presence.service';
 
 @WebSocketGateway({ cors: true })
 export class MatchGateway {
-  constructor(private readonly presenceGateway: PresenceGateway) {}
+  constructor(private readonly presenceService: PresenceService) {}
 
   @WebSocketServer()
   server: Server;

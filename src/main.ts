@@ -8,6 +8,7 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   // NestFactory is a class provided by NestJS to create an application instance.
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
   app.setGlobalPrefix((process.env.API_PREFIX ?? 'api') + '/v2'); // Set a global prefix for all routes
   // Swagger setup
   const options = new DocumentBuilder()

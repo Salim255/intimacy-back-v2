@@ -7,16 +7,15 @@ import {
   SubscribeMessage,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { PresenceService } from './presence.service';
 
 @WebSocketGateway({ cors: true })
 export class PresenceGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
+  constructor(private presenceService: PresenceService) {}
   @WebSocketServer()
   server: Server;
-
-  // Map to track online users: userId => socketId
-  private onlineUsers = new Map<string, string>();
 
   // Create a logger specifically for this gateway
   private logger = new Logger('PresenceGateway');
@@ -24,6 +23,9 @@ export class PresenceGateway
   // Triggered automatically when a client connects
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
+    client.on('disconnecting', () => {
+      this.logger.log('User disconnecting....👹👹', client.id);
+    });
   }
 
   // Triggered automatically when a client disconnects
@@ -43,9 +45,13 @@ export class PresenceGateway
     });
   }
 
-  registerUser(userId: string, clientId: string) {
-    if (!userId) return;
-    this.onlineUsers.set(userId, clientId); // Save userId -> socketId
-    this.logger.log(`User ${userId} registered with socket ${clientId}`);
-  }
+ /*  removeUser(socketId: string) {
+    for (const [userId, id] of this.onlineUsers.entries()) {
+      if (id === socketId) {
+        this.onlineUsers.delete(userId);
+        console.log(`[Presence] Removed user ${userId}`);
+        break;
+      }
+    }
+  } */
 }
