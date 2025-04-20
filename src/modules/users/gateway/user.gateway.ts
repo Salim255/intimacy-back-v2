@@ -32,7 +32,8 @@ export class UserGateway {
   async handleRegister(client: Socket, userId: number) {
     if (!userId || !client.id) return;
     const messages = await this.presenceService.registerUser(userId, client.id);
-    this.logger.log(messages);
-    if (!messages || !messages[0]) return;
+    if (!messages) return;
+    // Notify partners
+    client.broadcast.emit('user-online', messages);
   }
 }

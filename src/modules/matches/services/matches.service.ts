@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import {
   AcceptMatchPayload,
   MatchRepository,
@@ -11,6 +11,7 @@ import { MatchDto } from '../matches-dto/matches-dto';
 
 @Injectable()
 export class MatchesService {
+  private logger = new Logger('MatchesService');
   constructor(
     private readonly matchRepository: MatchRepository,
     private readonly userRepository: UserRepository,
@@ -88,6 +89,7 @@ export class MatchesService {
 
   async getMatches(userId: number): Promise<PartnerMatchDetails[]> {
     try {
+      this.logger.log(userId);
       const matches: PartnerMatchDetails[] =
         await this.matchRepository.fetchMatches(userId);
       return matches;

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
+import { UserDto } from './user-dto';
 
 export class UpdateUserDto {
   @ApiProperty({ description: 'User first name' })
@@ -17,23 +18,6 @@ export class UpdateUserDto {
   @ApiProperty({ description: 'User connection status' })
   @IsOptional()
   connection_status?: string;
-}
-
-export class UserDto {
-  @ApiProperty({ description: 'Updated user id' })
-  id: number;
-
-  @ApiProperty({ description: 'Updated user first name' })
-  first_name: string;
-
-  @ApiProperty({ description: 'Updated user last name' })
-  last_name: string;
-
-  @ApiProperty({ description: 'Updated user avatar' })
-  avatar: string;
-
-  @ApiProperty({ description: 'Updated user connection status' })
-  connection_status: string;
 }
 
 export class UpdatedUserResponseDto {

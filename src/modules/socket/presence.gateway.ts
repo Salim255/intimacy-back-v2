@@ -23,8 +23,11 @@ export class PresenceGateway
   // Triggered automatically when a client connects
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
-    client.on('disconnecting', () => {
+    client.on('disconnecting', async () => {
       this.logger.log('User disconnecting....👹👹', client.id);
+      const userOffline = await this.presenceService.removeUser(client.id);
+      if (!userOffline) return;
+      client.broadcast.emit('user-offline', userOffline);
     });
   }
 
@@ -44,14 +47,4 @@ export class PresenceGateway
       time: new Date(),
     });
   }
-
- /*  removeUser(socketId: string) {
-    for (const [userId, id] of this.onlineUsers.entries()) {
-      if (id === socketId) {
-        this.onlineUsers.delete(userId);
-        console.log(`[Presence] Removed user ${userId}`);
-        break;
-      }
-    }
-  } */
 }

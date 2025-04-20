@@ -1,7 +1,7 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { User } from '../entities/user.entity';
 import { UserRepository } from '../repository/user.repository';
-import { UserDto } from '../user-dto/update-user-dto';
+import { UserDto } from '../user-dto/user-dto';
 import { DataSource } from 'typeorm';
 import { UserKeysService } from '../../user-keys/services/user-keys.service';
 import * as passwordHandler from '../../auth/password-handler';
@@ -41,6 +41,7 @@ export type LoginUserResponse = CreateUserResponse;
 
 @Injectable()
 export class UsersService {
+  private logger = new Logger('UsersService');
   constructor(
     private readonly dataSource: DataSource,
     private readonly userKeysService: UserKeysService,
@@ -95,6 +96,7 @@ export class UsersService {
       };
       return response;
     } catch (error) {
+      this.logger.log(error);
       // Rollback the transaction in case of error
       await queryRunning.rollbackTransaction();
       // Release the query runner
@@ -294,6 +296,16 @@ export class UsersService {
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    }
+  }
+
+  async getMatchCandidates(userId: number): Promise<UserDto[]> {
+    try {
+      const result = await this.userRepository.findAvailableForMatch(userId);
+      return result;
+    } catch (error) {
+      this.logger.log(error);
+      throw new Error();
     }
   }
 }

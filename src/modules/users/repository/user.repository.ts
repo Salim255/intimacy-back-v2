@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
+import { UserDto } from '../user-dto/user-dto';
 
 export type InsertUserPayload = {
   first_name: string;
@@ -41,10 +42,10 @@ export class UserRepository {
     const result: User[] = await this.dataSource.query(query, [userId]);
     return result[0];
   }
+
   // Get user by email
   // This method retrieves a user from the database based on their email address.
   // to use in the login process
-
   async getUser(email: string): Promise<UserWithKeys> {
     const query = `
       SELECT 
@@ -104,5 +105,18 @@ export class UserRepository {
     const query = `DELETE FROM users WHERE id = $1 RETURNING *;`;
     const result: User[] = await this.dataSource.query(query, [userId]);
     return result[0];
+  }
+
+  async findAvailableForMatch(userId: number): Promise<UserDto[]> {
+    const query = `SELECT * 
+    
+    FROM users AS us
+    LEFT JOIN matches AS ms 
+      ON ms.to_user_id = $1 AND ms.from_user_id = us.id
+    WHERE us.id != $1;
+    `;
+    const result: UserDto[] = await this.dataSource.query(query, [userId]);
+    console.log(result);
+    return result;
   }
 }

@@ -29,8 +29,8 @@ import { GetUserResponseDto, LoginUserDto } from '../user-dto/login-user-dto';
 import {
   UpdateUserDto,
   UpdatedUserResponseDto,
-  UserDto,
 } from '../user-dto/update-user-dto';
+import { UserDto } from '../user-dto/user-dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { filterObj } from '../../../utils/object-filter';
 import { Request } from 'express';
@@ -38,6 +38,7 @@ import { FileUploadService } from '../../../common/file-upload/file-upload.servi
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ResizePhotoInterceptor } from '../../../common/file-upload/interceptors/resize-photo.interceptor';
 import { UploadToS3Interceptor } from '../../../common/file-upload/interceptors/upload-to-s3.interceptor';
+import { DiscoverUsersResponseDto } from '../user-dto/discover-users-dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -56,7 +57,6 @@ export class UsersController {
   async signup(@Body() body: CreateUserDto) {
     const { email, password, first_name, last_name, private_key, public_key } =
       body;
-
     const response = await this.usersService.signup({
       email,
       password,
@@ -90,7 +90,7 @@ export class UsersController {
     };
   }
 
-  @Get(':userId')
+  @Get()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: `Get user with it's id` })
   @ApiParam({ name: 'userId', description: `User's to fetch id` })
@@ -142,7 +142,7 @@ export class UsersController {
       if (req.file) {
         filteredBody.avatar = req.file.filename;
       }
-      const userId = req.user as { id: number };
+      const { id: userId } = req.user as { id: number };
       // Dynamically construct the update query clause
       const values: (string | number)[] = [];
       const fields: string[] = [];
@@ -158,11 +158,11 @@ export class UsersController {
 
       // Build and Add WHERE clause and append ID to the values
       query += `${fields.join(', ')} WHERE id = $${values.length + 1} RETURNING *;`;
-      values.push(userId.id);
+      values.push(userId);
 
       // Update user document
       const updatedUser: UserDto = await this.usersService.updateUser({
-        userId: userId.id,
+        userId: userId,
         query,
         values,
       });
@@ -204,5 +204,28 @@ export class UsersController {
   })
   disable() {
     return 'Hello from disable';
+  }
+
+  @Get('/discover')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Fetch potential matches' })
+  @ApiResponse({
+    status: 200,
+    description: 'Fetch potential matches with success',
+    type: DiscoverUsersResponseDto,
+  })
+  async getMatchCandidates(
+    @Req() req: Request,
+  ): Promise<DiscoverUsersResponseDto> {
+    const { id: userId } = req.user as { id: number };
+    const users = await this.usersService.getMatchCandidates(userId);
+
+    return {
+      status: 'success',
+      data: {
+        users,
+      },
+    };
   }
 }
