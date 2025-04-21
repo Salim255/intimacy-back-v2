@@ -1,6 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserDto } from './user-dto';
 
+export class DiscoverDto extends UserDto {
+  @ApiProperty({ description: 'Match status' })
+  match_status: number;
+}
 export class DiscoverUsersResponseDto {
   @ApiProperty({
     description: 'Fetched potential match status',
@@ -17,11 +21,12 @@ export class DiscoverUsersResponseDto {
           last_name: 'Adams',
           avatar: 'adams.image',
           connection_status: 'online',
+          match_status: null,
         },
       ],
     },
   })
   data: {
-    users: UserDto[];
+    users: DiscoverDto[];
   };
 }

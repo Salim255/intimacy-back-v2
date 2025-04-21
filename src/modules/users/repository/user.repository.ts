@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { UserDto } from '../user-dto/user-dto';
+import { DiscoverDto } from '../user-dto/discover-users-dto';
 
 export type InsertUserPayload = {
   first_name: string;
@@ -107,16 +107,20 @@ export class UserRepository {
     return result[0];
   }
 
-  async findAvailableForMatch(userId: number): Promise<UserDto[]> {
-    const query = `SELECT * 
-    
+  async findAvailableForMatch(userId: number): Promise<DiscoverDto[]> {
+    const query = `SELECT 
+      us.id,
+      us.first_name,
+      us.last_name,
+      us.avatar,
+      us.connection_status,
+      ms.status AS match_status
     FROM users AS us
     LEFT JOIN matches AS ms 
       ON ms.to_user_id = $1 AND ms.from_user_id = us.id
     WHERE us.id != $1;
     `;
-    const result: UserDto[] = await this.dataSource.query(query, [userId]);
-    console.log(result);
+    const result: DiscoverDto[] = await this.dataSource.query(query, [userId]);
     return result;
   }
 }

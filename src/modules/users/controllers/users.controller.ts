@@ -38,7 +38,10 @@ import { FileUploadService } from '../../../common/file-upload/file-upload.servi
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ResizePhotoInterceptor } from '../../../common/file-upload/interceptors/resize-photo.interceptor';
 import { UploadToS3Interceptor } from '../../../common/file-upload/interceptors/upload-to-s3.interceptor';
-import { DiscoverUsersResponseDto } from '../user-dto/discover-users-dto';
+import {
+  DiscoverDto,
+  DiscoverUsersResponseDto,
+} from '../user-dto/discover-users-dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -219,8 +222,8 @@ export class UsersController {
     @Req() req: Request,
   ): Promise<DiscoverUsersResponseDto> {
     const { id: userId } = req.user as { id: number };
-    const users = await this.usersService.getMatchCandidates(userId);
-
+    const users: DiscoverDto[] =
+      await this.usersService.getMatchCandidates(userId);
     return {
       status: 'success',
       data: {

@@ -7,6 +7,7 @@ import { UserKeysService } from '../../user-keys/services/user-keys.service';
 import * as passwordHandler from '../../auth/password-handler';
 import { JwtTokenService, JwtTokenPayload } from '../../auth/jws-token-service';
 import { PasswordComparisonPayload } from '../../auth/password-handler';
+import { DiscoverDto } from '../user-dto/discover-users-dto';
 
 export type UpdateUserPayload = {
   userId: number;
@@ -299,13 +300,21 @@ export class UsersService {
     }
   }
 
-  async getMatchCandidates(userId: number): Promise<UserDto[]> {
+  async getMatchCandidates(userId: number): Promise<DiscoverDto[]> {
     try {
-      const result = await this.userRepository.findAvailableForMatch(userId);
+      const result: DiscoverDto[] =
+        await this.userRepository.findAvailableForMatch(userId);
       return result;
     } catch (error) {
-      this.logger.log(error);
-      throw new Error();
+      const errorMessage = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error in fetch potential matches ' + errorMessage,
+          code: 'FETCH_POTENTIAL_MATCHES_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
