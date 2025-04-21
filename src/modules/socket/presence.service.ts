@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { UsersService } from '../users/services/users.service';
 import { MessageService } from '../messages/services/message.service';
 import { Message } from '../messages/entities/message.entity';
@@ -18,23 +18,32 @@ export class PresenceService {
     userId: number,
     socketId: string,
   ): Promise<Message[] | null> {
-    // Save the socket
-    this.onlineUsers.set(userId, socketId);
-    this.logger.log(`User ${userId} registered with socket ${socketId}`);
+    try {
+      // Save the socket
+      this.onlineUsers.set(userId, socketId);
+      this.logger.log(`User ${userId} registered with socket ${socketId}`);
 
-    // Update client as online
-    const result: UserDto = await this.usersService.updateUserConnectionStatus(
-      userId,
-      'online',
-    );
+      // Update client as online
+      const result: UserDto =
+        await this.usersService.updateUserConnectionStatus(userId, 'online');
 
-    if (!result.id) return null;
+      if (!result || result.id) return null;
 
-    // Update all messages that sent to this client to delivered
-    // Update all messages where this user is the receiver, to delivered
-    const messages: Message[] =
-      await this.messageService.updateAllMessagesToDelivered(userId);
-    return messages;
+      // Update all messages that sent to this client to delivered
+      // Update all messages where this user is the receiver, to delivered
+      const messages: Message[] =
+        await this.messageService.updateAllMessagesToDelivered(userId);
+      return messages;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error in register socket: ' + errorMessage,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   unregisterUser(userId: number) {

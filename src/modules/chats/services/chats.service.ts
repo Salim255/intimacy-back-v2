@@ -4,6 +4,7 @@ import { Chat } from '../entities/chat.entity';
 import { ChatWithDetailsDto } from '../chat-dto/chat-response.dto';
 import { MessageService } from '../../messages/services/message.service';
 import { ChatUsersService } from '../../chat-users/services/chat-users.service';
+import { SessionKaysService } from 'src/session-keys/services/session-kays.service';
 import { DataSource } from 'typeorm';
 
 export type CreateChatPayload = {
@@ -26,6 +27,7 @@ export class ChatsService {
     private readonly chatUsersService: ChatUsersService,
     private readonly messageService: MessageService,
     private readonly dataSource: DataSource,
+    private readonly sessionKaysService: SessionKaysService,
   ) {}
 
   async createFullChat(
@@ -38,7 +40,16 @@ export class ChatsService {
       // Step: 1 - Create the chat
       const createdChat: Chat = await this.chatsRepository.insert();
 
-      // Step: 2 - Create the users in the chat
+      // Step: 2 - Create session keys
+      await this.sessionKaysService.createSessionKeys({
+        chat_id: createdChat.id,
+        sender_id: createChatPayload.from_user_id,
+        receiver_id: createChatPayload.to_user_id,
+        encrypted_session_for_receiver: createChatPayload.session_key_receiver,
+        encrypted_session_for_sender: createChatPayload.session_key_sender,
+      });
+
+      // Step: 3 - Create the users in the chat
       await Promise.all(
         [createChatPayload.from_user_id, createChatPayload.to_user_id].map(
           (userId) => {
@@ -51,16 +62,16 @@ export class ChatsService {
         ),
       );
 
-      // Step: 3 - Create the message
+      // Step: 4 - Create the message
       await this.messageService.createMessage({
         content: createChatPayload.content,
-        fromUserId: createChatPayload.from_user_id,
-        toUserId: createChatPayload.to_user_id,
-        chatId: createdChat.id,
-        status: 'sent',
+        from_user_id: createChatPayload.from_user_id,
+        to_user_id: createChatPayload.to_user_id,
+        chat_id: createdChat.id,
+        partner_connection_status: 'sent',
       });
 
-      // Step: 4 - Return the created chat
+      // Step: 5 - Return the created chat
       const fetchChatPayload = {
         chatId: createdChat.id,
         userId: createChatPayload.from_user_id,

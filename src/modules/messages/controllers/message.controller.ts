@@ -1,7 +1,6 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
-  CreatedMessageDto,
   CreateMessageDto,
   CreateMessageResponseDto,
 } from '../message-dto/message-dto';
@@ -21,14 +20,8 @@ export class MessageController {
     type: CreateMessageResponseDto,
   })
   async createMessage(@Body() createMessageDto: CreateMessageDto) {
-    const createdMessage: CreatedMessageDto =
-      await this.messageService.createMessage({
-        content: createMessageDto.content,
-        fromUserId: createMessageDto.from_user_id,
-        toUserId: createMessageDto.to_user_id,
-        chatId: createMessageDto.chat_id,
-        status: createMessageDto.status,
-      });
+    const createdMessage =
+      await this.messageService.createMessage(createMessageDto);
     return {
       status: 'Success',
       data: {

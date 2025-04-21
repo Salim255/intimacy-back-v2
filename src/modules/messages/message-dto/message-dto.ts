@@ -36,7 +36,7 @@ export class CreateMessageDto {
     example: 'sent',
   })
   @IsNotEmpty()
-  status: string;
+  partner_connection_status: string;
 }
 
 export class CreatedMessageDto {

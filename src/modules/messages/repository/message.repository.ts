@@ -10,10 +10,12 @@ export class MessageRepository {
   async insert(createMessagePayload: CreateMessagePayload): Promise<Message> {
     const values = [
       createMessagePayload.content,
-      createMessagePayload.fromUserId,
-      createMessagePayload.toUserId,
-      createMessagePayload.chatId,
-      createMessagePayload.status,
+      createMessagePayload.from_user_id,
+      createMessagePayload.to_user_id,
+      createMessagePayload.chat_id,
+      createMessagePayload.partner_connection_status === 'online'
+        ? 'delivered'
+        : 'sent',
     ];
     const query = `INSERT INTO 
     messages (content, from_user_id, to_user_id , chat_id, status)

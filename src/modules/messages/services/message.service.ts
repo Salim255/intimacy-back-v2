@@ -5,10 +5,10 @@ import { CreatedMessageDto } from '../message-dto/message-dto';
 
 export type CreateMessagePayload = {
   content: string;
-  fromUserId: number;
-  toUserId: number;
-  chatId: number;
-  status: string;
+  from_user_id: number;
+  to_user_id: number;
+  chat_id: number;
+  partner_connection_status: string;
 };
 
 @Injectable()
