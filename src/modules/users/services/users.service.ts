@@ -306,6 +306,7 @@ export class UsersService {
         await this.userRepository.findAvailableForMatch(userId);
       return result;
     } catch (error) {
+      this.logger.log(error);
       const errorMessage = error instanceof Error ? error.message : '';
       throw new HttpException(
         {

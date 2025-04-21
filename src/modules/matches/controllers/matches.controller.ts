@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Logger,
   Param,
   Patch,
   Post,
@@ -29,6 +30,7 @@ import { Request } from 'express';
 @ApiTags('Matches')
 @Controller('matches')
 export class MatchesController {
+  private logger = new Logger('MatchesController');
   constructor(private readonly matchesService: MatchesService) {}
 
   @Post('initiate-match')
@@ -58,6 +60,7 @@ export class MatchesController {
         match,
       },
     };
+    this.logger.log(response);
     return response;
   }
 

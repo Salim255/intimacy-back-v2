@@ -3,7 +3,8 @@ import { UserDto } from './user-dto';
 
 export class DiscoverDto extends UserDto {
   @ApiProperty({ description: 'Match status' })
-  match_status: number;
+  match_status: number | null;
+  match_id: number | null;
 }
 export class DiscoverUsersResponseDto {
   @ApiProperty({
@@ -22,6 +23,7 @@ export class DiscoverUsersResponseDto {
           avatar: 'adams.image',
           connection_status: 'online',
           match_status: null,
+          match_id: null,
         },
       ],
     },

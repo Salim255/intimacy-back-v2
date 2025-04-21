@@ -114,11 +114,20 @@ export class UserRepository {
       us.last_name,
       us.avatar,
       us.connection_status,
-      ms.status AS match_status
+      ms.status AS match_status,
+      ms.id AS match_id
+
     FROM users AS us
+
     LEFT JOIN matches AS ms 
       ON ms.to_user_id = $1 AND ms.from_user_id = us.id
-    WHERE us.id != $1;
+    
+    WHERE us.id <> $1
+      AND NOT EXISTS (
+        SELECT 1 FROM matches m
+        WHERE m.from_user_id = $1 
+        AND m.to_user_id = us.id
+      );
     `;
     const result: DiscoverDto[] = await this.dataSource.query(query, [userId]);
     return result;
