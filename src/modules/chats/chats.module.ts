@@ -9,6 +9,7 @@ import { MessagesModule } from '../messages/messages.module';
 import { AuthModule } from '../auth/auth.module';
 import { ChatGateway } from './gateway/chat.gateway';
 import { SocketModule } from '../socket/socket.module';
+import { SessionKeysModule } from 'src/session-keys/session-keys.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { SocketModule } from '../socket/socket.module';
     MessagesModule, // Import the MessagesModule to use its services and repositories
     AuthModule, // Import the AuthModule to use its services and repositories
     SocketModule,
+    SessionKeysModule,
   ],
   controllers: [ChatsController],
   providers: [ChatsService, ChatRepository, ChatGateway],

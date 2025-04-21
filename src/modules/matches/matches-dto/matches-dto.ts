@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber } from 'class-validator';
-import { PartnerMatchDetails } from '../repository/match.repository';
+import { MatchDetails } from '../repository/match.repository';
 
 export class InitiateMatchDto {
   @IsNumber()
@@ -36,7 +36,7 @@ export class InitiateMatchResponseDto {
   };
 }
 
-export class AcceptMatchResponseDto {
+export class AcceptedMatchResponseDto {
   @ApiProperty({
     description: 'Status accepted match request response',
     example: 'success',
@@ -62,6 +62,6 @@ export class FetchMatchesResponseDto {
     type: Object,
   })
   data: {
-    matches: PartnerMatchDetails[];
+    matches: MatchDetails[];
   };
 }

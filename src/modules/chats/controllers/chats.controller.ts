@@ -46,10 +46,12 @@ export class ChatsController {
   async createChat(
     @Body() createChatDto: CreateChatDto,
   ): Promise<CreateChatResponseDto> {
+    console.log(createChatDto);
     //1 Create chat Logic to create a new chat
     const result = await this.chatsService.createFullChat({
       ...createChatDto,
     });
+
     //2 Return the created chat
     return {
       status: 'Success',

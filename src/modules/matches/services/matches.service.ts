@@ -1,12 +1,11 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import {
   AcceptMatchPayload,
+  MatchDetails,
   MatchRepository,
-  PartnerMatchDetails,
 } from '../repository/match.repository';
 import { InitiateMatchInput } from '../repository/match.repository';
 import { UserRepository } from '../../users/repository/user.repository';
-import { Match } from '../entities/match.entity';
 import { MatchDto } from '../matches-dto/matches-dto';
 
 @Injectable()
@@ -69,9 +68,11 @@ export class MatchesService {
     }
   }
 
-  async acceptMatch(acceptMatchPayload: AcceptMatchPayload): Promise<Match> {
+  async acceptMatch(
+    acceptMatchPayload: AcceptMatchPayload,
+  ): Promise<MatchDetails> {
     try {
-      const match: Match =
+      const match: MatchDetails =
         await this.matchRepository.acceptMatch(acceptMatchPayload);
       return match;
     } catch (error) {
@@ -87,10 +88,10 @@ export class MatchesService {
     }
   }
 
-  async getMatches(userId: number): Promise<PartnerMatchDetails[]> {
+  async getMatches(userId: number): Promise<MatchDetails[]> {
     try {
       this.logger.log(userId);
-      const matches: PartnerMatchDetails[] =
+      const matches: MatchDetails[] =
         await this.matchRepository.fetchMatches(userId);
       return matches;
     } catch (error) {

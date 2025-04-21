@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { Match } from '../entities/match.entity';
 import { MatchDto } from '../matches-dto/matches-dto';
 
 export type InitiateMatchInput = {
@@ -13,7 +12,7 @@ export type AcceptMatchPayload = {
   userId: number;
 };
 
-export type PartnerMatchDetails = {
+export type MatchDetails = {
   partner_id: number;
   first_name: string;
   last_name: string;
@@ -38,7 +37,7 @@ export class MatchRepository {
     return result[0];
   }
 
-  async fetchMatches(userId: number): Promise<PartnerMatchDetails[]> {
+  async fetchMatches(userId: number): Promise<MatchDetails[]> {
     try {
       const query = `
         SELECT 
@@ -72,10 +71,7 @@ export class MatchRepository {
             ) 
       )`;
       const values = [userId];
-      const result: PartnerMatchDetails[] = await this.dataSource.query(
-        query,
-        values,
-      );
+      const result: MatchDetails[] = await this.dataSource.query(query, values);
       return result;
     } catch (error) {
       console.error('Error fetching matches:', error);
@@ -91,15 +87,38 @@ export class MatchRepository {
     }
   }
 
-  async acceptMatch(data: AcceptMatchPayload): Promise<Match> {
+  async acceptMatch(data: AcceptMatchPayload): Promise<MatchDetails> {
     const query = `
-    UPDATE matches
+    WITH updated_match AS ( UPDATE matches
     SET status = 2
-    WHERE id = $1 AND to_user_id = $2 RETURNING *;
+    WHERE id = $1 AND to_user_id = $2 RETURNING * )
+
+
+    SELECT 
+      u.id AS partner_id,
+      u.first_name,
+      u.last_name,
+      u.avatar,
+      u.connection_status,
+      uk.public_key,
+      um.id AS match_id,
+      um.status AS match_status,
+      um.created_at AS match_created_at,
+      um.updated_at AS match_updated_at
+
+    FROM updated_match um
+
+    JOIN users u 
+
+    ON u.id = um.from_user_id   -- get the partner info
+
+    LEFT JOIN user_keys uk 
+
+    ON uk.user_id = u.id ;
     `;
 
     const values = [data.matchId, data.userId];
-    const match: Match[][] = await this.dataSource.query(query, values);
-    return match[0][0];
+    const match: MatchDetails[] = await this.dataSource.query(query, values);
+    return match[0];
   }
 }

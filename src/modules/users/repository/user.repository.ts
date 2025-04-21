@@ -127,7 +127,8 @@ export class UserRepository {
         SELECT 1 FROM matches m
         WHERE m.from_user_id = $1 
         AND m.to_user_id = us.id
-      );
+      )
+      AND (ms.status IS NULL OR ms.status <> 2);
     `;
     const result: DiscoverDto[] = await this.dataSource.query(query, [userId]);
     return result;

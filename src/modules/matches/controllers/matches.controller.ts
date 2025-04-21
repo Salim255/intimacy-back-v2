@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
-  AcceptMatchResponseDto,
+  AcceptedMatchResponseDto,
   FetchMatchesResponseDto,
   InitiateMatchDto,
   InitiateMatchResponseDto,
@@ -23,7 +23,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import {
   AcceptMatchPayload,
   InitiateMatchInput,
-  PartnerMatchDetails,
+  MatchDetails,
 } from '../repository/match.repository';
 import { Request } from 'express';
 
@@ -68,7 +68,7 @@ export class MatchesController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
   @ApiOperation({ description: 'Accepted match request' })
-  @ApiResponse({ type: AcceptMatchResponseDto })
+  @ApiResponse({ type: AcceptedMatchResponseDto })
   async acceptMatch(@Param('matchId') matchId: number, @Req() req: Request) {
     const { id: userId } = req.user as { id: number };
     const acceptMatchPayload: AcceptMatchPayload = {
@@ -90,7 +90,7 @@ export class MatchesController {
   @ApiResponse({ type: FetchMatchesResponseDto })
   async fetchMatches(@Req() req: Request) {
     const { id: userId } = req.user as { id: number };
-    const matches: PartnerMatchDetails[] =
+    const matches: MatchDetails[] =
       await this.matchesService.getMatches(userId);
     return {
       status: 'Success',

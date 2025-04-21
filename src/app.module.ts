@@ -9,6 +9,7 @@ import { MatchesModule } from './modules/matches/matches.module';
 import { MessagesModule } from './modules/messages/messages.module';
 import { ChatsModule } from './modules/chats/chats.module';
 import { ChatUsersModule } from './modules/chat-users/chat-users.module';
+import { SessionKeysModule } from './session-keys/session-keys.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ChatUsersModule } from './modules/chat-users/chat-users.module';
     ChatsModule,
     ChatUsersModule,
     MessagesModule,
+    SessionKeysModule,
   ],
   controllers: [AppController], // Controller to handle incoming requests
   providers: [AppService],
