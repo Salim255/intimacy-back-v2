@@ -26,6 +26,10 @@ export class TypingGateway {
       typingStatus: string;
     },
   ) {
+    if (data.roomId) {
+      this.logger.log(data, 'hLLo typing'); //////////
+      this.server.to(data.roomId).emit('notify-user-typing', data);
+    }
     this.logger.log(data, 'hLLo typing'); //////////
   }
 
@@ -38,6 +42,11 @@ export class TypingGateway {
       typingStatus: string;
     },
   ) {
-    this.logger.log(data, 'Stop typing');
+    if (data.roomId) {
+      this.logger.log(data, 'Stop typing');
+      this.server
+        .to(data.roomId)
+        .emit('notify-user-stop-typing', data.typingStatus);
+    }
   }
 }

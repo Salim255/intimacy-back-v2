@@ -10,6 +10,7 @@ import { AuthModule } from '../auth/auth.module';
 import { ChatGateway } from './gateway/chat.gateway';
 import { SocketModule } from '../socket/socket.module';
 import { SessionKeysModule } from 'src/session-keys/session-keys.module';
+import { RoomGateway } from './gateway/room.gateway';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { SessionKeysModule } from 'src/session-keys/session-keys.module';
     SessionKeysModule,
   ],
   controllers: [ChatsController],
-  providers: [ChatsService, ChatRepository, ChatGateway],
+  providers: [ChatsService, ChatRepository, ChatGateway, RoomGateway],
   exports: [ChatsService], // Export the service and repository if needed in other modules
 })
 export class ChatsModule {}
