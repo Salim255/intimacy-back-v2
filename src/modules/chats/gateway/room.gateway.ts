@@ -10,13 +10,19 @@ import { PresenceService } from 'src/modules/socket/presence.service';
 @WebSocketGateway({ cors: true })
 export class RoomGateway {
   constructor(private readonly presenceService: PresenceService) {}
-  private logger = new Logger();
+  private logger = new Logger('RoomGateway');
 
   private generateRoomId(user1: number, user2: number) {
     return [user1, user2].sort().join('-'); // Sort to ensure consistent room IDs
   }
   @WebSocketServer()
   server: Server;
+
+  @SubscribeMessage('leave-room')
+  handleLeaveRoom(client: Socket, data: { roomId: string; userId: number }) {
+    this.logger.log('👹👹👹', data, 'Hello from user Id , that left room');
+    client.to(data.roomId).emit('partner-left-room', data);
+  }
 
   @SubscribeMessage('join-room')
   handleJoinRoom(
@@ -28,7 +34,7 @@ export class RoomGateway {
       lastMessageSenderId: number;
     },
   ) {
-    console.log('Join room');
+    this.logger.log('Join room');
     const roomId = this.generateRoomId(data.fromUserId, data.toUserId);
     this.server.socketsJoin(roomId);
 

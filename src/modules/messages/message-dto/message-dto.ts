@@ -2,6 +2,11 @@ import { IsNotEmpty } from 'class-validator';
 import { Message } from '../entities/message.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
+export enum PartnerConnectionStatus {
+  ONLINE = 'online',
+  OFFLINE = 'offline',
+  InRoom = 'in-room',
+}
 export class CreateMessageDto {
   @ApiProperty({
     description: 'The content of the message',
@@ -36,7 +41,7 @@ export class CreateMessageDto {
     example: 'sent',
   })
   @IsNotEmpty()
-  partner_connection_status: string;
+  partner_connection_status: PartnerConnectionStatus;
 }
 
 export class CreatedMessageDto {

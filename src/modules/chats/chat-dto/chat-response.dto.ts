@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
+import { PartnerConnectionStatus } from 'src/modules/messages/message-dto/message-dto';
 
 export class CreateChatDto {
   @ApiProperty({ description: 'Message content' })
@@ -21,6 +22,12 @@ export class CreateChatDto {
   @ApiProperty({ description: `Receiver Session Key` })
   @IsNotEmpty()
   session_key_receiver: string;
+
+  @ApiProperty({
+    description: 'Receiver connection status',
+    example: 'online',
+  })
+  partner_connection_status: PartnerConnectionStatus;
 }
 export class LastMessageDto {
   id: number;

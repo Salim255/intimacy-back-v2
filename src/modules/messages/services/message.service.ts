@@ -1,14 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { MessageRepository } from '../repository/message.repository';
 import { Message } from '../entities/message.entity';
-import { CreatedMessageDto } from '../message-dto/message-dto';
+import {
+  CreatedMessageDto,
+  PartnerConnectionStatus,
+} from '../message-dto/message-dto';
 
 export type CreateMessagePayload = {
   content: string;
   from_user_id: number;
   to_user_id: number;
   chat_id: number;
-  partner_connection_status: string;
+  partner_connection_status: PartnerConnectionStatus;
 };
 
 @Injectable()

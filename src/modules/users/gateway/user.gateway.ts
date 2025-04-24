@@ -31,9 +31,9 @@ export class UserGateway {
   @SubscribeMessage('register-user')
   async handleRegister(client: Socket, userId: number) {
     if (!userId || !client.id) return;
-    const messages = await this.presenceService.registerUser(userId, client.id);
-    if (!messages) return;
+    await this.presenceService.registerUser(userId, client.id);
+    //if (!messagesWithDeliveredSignature) return;
     // Notify partners
-    client.broadcast.emit('user-online', messages);
+    client.broadcast.emit('user-online', { userId, status: 'online' });
   }
 }

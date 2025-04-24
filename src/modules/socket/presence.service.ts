@@ -14,6 +14,7 @@ export class PresenceService {
   private onlineUsers = new Map<number, string>(); // userId -> socketId
 
   private logger = new Logger();
+
   async registerUser(
     userId: number,
     socketId: string,
@@ -26,8 +27,7 @@ export class PresenceService {
       // Update client as online
       const result: UserDto =
         await this.usersService.updateUserConnectionStatus(userId, 'online');
-
-      if (!result || result.id) return null;
+      if (!result || !result.id) return null;
 
       // Update all messages that sent to this client to delivered
       // Update all messages where this user is the receiver, to delivered

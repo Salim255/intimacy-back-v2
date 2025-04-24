@@ -3,10 +3,9 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { PresenceService } from 'src/modules/socket/presence.service';
-import { Socket } from 'dgram';
 
 @WebSocketGateway()
 export class TypingGateway {
@@ -27,10 +26,8 @@ export class TypingGateway {
     },
   ) {
     if (data.roomId) {
-      this.logger.log(data, 'hLLo typing'); //////////
-      this.server.to(data.roomId).emit('notify-user-typing', data);
+      client.to(data.roomId).emit('notify-user-typing', data);
     }
-    this.logger.log(data, 'hLLo typing'); //////////
   }
 
   @SubscribeMessage('user-stop-typing')
@@ -43,10 +40,7 @@ export class TypingGateway {
     },
   ) {
     if (data.roomId) {
-      this.logger.log(data, 'Stop typing');
-      this.server
-        .to(data.roomId)
-        .emit('notify-user-stop-typing', data.typingStatus);
+      client.to(data.roomId).emit('notify-user-stop-typing', data.typingStatus);
     }
   }
 }

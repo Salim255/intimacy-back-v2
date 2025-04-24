@@ -6,6 +6,7 @@ import { MessageService } from '../../messages/services/message.service';
 import { ChatUsersService } from '../../chat-users/services/chat-users.service';
 import { SessionKaysService } from 'src/session-keys/services/session-kays.service';
 import { DataSource } from 'typeorm';
+import { PartnerConnectionStatus } from 'src/modules/messages/message-dto/message-dto';
 
 export type CreateChatPayload = {
   content: string;
@@ -13,6 +14,7 @@ export type CreateChatPayload = {
   to_user_id: number;
   session_key_sender: string;
   session_key_receiver: string;
+  partner_connection_status: PartnerConnectionStatus;
 };
 
 export type UpdateChatCounterPayload = {
@@ -68,7 +70,7 @@ export class ChatsService {
         from_user_id: createChatPayload.from_user_id,
         to_user_id: createChatPayload.to_user_id,
         chat_id: createdChat.id,
-        partner_connection_status: 'sent',
+        partner_connection_status: createChatPayload.partner_connection_status,
       });
 
       // Step: 5 - Return the created chat

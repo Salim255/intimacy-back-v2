@@ -2,20 +2,27 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Message } from '../entities/message.entity';
 import { CreateMessagePayload } from '../services/message.service';
+import { PartnerConnectionStatus } from '../message-dto/message-dto';
 
 @Injectable()
 export class MessageRepository {
   constructor(private readonly dataSource: DataSource) {}
 
   async insert(createMessagePayload: CreateMessagePayload): Promise<Message> {
+    const messageStatus =
+      createMessagePayload.partner_connection_status ===
+      PartnerConnectionStatus.InRoom
+        ? 'read'
+        : createMessagePayload.partner_connection_status ===
+            PartnerConnectionStatus.ONLINE
+          ? 'delivered'
+          : 'sent';
     const values = [
       createMessagePayload.content,
       createMessagePayload.from_user_id,
       createMessagePayload.to_user_id,
       createMessagePayload.chat_id,
-      createMessagePayload.partner_connection_status === 'online'
-        ? 'delivered'
-        : 'sent',
+      messageStatus,
     ];
     const query = `INSERT INTO 
     messages (content, from_user_id, to_user_id , chat_id, status)
