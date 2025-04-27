@@ -59,4 +59,28 @@ export class MessageService {
       );
     }
   }
+
+  async updateMessagesInActiveChatToDelivered(
+    formUserId: number,
+    toUserId: number,
+  ) {
+    try {
+      const updatedMessages = this.messageRepository.updateMessagesToDelivered(
+        formUserId,
+        toUserId,
+      );
+      return updatedMessages;
+    } catch (error) {
+      const messageError =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Failed to update messages: ' + messageError,
+          code: 'UPDATE_MESSAGES_TO_DELIVERED_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

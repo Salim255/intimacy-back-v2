@@ -2,6 +2,12 @@ import { DataSource } from 'typeorm';
 import { Chat } from '../entities/chat.entity';
 import { ChatWithDetailsDto } from '../chat-dto/chat-response.dto';
 import { Injectable } from '@nestjs/common';
+import { Message } from 'src/modules/messages/entities/message.entity';
+
+export type UpdateChatMessagesToRead = {
+  chatId: number;
+  senderId: number;
+};
 
 @Injectable()
 export class ChatRepository {
@@ -38,11 +44,11 @@ export class ChatRepository {
     return updatedChat[0][0];
   }
 
-  async getChatById(chatId: number): Promise<Chat> {
+  async getChatById(chatId: number): Promise<ChatWithDetailsDto> {
     const values = [chatId];
     const query = `SELECT * FROM chats
     WHERE id = $1;`;
-    const chat: Chat = await this.dataSource.query(query, values);
+    const chat: ChatWithDetailsDto = await this.dataSource.query(query, values);
     return chat;
   }
 
@@ -119,6 +125,7 @@ export class ChatRepository {
     chatId: number;
   }): Promise<ChatWithDetailsDto> {
     const values = [data.userId, data.chatId];
+    console.log(values);
     const query = `
     SELECT
       chats.id,
@@ -234,5 +241,21 @@ export class ChatRepository {
         `;
     const chat: Chat[] = await this.dataSource.query(query, values);
     return chat[0];
+  }
+
+  async updateChatMessagesToRead(
+    updateChatMessagePayload: UpdateChatMessagesToRead,
+  ): Promise<Message[]> {
+    const values = [
+      updateChatMessagePayload.chatId,
+      updateChatMessagePayload.senderId,
+    ];
+    const query = `UPDATE messages
+    SET status='read'
+    WHERE (status = 'sent' OR status = 'delivered')
+    AND chat_id = $1 AND from_user_id = $2
+    RETURNING *;`;
+    const messages: Message[][] = await this.dataSource.query(query, values);
+    return messages[0];
   }
 }

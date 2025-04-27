@@ -37,7 +37,7 @@ export class MessageRepository {
   }
 
   // This code used to update messages in room to read once receiver joined a room
-  async markMessagesAsReadFromSender(fromUserId, toUserId) {
+  async markMessagesAsReadFromSender(fromUserId: number, toUserId: number) {
     const value = [fromUserId, toUserId];
     const query = `UPDATE messages SET status = 'read'
       WHERE (status = 'delivered' OR  status = 'sent') 
@@ -61,5 +61,23 @@ export class MessageRepository {
       value,
     );
     return updatedMessages[0];
+  }
+
+  async updateMessagesToDelivered(
+    fromUserId: number,
+    toUserId: number,
+  ): Promise<Message[]> {
+    const values = [fromUserId, toUserId];
+    console.log('FromuserID: ', values);
+    const query = `UPDATE messages SET status = 'delivered'
+      WHERE status = 'sent'
+        AND to_user_id = $2 AND from_user_id = $1
+      RETURNING *;`;
+    const updatedMessages: Message[] = await this.dataSource.query(
+      query,
+      values,
+    );
+    console.log(updatedMessages);
+    return updatedMessages;
   }
 }

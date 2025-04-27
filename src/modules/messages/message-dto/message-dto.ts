@@ -90,3 +90,10 @@ export class FetchMessagesResponseDto {
     messages: Message[];
   };
 }
+
+export class UpdatedMessagesToDeliveredResponseDto extends FetchMessagesResponseDto {}
+
+export class ToUserIdDto {
+  @ApiProperty()
+  toUserId: number;
+}

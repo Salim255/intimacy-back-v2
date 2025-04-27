@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
+import { Message } from 'src/modules/messages/entities/message.entity';
 import { PartnerConnectionStatus } from 'src/modules/messages/message-dto/message-dto';
 
 export class CreateChatDto {
@@ -221,5 +222,74 @@ export class FetchChatsResponseDto {
   @IsNotEmpty()
   data: {
     chats: ChatWithDetailsDto[];
+  };
+}
+
+export class FitchSingleChatWithDetailsResponse {
+  @ApiProperty({ description: 'Status of the response', example: 'Success' })
+  @IsNotEmpty()
+  status: string;
+  @ApiProperty({
+    description: 'Fetched chat details',
+    type: Object,
+    example: {
+      chat: {
+        id: 3,
+        type: 'dual',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        no_read_messages: 1,
+        encrypted_session_base64: 'session_key',
+        users: [
+          {
+            id: 1,
+            avatar: null,
+            last_name: 'Doshka',
+            first_name: 'Doshka',
+            connection_status: 'offline',
+            is_admin: false,
+          },
+          {
+            id: 2,
+            avatar: null,
+            last_name: 'Salim',
+            first_name: 'Salim',
+            connection_status: 'offline',
+            is_admin: true,
+          },
+        ],
+        messages: [
+          {
+            id: 4,
+            status: 'sent',
+            chat_id: 3,
+            content: 'Hello',
+            created_at: new Date().toISOString(),
+            to_user_id: 1,
+            updated_at: new Date().toISOString(),
+            from_user_id: 2,
+          },
+        ],
+      },
+    },
+  })
+  @IsNotEmpty()
+  data: {
+    chat: ChatWithDetailsDto;
+  };
+}
+
+export class UpdateActiveChatMessagesToReadResponseDto {
+  @ApiProperty({ description: 'Status of the response', example: 'Success' })
+  status: string;
+
+  @ApiProperty({
+    description: 'Updated messages',
+    example: {
+      messages: [Message],
+    },
+  })
+  data: {
+    messages: Message[];
   };
 }

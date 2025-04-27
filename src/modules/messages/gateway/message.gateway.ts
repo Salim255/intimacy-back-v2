@@ -3,11 +3,15 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { MessageService } from '../services/message.service';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { PresenceService } from 'src/modules/socket/presence.service';
-import { Message } from '../entities/message.entity';
+
+export type MessageNotifierPayloadDto = {
+  fromUserId: number;
+  toUserId: number;
+  chatId: number;
+};
 
 @WebSocketGateway()
 export class MessageGateway {
@@ -17,20 +21,15 @@ export class MessageGateway {
   // Inject the WebSocket server so we can emit events from the backend
   @WebSocketServer()
   server: Server;
-  constructor(
-    private readonly presenceService: PresenceService,
-    private readonly messageService: MessageService,
-  ) {}
-  @SubscribeMessage('send-message')
-  handleSendMessage(
-    client: Socket,
-    messagePayload: {
-      message: Message;
-      fromUserId: number;
-      toUserId: number;
-      roomId: string;
-    },
-  ) {
-    this.logger.log(messagePayload);
+  constructor(private presenceService: PresenceService) {}
+
+  @SubscribeMessage('coming-message')
+  handleSendMessage(client: Socket, data: MessageNotifierPayloadDto) {
+    const partnerSocket = this.presenceService.getSocketIdByUserId(
+      data.toUserId,
+    );
+    this.logger.log(data, 'Hello', partnerSocket);
+    if (!partnerSocket) return;
+    this.server.to(partnerSocket).emit('coming-message', data);
   }
 }

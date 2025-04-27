@@ -7,9 +7,11 @@ import { Message } from './entities/message.entity';
 import { MessageGateway } from './gateway/message.gateway';
 import { TypingGateway } from './gateway/typing.gateway';
 import { SocketModule } from '../socket/socket.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     TypeOrmModule.forFeature([Message]), // Add your entities here
     forwardRef(() => SocketModule),
   ],

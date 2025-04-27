@@ -7,6 +7,12 @@ import {
 import { Server, Socket } from 'socket.io';
 import { PresenceService } from 'src/modules/socket/presence.service';
 
+export type JoinRomData = {
+  fromUserId: number;
+  toUserId: number;
+  chatId: number | null;
+};
+
 @WebSocketGateway({ cors: true })
 export class RoomGateway {
   constructor(private readonly presenceService: PresenceService) {}
@@ -19,33 +25,29 @@ export class RoomGateway {
   server: Server;
 
   @SubscribeMessage('leave-room')
-  handleLeaveRoom(client: Socket, data: { roomId: string; userId: number }) {
-    this.logger.log('👹👹👹', data, 'Hello from user Id , that left room');
-    client.to(data.roomId).emit('partner-left-room', data);
+  async handleLeaveRoom(client: Socket, data: JoinRomData) {
+    const roomId = this.generateRoomId(data.fromUserId, data.toUserId);
+    await client.leave(roomId);
+    // Now notify the remaining users in the room
+    const room = this.server.sockets.adapter.rooms.get(roomId);
+    if (room?.size) {
+      this.server.to(roomId).emit('partner-left-room', data);
+    }
   }
 
   @SubscribeMessage('join-room')
-  handleJoinRoom(
-    client: Socket,
-    data: {
-      fromUserId: number;
-      toUserId: number;
-      chatId: number;
-      lastMessageSenderId: number;
-    },
-  ) {
+  handleJoinRoom(client: Socket, data: JoinRomData) {
     this.logger.log('Join room');
     const roomId = this.generateRoomId(data.fromUserId, data.toUserId);
     this.server.socketsJoin(roomId);
 
     const roomSize = this.server.sockets.adapter.rooms.get(roomId)?.size || 0;
     //const socketsInRoom = this.server.sockets.adapter.rooms.get(roomId);
-    //console.log(roomSize, 'hello size', socketsInRoom);
     // Check if the sender is connected so we send the notification
     if (roomSize < 2) return;
     // Emit to all clients in the room (except sender)
-    client.to(roomId).emit('partner-joined-room', data);
+    //client.to(roomId).emit('partner-joined-room', data);
     // Emit to all clients in the room (include sender)
-    //this.server.in(roomId).emit('partner-joined-room', data);
+    this.server.in(roomId).emit('partner-joined-room', data);
   }
 }

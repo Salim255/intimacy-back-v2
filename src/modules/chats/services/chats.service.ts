@@ -1,5 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { ChatRepository } from '../repository/chat.repository';
+import {
+  ChatRepository,
+  UpdateChatMessagesToRead,
+} from '../repository/chat.repository';
 import { Chat } from '../entities/chat.entity';
 import { ChatWithDetailsDto } from '../chat-dto/chat-response.dto';
 import { MessageService } from '../../messages/services/message.service';
@@ -7,6 +10,7 @@ import { ChatUsersService } from '../../chat-users/services/chat-users.service';
 import { SessionKaysService } from 'src/session-keys/services/session-kays.service';
 import { DataSource } from 'typeorm';
 import { PartnerConnectionStatus } from 'src/modules/messages/message-dto/message-dto';
+import { Message } from 'src/modules/messages/entities/message.entity';
 
 export type CreateChatPayload = {
   content: string;
@@ -162,6 +166,55 @@ export class ChatsService {
           status: 'fail',
           message: 'Error getting all chats by user ID: ' + messageError,
           code: 'GETTING_ALL_CHATS_USERID_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+  async fetchChatByChatIdUserId(
+    chatId: number,
+    userId: number,
+  ): Promise<ChatWithDetailsDto> {
+    try {
+      const chat: ChatWithDetailsDto =
+        await this.chatsRepository.getChatDetailsByChatIdUserId({
+          chatId,
+          userId,
+        });
+      return chat;
+    } catch (error) {
+      console.error('Error fetching chats:', error);
+      const messageError =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error getting  chat by user chat id: ' + messageError,
+          code: 'GETTING_CHAT__ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateChatMessagesToRead(
+    updateChatMessagePayload: UpdateChatMessagesToRead,
+  ): Promise<Message[]> {
+    try {
+      const messages: Message[] =
+        await this.chatsRepository.updateChatMessagesToRead(
+          updateChatMessagePayload,
+        );
+      return messages;
+    } catch (error) {
+      console.error('Error updating chat messages:', error);
+      const messageError =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error in update chat messages to read: ' + messageError,
+          code: 'UPDATING_CHAT_MESSAGES_TO_READ__ERROR',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
