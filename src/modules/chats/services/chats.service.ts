@@ -20,12 +20,6 @@ export type CreateChatPayload = {
   session_key_receiver: string;
   partner_connection_status: PartnerConnectionStatus;
 };
-
-export type UpdateChatCounterPayload = {
-  chatId: number;
-  updateType: 'increment' | 'reset';
-};
-
 @Injectable()
 export class ChatsService {
   constructor(
@@ -109,46 +103,6 @@ export class ChatsService {
     } finally {
       // Release the query runner
       await queryRunning.release();
-    }
-  }
-
-  async updateChatCounter(
-    updatePayload: UpdateChatCounterPayload,
-  ): Promise<Chat> {
-    try {
-      const { chatId, updateType } = updatePayload;
-      let updatedChat: Chat | null = null;
-
-      if (updateType === 'increment') {
-        updatedChat =
-          await this.chatsRepository.incrementMessageCounter(chatId);
-      } else if (updateType === 'reset') {
-        updatedChat = await this.chatsRepository.resetMessageCounter(chatId);
-      }
-
-      if (!updatedChat) {
-        throw new HttpException(
-          {
-            status: 'fail',
-            message: 'Invalid update type provided',
-            code: 'INVALID_UPDATE_TYPE',
-          },
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      return updatedChat;
-    } catch (error) {
-      const messageError =
-        error instanceof Error ? error.message : 'Unknown error';
-      throw new HttpException(
-        {
-          status: 'fail',
-          message: 'Error updating chat counter: ' + messageError,
-          code: 'CHAT_COUNTER_UPDATE_ERROR',
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
     }
   }
 

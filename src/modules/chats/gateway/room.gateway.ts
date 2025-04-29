@@ -30,20 +30,22 @@ export class RoomGateway {
     await client.leave(roomId);
     // Now notify the remaining users in the room
     const room = this.server.sockets.adapter.rooms.get(roomId);
+    console.log(room?.size, '😍😍😍 Leave room');
     if (room?.size) {
       this.server.to(roomId).emit('partner-left-room', data);
     }
   }
 
   @SubscribeMessage('join-room')
-  handleJoinRoom(client: Socket, data: JoinRomData) {
+  async handleJoinRoom(client: Socket, data: JoinRomData) {
     this.logger.log('Join room');
     const roomId = this.generateRoomId(data.fromUserId, data.toUserId);
-    this.server.socketsJoin(roomId);
+    await client.join(roomId);
 
     const roomSize = this.server.sockets.adapter.rooms.get(roomId)?.size || 0;
     //const socketsInRoom = this.server.sockets.adapter.rooms.get(roomId);
     // Check if the sender is connected so we send the notification
+    this.logger.log(roomSize, '😍😍😍😍');
     if (roomSize < 2) return;
     // Emit to all clients in the room (except sender)
     //client.to(roomId).emit('partner-joined-room', data);

@@ -11,6 +11,7 @@ export type MessageNotifierPayloadDto = {
   fromUserId: number;
   toUserId: number;
   chatId: number;
+  partnerStatus: 'in-room' | 'online';
 };
 
 @WebSocketGateway()
@@ -30,6 +31,10 @@ export class MessageGateway {
     );
     this.logger.log(data, 'Hello', partnerSocket);
     if (!partnerSocket) return;
-    this.server.to(partnerSocket).emit('coming-message', data);
+    this.server
+      .to(partnerSocket)
+      .emit('coming-message', data, (partnerAckResponse: any) => {
+        this.logger.log(partnerAckResponse, 'clikent acc ');
+      });
   }
 }

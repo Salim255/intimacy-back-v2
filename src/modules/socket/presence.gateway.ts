@@ -27,7 +27,10 @@ export class PresenceGateway
       this.logger.log('User disconnecting....👹👹', client.id);
       const userOffline = await this.presenceService.removeUser(client.id);
       if (!userOffline) return;
-      client.broadcast.emit('user-offline', userOffline);
+      client.broadcast.emit('user-offline', {
+        status: 'offline',
+        userId: userOffline.id,
+      });
     });
   }
 

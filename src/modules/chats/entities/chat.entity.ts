@@ -19,7 +19,4 @@ export class Chat {
 
   @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: string;
-
-  @Column({ type: 'integer', default: 0 })
-  no_read_messages: number;
 }

@@ -279,6 +279,16 @@ export class UsersService {
           userId,
           connectionStatus,
         );
+      if (!updatedUser) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'Error in update user connection status ',
+            code: 'NO_USER_FOUND',
+          },
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
 
       return {
         id: updatedUser.id,
@@ -293,7 +303,7 @@ export class UsersService {
         {
           status: 'fail',
           message: 'Error in update user connection status ' + errorMessage,
-          code: 'UPDATE_STATUS_ERROR',
+          code: 'UPDATE_STATUS_USERS_ERROR',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
