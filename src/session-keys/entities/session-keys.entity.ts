@@ -3,8 +3,8 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  ManyToOne,
   JoinColumn,
+  OneToOne,
 } from 'typeorm';
 import { Chat } from '../../modules/chats/entities/chat.entity';
 
@@ -31,7 +31,7 @@ export class SessionKeys {
   @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
 
-  @ManyToOne(() => Chat, { onDelete: 'CASCADE' })
+  @OneToOne(() => Chat, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'chat_id' })
   chat: Chat;
 }

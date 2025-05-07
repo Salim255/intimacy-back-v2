@@ -10,6 +10,7 @@ import { MessagesModule } from './modules/messages/messages.module';
 import { ChatsModule } from './modules/chats/chats.module';
 import { ChatUsersModule } from './modules/chat-users/chat-users.module';
 import { SessionKeysModule } from './session-keys/session-keys.module';
+import { ProfileModule } from './modules/profiles/profiles.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { SessionKeysModule } from './session-keys/session-keys.module';
     ChatUsersModule,
     MessagesModule,
     SessionKeysModule,
+    ProfileModule,
   ],
   controllers: [AppController], // Controller to handle incoming requests
   providers: [AppService],
