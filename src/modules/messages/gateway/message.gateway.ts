@@ -31,10 +31,6 @@ export class MessageGateway {
     );
     this.logger.log(data, 'Hello', partnerSocket);
     if (!partnerSocket) return;
-    this.server
-      .to(partnerSocket)
-      .emit('coming-message', data, (partnerAckResponse: any) => {
-        this.logger.log(partnerAckResponse, 'clikent acc ');
-      });
+    this.server.to(partnerSocket).emit('coming-message', data);
   }
 }

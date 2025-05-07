@@ -274,11 +274,25 @@ export class UsersService {
     connectionStatus: string,
   ): Promise<UserDto> {
     try {
+      // 1- Check is user exit
+      const savedUser: UserDto = await this.getUserById(userId);
+      if (!savedUser) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'User not found or no longer exists.',
+            code: 'USER_NOT_FOUND',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
       const updatedUser: User =
         await this.userRepository.updateUserConnectionStatus(
           userId,
           connectionStatus,
         );
+
       if (!updatedUser) {
         throw new HttpException(
           {

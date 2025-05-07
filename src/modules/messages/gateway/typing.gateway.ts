@@ -29,6 +29,7 @@ export class TypingGateway {
     const partnerSocket = this.presenceService.getSocketIdByUserId(
       data.toUserId,
     );
+    this.logger.log('Start typing', partnerSocket, data.roomId);
     if (!partnerSocket) return;
     this.server.to(partnerSocket).emit('notify-user-typing', data);
   }
@@ -39,6 +40,7 @@ export class TypingGateway {
     const partnerSocket = this.presenceService.getSocketIdByUserId(
       data.toUserId,
     );
+
     if (!partnerSocket) return;
     this.logger.log('Stop typing', data.roomId);
     this.server.to(partnerSocket).emit('notify-user-stop-typing', data);
