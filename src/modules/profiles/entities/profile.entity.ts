@@ -29,16 +29,13 @@ export class Profile {
   user: User;
 
   @Column({ length: 100 })
-  firstName: string;
-
-  @Column({ length: 100 })
-  lastName: string;
+  name: string;
 
   @Column()
   avatar: string;
 
-  @Column()
-  age: number;
+  @Column({ type: 'date', name: 'birth_date' })
+  birth_date: Date;
 
   @Column({
     type: 'enum',
@@ -56,17 +53,17 @@ export class Profile {
     type: 'enum',
     enum: InterestedIn,
   })
-  interestedIn: InterestedIn;
+  interested_in: InterestedIn;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
     default: () => 'CURRENT_TIMESTAMP',
   })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({
     type: 'timestamp with time zone',
     default: () => 'CURRENT_TIMESTAMP',
   })
-  updatedAt: Date;
+  updated_at: Date;
 }

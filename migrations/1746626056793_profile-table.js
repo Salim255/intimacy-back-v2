@@ -10,15 +10,15 @@ exports.shorthands = undefined;
  */
 exports.up = (pgm) => {
     pgm.sql(`
-        CREATE TYPE gender_enum AS ENUM ('male', 'female', 'other');
-        CREATE TYPE interested_in_enum AS ENUM ('men', 'women', 'both');
+        /* CREATE TYPE gender_enum AS ENUM ('male', 'female', 'other');
+        CREATE TYPE interested_in_enum AS ENUM ('men', 'women', 'both'); */
 
         CREATE TABLE profiles (
           id SERIAL PRIMARY KEY,
           user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,  -- Foreign key to the users table
-          display_name VARCHAR(100) NOT NULL,
+          name VARCHAR(100) NOT NULL,
           avatar VARCHAR(255),
-          age INTEGER NOT NULL,
+          birth_date DATE NOT NULL,
           gender gender_enum NOT NULL,
           country VARCHAR(100) NOT NULL,
           city VARCHAR(100) NOT NULL,
