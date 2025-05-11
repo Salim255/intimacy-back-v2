@@ -24,15 +24,10 @@ export class ResizeMultiPhotosInterceptor implements NestInterceptor {
       // Run all sharp-resize operations in parallel
       await Promise.all(
         files.map(async (file) => {
-          console.log(file, 'hello file')
           const buffer = await sharp(file.buffer)
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             .resize(500, 500)
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             .toFormat('jpeg')
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             .jpeg({ quality: 90 })
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             .toBuffer();
 
           const uniqueSuffix = crypto.randomBytes(8).toString('hex');

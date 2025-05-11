@@ -85,8 +85,8 @@ export class PotentialMatch {
   @ApiProperty({ description: 'User name' })
   name: string;
 
-  @ApiProperty({ description: 'User avatar' })
-  avatar: string;
+  @ApiProperty({ description: 'User photos' })
+  photos: string[];
 
   @ApiProperty({ description: 'User country' })
   country: string;
@@ -115,7 +115,7 @@ export class FetchPotentialMatchesResponseDto {
           match_status: null,
           birth_date: 'date',
           name: 'Salim',
-          avatar: 'avater',
+          photos: ['url1', 'url2'],
           country: 'France',
           city: 'Lille',
           connection_status: 'online',

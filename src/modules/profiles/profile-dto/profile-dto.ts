@@ -69,6 +69,9 @@ export class ProfileDto {
   @ApiProperty({ description: 'User interested in' })
   interested_in: InterestedIn;
 
+  @ApiProperty({ description: 'User photos' })
+  photos: string[];
+
   @ApiProperty({ description: 'Profile created  at' })
   create_at: Date;
 

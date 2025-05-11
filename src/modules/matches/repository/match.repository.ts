@@ -141,13 +141,12 @@ export class MatchRepository {
   async findAvailableForMatch(userId: number): Promise<PotentialMatch[]> {
     const query = `SELECT 
         us.id AS user_id,
-        us.avatar,
         us.connection_status,
         ms.status AS match_status,
         ms.id AS match_id,
 
         pr.id AS profile_id,
-        pr.name,
+        pr.photos,
         pr.avatar,
         pr.birth_date,
         pr.city,
