@@ -16,8 +16,6 @@ export type UpdateUserPayload = {
 };
 
 export type CreateUserPayload = {
-  first_name: string;
-  last_name: string;
   email: string;
   password: string;
   private_key: string;
@@ -62,8 +60,6 @@ export class UsersService {
       );
       // Step: 1 - Create the user
       const createdUser: User = await this.userRepository.insert({
-        first_name: createUserPayload.first_name,
-        last_name: createUserPayload.first_name,
         email: createUserPayload.email,
         password: hashedPassword,
       });
@@ -190,10 +186,7 @@ export class UsersService {
       }
       const userDto: UserDto = {
         id: user.id,
-        first_name: user.first_name,
-        last_name: user.last_name,
         connection_status: user.connection_status,
-        avatar: user.avatar,
       };
       return userDto;
     } catch (error) {
@@ -306,10 +299,7 @@ export class UsersService {
 
       return {
         id: updatedUser.id,
-        last_name: updatedUser.last_name,
-        first_name: updatedUser.first_name,
         connection_status: updatedUser.connection_status,
-        avatar: updatedUser.avatar,
       } as UserDto;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '';

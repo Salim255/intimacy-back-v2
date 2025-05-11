@@ -34,9 +34,8 @@ export class ResizePhotoInterceptor implements NestInterceptor {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         .toBuffer();
 
-      request.file.buffer = buffer as Buffer;
+      request.file.buffer = buffer;
       request.file.filename = filename;
-      console.log(request.file.filename, 'Hello');
     }
 
     return next.handle();

@@ -17,15 +17,6 @@ export class User {
   @UpdateDateColumn({ type: 'timestamptz', default: () => 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 
-  @Column({ type: 'varchar', length: 30, nullable: true })
-  first_name: string;
-
-  @Column({ type: 'varchar', length: 30, nullable: true })
-  last_name: string;
-
-  @Column({ type: 'varchar', length: 250, nullable: true })
-  avatar: string;
-
   @Column({ type: 'varchar', length: 50, unique: true })
   email: string;
 

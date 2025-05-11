@@ -55,6 +55,9 @@ export class Profile {
   })
   interested_in: InterestedIn;
 
+  @Column('simple-array', { nullable: false })
+  photos: string[];
+
   @CreateDateColumn({
     type: 'timestamp with time zone',
     default: () => 'CURRENT_TIMESTAMP',

@@ -9,7 +9,13 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   CreateMessageDto,
   CreateMessageResponseDto,
@@ -26,6 +32,8 @@ export class MessageController {
   constructor(private readonly messageService: MessageService) {}
   @Post()
   @HttpCode(201)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Create a new message' })
   @ApiBody({ type: CreateMessageDto })
   @ApiResponse({
@@ -46,6 +54,7 @@ export class MessageController {
 
   @Patch('update-active-chat/messages/delivered')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @HttpCode(200)
   @ApiOperation({ summary: 'Update messages in active chat to delivered' })
   @ApiBody({

@@ -23,6 +23,7 @@ exports.up = (pgm) => {
           country VARCHAR(100) NOT NULL,
           city VARCHAR(100) NOT NULL,
           interested_in interested_in_enum NOT NULL,
+            photos TEXT[] NOT NULL DEFAULT '{}',
           created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
         );

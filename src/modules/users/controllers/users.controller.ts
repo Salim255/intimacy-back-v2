@@ -8,12 +8,12 @@ import {
   Patch,
   Post,
   Req,
-  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -38,10 +38,6 @@ import { FileUploadService } from '../../../common/file-upload/file-upload.servi
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ResizePhotoInterceptor } from '../../../common/file-upload/interceptors/resize-photo.interceptor';
 import { UploadToS3Interceptor } from '../../../common/file-upload/interceptors/upload-to-s3.interceptor';
-import {
-  DiscoverDto,
-  DiscoverUsersResponseDto,
-} from '../user-dto/discover-users-dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -58,13 +54,10 @@ export class UsersController {
     type: CreateUserResponseDto,
   })
   async signup(@Body() body: CreateUserDto) {
-    const { email, password, first_name, last_name, private_key, public_key } =
-      body;
+    const { email, password, private_key, public_key } = body;
     const response = await this.usersService.signup({
       email,
       password,
-      first_name,
-      last_name,
       private_key,
       public_key,
     });
@@ -95,6 +88,7 @@ export class UsersController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: `Get user with it's id` })
   @ApiParam({ name: 'userId', description: `User's to fetch id` })
   @ApiResponse({
@@ -116,6 +110,7 @@ export class UsersController {
 
   @Patch('update-me')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @UseInterceptors(
     FileInterceptor('photo', new FileUploadService().getMulterOptions()),
     ResizePhotoInterceptor,
@@ -130,7 +125,6 @@ export class UsersController {
   })
   async updateMe(
     @Body() body: UpdateUserDto,
-    @UploadedFile() file: Express.Multer.File,
     @Req() req: Request,
   ): Promise<UpdatedUserResponseDto> {
     try {
@@ -175,10 +169,7 @@ export class UsersController {
         data: {
           user: {
             id: updatedUser.id,
-            first_name: updatedUser.first_name,
-            last_name: updatedUser.last_name,
             connection_status: updatedUser.connection_status,
-            avatar: updatedUser.avatar,
           },
         },
       };
@@ -196,6 +187,7 @@ export class UsersController {
   }
 
   @Patch(':userId/')
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Disable user' })
   @ApiParam({ name: 'userId', description: `User's to disable id` })
   @ApiResponse({
@@ -207,28 +199,5 @@ export class UsersController {
   })
   disable() {
     return 'Hello from disable';
-  }
-
-  @Get('/discover')
-  @UseGuards(JwtAuthGuard)
-  @HttpCode(200)
-  @ApiOperation({ summary: 'Fetch potential matches' })
-  @ApiResponse({
-    status: 200,
-    description: 'Fetch potential matches with success',
-    type: DiscoverUsersResponseDto,
-  })
-  async getMatchCandidates(
-    @Req() req: Request,
-  ): Promise<DiscoverUsersResponseDto> {
-    const { id: userId } = req.user as { id: number };
-    const users: DiscoverDto[] =
-      await this.usersService.getMatchCandidates(userId);
-    return {
-      status: 'success',
-      data: {
-        users,
-      },
-    };
   }
 }

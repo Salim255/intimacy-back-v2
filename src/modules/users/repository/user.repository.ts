@@ -5,8 +5,6 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DiscoverDto } from '../user-dto/discover-users-dto';
 
 export type InsertUserPayload = {
-  first_name: string;
-  last_name: string;
   email: string;
   password: string;
 };
@@ -28,11 +26,11 @@ export class UserRepository {
   async insert(data: InsertUserPayload): Promise<User> {
     //const ds = this.dataSource; // inject it
     const query = `
-      INSERT INTO users (first_name, last_name, email, password)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO users (email, password)
+      VALUES ($1, $2)
       RETURNING *;
     `;
-    const values = [data.first_name, data.last_name, data.email, data.password];
+    const values = [data.email, data.password];
     const result: User[] = await this.dataSource.query(query, values);
     return result[0];
   }

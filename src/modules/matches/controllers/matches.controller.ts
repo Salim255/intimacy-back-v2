@@ -10,13 +10,21 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import {
   AcceptedMatchResponseDto,
   FetchMatchesResponseDto,
+  FetchPotentialMatchesResponseDto,
   InitiateMatchDto,
   InitiateMatchResponseDto,
   MatchDto,
+  PotentialMatch,
 } from '../matches-dto/matches-dto';
 import { MatchesService } from '../services/matches.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
@@ -35,6 +43,7 @@ export class MatchesController {
 
   @Post('initiate-match')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @HttpCode(201)
   @ApiOperation({
     description: 'Initiate a potential match',
@@ -66,6 +75,7 @@ export class MatchesController {
 
   @Patch(':matchId/accept')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @HttpCode(200)
   @ApiOperation({ description: 'Accepted match request' })
   @ApiResponse({ type: AcceptedMatchResponseDto })
@@ -85,6 +95,7 @@ export class MatchesController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @HttpCode(200)
   @ApiOperation({ description: `Fetch all current user's matches` })
   @ApiResponse({ type: FetchMatchesResponseDto })
@@ -95,6 +106,30 @@ export class MatchesController {
     return {
       status: 'Success',
       data: { matches },
+    };
+  }
+
+  @Get('/discover')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Fetch potential matches' })
+  @ApiResponse({
+    status: 200,
+    description: 'Fetch potential matches with success',
+    type: FetchPotentialMatchesResponseDto,
+  })
+  async getMatchCandidates(
+    @Req() req: Request,
+  ): Promise<FetchPotentialMatchesResponseDto> {
+    const { id: userId } = req.user as { id: number };
+    const profiles: PotentialMatch[] =
+      await this.matchesService.getMatchCandidates(userId);
+    return {
+      status: 'success',
+      data: {
+        profiles,
+      },
     };
   }
 }

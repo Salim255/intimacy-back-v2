@@ -15,6 +15,16 @@ async function bootstrap() {
     .setTitle('API Documentation') // Set the title of your API
     .setDescription('API description') // Provide a short description
     .setVersion('1.0') // Set the version of your API
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+        name: 'Authorization',
+      },
+      'access-token',
+    )
     .build(); // Create the document options
 
   // Generate the Swagger document

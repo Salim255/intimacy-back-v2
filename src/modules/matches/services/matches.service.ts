@@ -6,7 +6,7 @@ import {
 } from '../repository/match.repository';
 import { InitiateMatchInput } from '../repository/match.repository';
 import { UserRepository } from '../../users/repository/user.repository';
-import { MatchDto } from '../matches-dto/matches-dto';
+import { MatchDto, PotentialMatch } from '../matches-dto/matches-dto';
 
 @Injectable()
 export class MatchesService {
@@ -101,6 +101,24 @@ export class MatchesService {
           status: 'fail',
           message: `Error in fetch user's matches: ` + errorMessage,
           code: 'GET_MATCHES_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getMatchCandidates(userId: number): Promise<PotentialMatch[]> {
+    try {
+      const result: PotentialMatch[] =
+        await this.matchRepository.findAvailableForMatch(userId);
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error in fetch potential matches ' + errorMessage,
+          code: 'FETCH_POTENTIAL_MATCHES_ERROR',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );

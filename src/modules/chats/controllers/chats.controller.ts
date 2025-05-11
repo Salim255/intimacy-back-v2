@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -37,6 +38,7 @@ export class ChatsController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @HttpCode(201)
   @ApiOperation({
     summary: 'Create a new chat',
@@ -72,6 +74,7 @@ export class ChatsController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @HttpCode(200)
   @ApiOperation({
     summary: 'Get all chats by user ID',
@@ -100,6 +103,7 @@ export class ChatsController {
   @ApiParam({ name: 'chatId', description: `ID of the chat to fetch` })
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Fetch chat by its id' })
   @ApiResponse({
     status: 200,
@@ -137,6 +141,7 @@ export class ChatsController {
 
   @Patch(':chatId/update-ms-to-read')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @HttpCode(200)
   @ApiOperation({ summary: 'Upadate messages in a given chat ID to read' })
   @ApiParam({

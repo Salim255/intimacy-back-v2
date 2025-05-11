@@ -1,36 +1,53 @@
-import { IsDate, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsDate, IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { Gender, InterestedIn } from '../entities/profile.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class CreateProfileDto {
+  @ApiProperty({ description: 'Profile name' })
   @IsString()
   @IsNotEmpty()
   name: string;
 
+  @ApiProperty({ description: 'User birthdate' })
   @Type(() => Date)
   @IsDate()
   @IsNotEmpty()
   birthDate: Date;
 
+  @ApiProperty({ description: 'User gender' })
   @IsEnum(Gender)
   @IsNotEmpty()
   gender: Gender;
 
+  @ApiProperty({ description: 'User country' })
   @IsString()
   @IsNotEmpty()
   country: string;
 
+  @ApiProperty({ description: 'User city' })
   @IsString()
   @IsNotEmpty()
   city: string;
 
+  @ApiProperty({ description: 'User interest in' })
   @IsEnum(InterestedIn)
   @IsNotEmpty()
   interestedIn: InterestedIn;
+
+  @ApiProperty({ description: 'Profile photos' })
+  @IsArray()
+  @IsNotEmpty()
+  photos: string[];
 }
 
 export class ProfileDto {
+  @ApiProperty({ description: 'Profile id' })
+  id: number;
+
+  @ApiProperty({ description: 'User id' })
+  user_id: number;
+
   @ApiProperty({ description: 'User birth date' })
   birth_date: Date;
 
@@ -51,6 +68,12 @@ export class ProfileDto {
 
   @ApiProperty({ description: 'User interested in' })
   interested_in: InterestedIn;
+
+  @ApiProperty({ description: 'Profile created  at' })
+  create_at: Date;
+
+  @ApiProperty({ description: 'Profile updated at' })
+  updated_at: Date;
 }
 
 export class CreatedProfileResponseDto {
@@ -58,7 +81,53 @@ export class CreatedProfileResponseDto {
   status: string;
   @ApiProperty({
     description: 'Created profile',
-    example: { profile: ProfileDto },
+    example: {
+      profile: {
+        id: 9,
+        user_id: 1,
+        name: 'BigOne',
+        avatar: null,
+        birth_date: '1995-06-14T22:00:00.000Z',
+        gender: 'male',
+        country: 'france',
+        city: 'lille',
+        interested_in: 'both',
+        created_at: '2025-05-08T01:34:20.921Z',
+        updated_at: '2025-05-08T01:34:20.921Z',
+      },
+    },
   })
   data: { profile: ProfileDto };
+}
+
+export class GetProfileResponseDto {
+  @ApiProperty({
+    description: 'Status of fetch profile response',
+    example: 'success',
+  })
+  status: string;
+  @ApiProperty({
+    description: 'Fetched profile details',
+    type: Object,
+    example: {
+      data: {
+        profile: {
+          id: 9,
+          user_id: 1,
+          name: 'BigOne',
+          avatar: null,
+          birth_date: '1995-06-14T22:00:00.000Z',
+          gender: 'male',
+          country: 'france',
+          city: 'lille',
+          interested_in: 'both',
+          created_at: '2025-05-08T01:34:20.921Z',
+          updated_at: '2025-05-08T01:34:20.921Z',
+        },
+      },
+    },
+  })
+  data: {
+    profile: ProfileDto;
+  };
 }

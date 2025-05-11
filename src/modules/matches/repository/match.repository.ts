@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { MatchDto } from '../matches-dto/matches-dto';
+import { MatchDto, PotentialMatch } from '../matches-dto/matches-dto';
 
 export type InitiateMatchInput = {
   toUserId: number;
@@ -12,12 +12,20 @@ export type AcceptMatchPayload = {
   userId: number;
 };
 
+enum ConnectionStatus {
+  Online = 'online',
+  Offline = 'offline',
+  Away = 'away',
+}
 export type MatchDetails = {
   partner_id: number;
-  first_name: string;
-  last_name: string;
+  profile_id: number;
+  name: string;
+  birth_date: Date;
+  city: string;
+  country: string;
   avatar: string | null;
-  connection_status: 'online' | 'offline' | 'away'; // assuming status types
+  connection_status: ConnectionStatus; // assuming status types
   public_key: string;
   match_id: number;
   match_status: 1 | 2; // assuming status types
@@ -42,15 +50,20 @@ export class MatchRepository {
       const query = `
         SELECT 
           u.id AS partner_id,
-          u.first_name,
-          u.last_name,
-          u.avatar,
           u.connection_status,
           uk.public_key,
           mtc.id AS match_id,
           mtc.status AS match_status,
           mtc.created_at AS match_created_at,
-          mtc.updated_at AS match_updated_at
+          mtc.updated_at AS match_updated_at,
+          
+          pr.id AS profile_id,
+          pr.name,
+          pr.avatar,
+          pr.birth_date,
+          pr.city,
+          pr.country
+
         FROM users u
 
         INNER JOIN matches mtc
@@ -60,6 +73,9 @@ export class MatchRepository {
           )
 
         LEFT JOIN user_keys uk ON uk.user_id = u.id
+
+        LEFT JOIN profiles AS pr
+          ON pr.user_id = u.id
 
         WHERE mtc.status = 2 AND u.id != $1 AND  NOT EXISTS (
           SELECT 1
@@ -120,5 +136,43 @@ export class MatchRepository {
     const values = [data.matchId, data.userId];
     const match: MatchDetails[] = await this.dataSource.query(query, values);
     return match[0];
+  }
+
+  async findAvailableForMatch(userId: number): Promise<PotentialMatch[]> {
+    const query = `SELECT 
+        us.id AS user_id,
+        us.avatar,
+        us.connection_status,
+        ms.status AS match_status,
+        ms.id AS match_id,
+
+        pr.id AS profile_id,
+        pr.name,
+        pr.avatar,
+        pr.birth_date,
+        pr.city,
+        pr.country
+        
+  
+      FROM users AS us
+  
+      LEFT JOIN matches AS ms 
+        ON ms.to_user_id = $1 AND ms.from_user_id = us.id
+      
+      LEFT JOIN profiles AS pr
+        ON pr.user_id = us.id
+      
+      WHERE us.id <> $1
+        AND NOT EXISTS (
+          SELECT 1 FROM matches m
+          WHERE m.from_user_id = $1 
+          AND m.to_user_id = us.id
+        )
+        AND (ms.status IS NULL OR ms.status <> 2);
+      `;
+    const result: PotentialMatch[] = await this.dataSource.query(query, [
+      userId,
+    ]);
+    return result;
   }
 }

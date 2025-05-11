@@ -57,13 +57,16 @@ export class ChatRepository {
         FROM (
             SELECT
               u.id AS user_id,
-              u.avatar,
-              u.last_name,
-              u.first_name,
               chat_users.is_admin, 
-              u.connection_status
+              u.connection_status,
+              pr.name,
+              pr.avatar,
+              pr.city,
+              pr.country,
+              pr.birth_date
             FROM users AS u
             JOIN chat_users ON chat_users.user_id = u.id AND chat_users.chat_id = cu.chat_id
+            JOIN profiles AS pr ON pr.user_id = u.id
         ) AS users_data
     ) AS users,
     ------------------End Users collection------------------
