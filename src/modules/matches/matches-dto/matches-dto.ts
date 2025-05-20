@@ -32,7 +32,7 @@ export class InitiateMatchResponseDto {
     type: Object,
   })
   data: {
-    match: MatchDto;
+    match: MatchDetails;
   };
 }
 

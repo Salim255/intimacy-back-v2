@@ -54,8 +54,17 @@ export class ProfileDto {
   @ApiProperty({ description: 'User name' })
   name: string;
 
-  @ApiProperty({ description: 'User avatar' })
-  avatar: string;
+  @ApiProperty({ description: 'User biography' })
+  bio: string;
+
+  @ApiProperty({ description: 'User height' })
+  height: string;
+
+  @ApiProperty({ description: 'User has children' })
+  children: boolean;
+
+  @ApiProperty({ description: 'User education' })
+  education: string;
 
   @ApiProperty({ description: 'User gender' })
   gender: Gender;
@@ -65,6 +74,12 @@ export class ProfileDto {
 
   @ApiProperty({ description: 'User city' })
   city: string;
+
+  @ApiProperty({ description: 'User location latitude' })
+  latitude: number;
+
+  @ApiProperty({ description: 'User location longitude' })
+  longitude: number;
 
   @ApiProperty({ description: 'User interested in' })
   interested_in: InterestedIn;
@@ -89,7 +104,7 @@ export class CreatedProfileResponseDto {
         id: 9,
         user_id: 1,
         name: 'BigOne',
-        avatar: null,
+        longitude: 1.33,
         birth_date: '1995-06-14T22:00:00.000Z',
         gender: 'male',
         country: 'france',
@@ -118,7 +133,6 @@ export class GetProfileResponseDto {
           id: 9,
           user_id: 1,
           name: 'BigOne',
-          avatar: null,
           birth_date: '1995-06-14T22:00:00.000Z',
           gender: 'male',
           country: 'france',

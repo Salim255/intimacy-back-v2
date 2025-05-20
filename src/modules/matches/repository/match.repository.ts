@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { MatchDto, PotentialMatch } from '../matches-dto/matches-dto';
+import { PotentialMatch } from '../matches-dto/matches-dto';
+import { Match } from '../entities/match.entity';
 
 export type InitiateMatchInput = {
   toUserId: number;
@@ -24,7 +25,7 @@ export type MatchDetails = {
   birth_date: Date;
   city: string;
   country: string;
-  avatar: string | null;
+  photos: string[];
   connection_status: ConnectionStatus; // assuming status types
   public_key: string;
   match_id: number;
@@ -37,11 +38,11 @@ export type MatchDetails = {
 export class MatchRepository {
   constructor(private readonly dataSource: DataSource) {}
 
-  async initiateMatch(data: InitiateMatchInput): Promise<MatchDto> {
+  async initiateMatch(data: InitiateMatchInput): Promise<MatchDetails> {
     const values = [data.toUserId, data.fromUserId, 1];
     const query = `INSERT INTO matches (to_user_id, from_user_id, status)
     VALUES ($1, $2, $3) RETURNING id, to_user_id, from_user_id, status;`;
-    const result: MatchDto[] = await this.dataSource.query(query, values);
+    const result: MatchDetails[] = await this.dataSource.query(query, values);
     return result[0];
   }
 
@@ -59,7 +60,7 @@ export class MatchRepository {
           
           pr.id AS profile_id,
           pr.name,
-          pr.avatar,
+          pr.photos,
           pr.birth_date,
           pr.city,
           pr.country
@@ -112,9 +113,12 @@ export class MatchRepository {
 
     SELECT 
       u.id AS partner_id,
-      u.first_name,
-      u.last_name,
-      u.avatar,
+      pr.id AS profile_id,
+      pr.name,
+      pr.photos,
+      pr.birth_date,
+      pr.city,
+      pr.country,
       u.connection_status,
       uk.public_key,
       um.id AS match_id,
@@ -125,8 +129,10 @@ export class MatchRepository {
     FROM updated_match um
 
     JOIN users u 
-
     ON u.id = um.from_user_id   -- get the partner info
+
+    LEFT JOIN profiles AS pr
+          ON pr.user_id = u.id
 
     LEFT JOIN user_keys uk 
 
@@ -146,6 +152,7 @@ export class MatchRepository {
         ms.id AS match_id,
 
         pr.id AS profile_id,
+        pr.name,
         pr.photos,
         pr.avatar,
         pr.birth_date,
@@ -173,5 +180,18 @@ export class MatchRepository {
       userId,
     ]);
     return result;
+  }
+
+  async fetchMatchByUsers(userId1: number, userId2: number): Promise<Match> {
+    const query = `SELECT * FROM matches AS mtc
+    WHERE 
+      (mtc.from_user_id = $1 AND mtc.to_user_id = $2)
+      OR (mtc.from_user_id = $2 AND mtc.to_user_id = $1)
+    `;
+    const match: Match[] = await this.dataSource.query(query, [
+      userId1,
+      userId2,
+    ]);
+    return match[0];
   }
 }

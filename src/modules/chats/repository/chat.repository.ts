@@ -60,7 +60,7 @@ export class ChatRepository {
               chat_users.is_admin, 
               u.connection_status,
               pr.name,
-              pr.avatar,
+              pr.photos,
               pr.city,
               pr.country,
               pr.birth_date
@@ -138,13 +138,16 @@ export class ChatRepository {
         FROM (
           SELECT 
             u.id AS user_id, 
-            u.first_name, 
-            u.last_name, 
-            u.avatar, 
             u.connection_status,
+            pr.name,
+            pr.photos,
+            pr.city,
+            pr.country,
+            pr.birth_date,
             cu.is_admin  -- bring the is_admin from chat_users
           FROM chat_users cu
           JOIN users u ON u.id = cu.user_id
+          JOIN profiles AS pr ON pr.user_id = u.id
           WHERE cu.chat_id = $2
         ) AS user_data
       ) AS users,
@@ -205,7 +208,12 @@ export class ChatRepository {
 
         -----------------Users collection------------------------
         ( SELECT jsonb_agg(users) FROM (
-            SELECT u.id AS user_id, u.avatar, u.last_name , u.first_name , u.connection_status FROM users u
+            SELECT 
+                u.id AS user_id,
+                u.avatar,
+                u.last_name,
+                u.first_name,
+                u.connection_status FROM users u
                 WHERE u.id IN (
                 SELECT uc.user_id FROM chat_users uc
                     WHERE uc.chat_id = c.id)

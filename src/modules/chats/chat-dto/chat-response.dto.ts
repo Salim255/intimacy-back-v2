@@ -46,9 +46,11 @@ export class LastMessageDto {
 
 export class UserInChatDto {
   user_id: number;
-  avatar: string | null;
-  last_name: string;
-  first_name: string;
+  name: string;
+  photos: string[];
+  city: string;
+  country: string;
+  birth_date: Date;
   connection_status: string;
   is_admin: boolean;
 }
@@ -93,17 +95,21 @@ export class CreateChatResponseDto {
         encrypted_session_base64: 'session_key',
         users: [
           {
-            id: 1,
-            avatar: null,
-            last_name: 'Doshka',
-            first_name: 'Doshka',
+            user_id: 1,
+            photos: ['url1', 'url2'],
+            name: 'Doshka',
+            city: 'Lille',
+            country: 'France',
+            birth_date: 'birth_date',
             connection_status: 'offline',
           },
           {
-            id: 2,
-            avatar: null,
-            last_name: 'Salim',
-            first_name: 'Salim',
+            user_id: 2,
+            photos: ['url1', 'url2'],
+            name: 'Mike',
+            city: 'Lille',
+            country: 'France',
+            birth_date: 'birth_date',
             connection_status: 'offline',
           },
         ],

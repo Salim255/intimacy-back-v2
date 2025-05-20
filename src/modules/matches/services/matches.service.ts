@@ -6,7 +6,7 @@ import {
 } from '../repository/match.repository';
 import { InitiateMatchInput } from '../repository/match.repository';
 import { UserRepository } from '../../users/repository/user.repository';
-import { MatchDto, PotentialMatch } from '../matches-dto/matches-dto';
+import { PotentialMatch } from '../matches-dto/matches-dto';
 
 @Injectable()
 export class MatchesService {
@@ -16,17 +16,21 @@ export class MatchesService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async initiateMatch(input: InitiateMatchInput): Promise<MatchDto> {
+  async initiateMatch(input: InitiateMatchInput): Promise<MatchDetails> {
     try {
-      if (input.fromUserId === input.toUserId) {
-        throw new HttpException(
-          {
-            status: 'fail',
-            message: 'Cannot initiate match: users conflict.',
-            code: 'USERS_CONFLICT',
-          },
-          HttpStatus.CONFLICT,
-        );
+      // Check if the user there are initiated match
+      const existMatch = await this.matchRepository.fetchMatchByUsers(
+        input.fromUserId,
+        input.toUserId,
+      );
+
+      if (existMatch) {
+        const match: MatchDetails = await this.matchRepository.acceptMatch({
+          matchId: existMatch.id,
+          userId: existMatch.to_user_id,
+        });
+
+        return match;
       }
       // Check the potential match user is exist
       const existUser = await this.userRepository.getUserById(input.toUserId);
@@ -40,7 +44,10 @@ export class MatchesService {
           HttpStatus.BAD_REQUEST,
         );
       }
-      const match: MatchDto = await this.matchRepository.initiateMatch(input);
+
+      const match: MatchDetails =
+        await this.matchRepository.initiateMatch(input);
+
       if (!match) {
         throw new HttpException(
           {

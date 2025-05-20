@@ -23,7 +23,6 @@ import {
   FetchPotentialMatchesResponseDto,
   InitiateMatchDto,
   InitiateMatchResponseDto,
-  MatchDto,
   PotentialMatch,
 } from '../matches-dto/matches-dto';
 import { MatchesService } from '../services/matches.service';
@@ -61,7 +60,7 @@ export class MatchesController {
       fromUserId,
     };
 
-    const match: MatchDto =
+    const match: MatchDetails =
       await this.matchesService.initiateMatch(initiateMatchPayload);
     const response: InitiateMatchResponseDto = {
       status: 'Success',

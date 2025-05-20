@@ -31,9 +31,6 @@ export class Profile {
   @Column({ length: 100 })
   name: string;
 
-  @Column()
-  avatar: string;
-
   @Column({ type: 'date', name: 'birth_date' })
   birth_date: Date;
 
@@ -57,6 +54,24 @@ export class Profile {
 
   @Column('simple-array', { nullable: false })
   photos: string[];
+
+  @Column({ type: 'text' })
+  bio: string;
+
+  @Column({ type: 'int', nullable: true })
+  height: string;
+
+  @Column({ type: 'boolean', default: false })
+  children: boolean;
+
+  @Column({ length: 100, nullable: true })
+  education: string;
+
+  @Column({ type: 'double precision', nullable: true })
+  latitude: number;
+
+  @Column({ type: 'double precision', nullable: true })
+  longitude: number;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',
