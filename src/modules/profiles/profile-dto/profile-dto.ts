@@ -198,9 +198,19 @@ export class UpdateChildrenBodyDto {
 }
 
 export class UpdateEducationBodyDto {
-  @ApiProperty({ description: 'Profile  has children' })
+  @ApiProperty({ description: 'Profile education' })
   @IsNotEmpty()
   education: string;
+
+  @ApiProperty({ description: 'Profile id' })
+  @IsNotEmpty()
+  profileId: number;
+}
+
+export class UpdateGenderBodyDto {
+  @ApiProperty({ description: 'Profile  has children' })
+  @IsNotEmpty()
+  gender: Gender;
 
   @ApiProperty({ description: 'Profile id' })
   @IsNotEmpty()

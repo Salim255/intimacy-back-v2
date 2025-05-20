@@ -28,6 +28,7 @@ import {
   UpdateChildrenBodyDto,
   UpdateCoordinatesBodyDto,
   UpdateEducationBodyDto,
+  UpdateGenderBodyDto,
   UpdateHomeBodyDto,
 } from '../profile-dto/profile-dto';
 import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
@@ -325,6 +326,48 @@ export class ProfilesController {
         {
           status: 'fail',
           message: 'Error while updating profile education ' + errMessage,
+          code: 'ERROR_UPDATE_PROFILE',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Patch('update-gender')
+  @ApiBody({ type: UpdateGenderBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated profile gender with success',
+    type: GetProfileResponseDto,
+  })
+  async updateGender(@Req() req: Request): Promise<GetProfileResponseDto> {
+    try {
+      const { profileId, gender } = req.body as UpdateGenderBodyDto;
+      const result = [profileId, gender].filter(Boolean);
+      if (result.length !== 2) {
+        throw new Error();
+      }
+
+      const updatedProfile = await this.profilesService.updateGender({
+        profileId,
+        gender,
+      });
+
+      return {
+        status: 'success',
+        data: {
+          profile: updatedProfile,
+        },
+      };
+    } catch (error) {
+      const errMessage =
+        error instanceof Error ? error.message : 'unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error while updating profile gender ' + errMessage,
           code: 'ERROR_UPDATE_PROFILE',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,

@@ -9,6 +9,7 @@ import {
   UpdateBioBodyDto,
   UpdateChildrenBodyDto,
   UpdateEducationBodyDto,
+  UpdateGenderBodyDto,
   UpdateHomeBodyDto,
 } from '../profile-dto/profile-dto';
 
@@ -61,6 +62,11 @@ export class ProfilesService {
     updatePayload: UpdateEducationBodyDto,
   ): Promise<ProfileDto> {
     const result = this.profileRepository.updateEducation(updatePayload);
+    return result;
+  }
+
+  async updateGender(updatePayload: UpdateGenderBodyDto): Promise<ProfileDto> {
+    const result = this.profileRepository.updateGender(updatePayload);
     return result;
   }
 }
