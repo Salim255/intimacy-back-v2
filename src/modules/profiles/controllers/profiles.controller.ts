@@ -27,6 +27,7 @@ import {
   UpdateBioBodyDto,
   UpdateChildrenBodyDto,
   UpdateCoordinatesBodyDto,
+  UpdateEducationBodyDto,
   UpdateHomeBodyDto,
 } from '../profile-dto/profile-dto';
 import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
@@ -253,7 +254,7 @@ export class ProfilesController {
   @ApiBody({ type: UpdateChildrenBodyDto })
   @ApiResponse({
     status: 200,
-    description: 'Updated profile home with success',
+    description: 'Updated profile children with success',
     type: GetProfileResponseDto,
   })
   async updateChildren(@Req() req: Request): Promise<GetProfileResponseDto> {
@@ -282,6 +283,48 @@ export class ProfilesController {
         {
           status: 'fail',
           message: 'Error while updating profile children ' + errMessage,
+          code: 'ERROR_UPDATE_PROFILE',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Patch('update-education')
+  @ApiBody({ type: UpdateEducationBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated profile education with success',
+    type: GetProfileResponseDto,
+  })
+  async updateEducation(@Req() req: Request): Promise<GetProfileResponseDto> {
+    try {
+      const { profileId, education } = req.body as UpdateEducationBodyDto;
+      const result = [profileId, education].filter(Boolean);
+      if (result.length !== 2) {
+        throw new Error();
+      }
+
+      const updatedProfile = await this.profilesService.updateEducation({
+        profileId,
+        education,
+      });
+
+      return {
+        status: 'success',
+        data: {
+          profile: updatedProfile,
+        },
+      };
+    } catch (error) {
+      const errMessage =
+        error instanceof Error ? error.message : 'unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error while updating profile education ' + errMessage,
           code: 'ERROR_UPDATE_PROFILE',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
