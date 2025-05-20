@@ -1,7 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
-import { CreateProfileDto, ProfileDto } from '../profile-dto/profile-dto';
+import {
+  CreateProfileDto,
+  ProfileDto,
+  UpdateBioBodyDto,
+  UpdateChildrenBodyDto,
+  UpdateHomeBodyDto,
+} from '../profile-dto/profile-dto';
 import { InjectDataSource } from '@nestjs/typeorm';
+
+export type UpdateCoordinatesPayload = {
+  longitude: number;
+  latitude: number;
+  profileId: number;
+};
 
 @Injectable()
 export class ProfileRepository {
@@ -40,5 +52,75 @@ export class ProfileRepository {
       values,
     );
     return fetchedProfile[0];
+  }
+
+  async updateLocation(
+    coordinates: UpdateCoordinatesPayload,
+  ): Promise<ProfileDto> {
+    const values = [
+      coordinates.latitude,
+      coordinates.longitude,
+      coordinates.profileId,
+    ];
+    console.log(coordinates);
+    const query = `UPDATE profiles
+    SET latitude = $1,longitude = $2
+    WHERE profiles.id = $3
+    RETURNING *;`;
+
+    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+      query,
+      values,
+    );
+    return updatedProfile[0];
+  }
+
+  async updateBio(updatePayload: UpdateBioBodyDto): Promise<ProfileDto> {
+    const values = [updatePayload.bio, updatePayload.profileId];
+
+    const query = `UPDATE profiles
+    SET bio = $1
+    WHERE profiles.id = $2
+    RETURNING *;`;
+
+    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+      query,
+      values,
+    );
+    return updatedProfile[0];
+  }
+
+  async updateHome(updatePayload: UpdateHomeBodyDto): Promise<ProfileDto> {
+    const values = [
+      updatePayload.city,
+      updatePayload.country,
+      updatePayload.profileId,
+    ];
+
+    const query = `UPDATE profiles
+    SET city = $1, country = $2
+    WHERE profiles.id = $3
+    RETURNING *;`;
+    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+      query,
+      values,
+    );
+    return updatedProfile[0];
+  }
+
+  async updateChildren(
+    updatePayload: UpdateChildrenBodyDto,
+  ): Promise<ProfileDto> {
+    const values = [updatePayload.status, updatePayload.profileId];
+
+    const query = `UPDATE profiles
+    SET children = $1
+    WHERE profiles.id = $2
+    RETURNING *;`;
+    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+      query,
+      values,
+    );
+    return updatedProfile[0];
   }
 }

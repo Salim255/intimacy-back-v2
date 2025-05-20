@@ -4,6 +4,7 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -23,6 +24,10 @@ import {
   CreateProfileDto,
   GetProfileResponseDto,
   ProfileDto,
+  UpdateBioBodyDto,
+  UpdateChildrenBodyDto,
+  UpdateCoordinatesBodyDto,
+  UpdateHomeBodyDto,
 } from '../profile-dto/profile-dto';
 import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
 import { Request } from 'express';
@@ -110,5 +115,177 @@ export class ProfilesController {
         profile: savedProfile,
       },
     };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Patch('update-location')
+  @ApiBody({ type: UpdateCoordinatesBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated profile with success',
+    type: GetProfileResponseDto,
+  })
+  async updateLocation(@Req() req: Request): Promise<GetProfileResponseDto> {
+    try {
+      const { profileId, latitude, longitude } =
+        req.body as UpdateCoordinatesBodyDto;
+      const result = [profileId, latitude, longitude].filter(Boolean);
+      console.log(result);
+      if (result.length !== 3) {
+        throw new Error();
+      }
+
+      const updatedProfile = await this.profilesService.updateProfileLocation({
+        profileId,
+        latitude,
+        longitude,
+      });
+
+      return {
+        status: 'success',
+        data: {
+          profile: updatedProfile,
+        },
+      };
+    } catch (error) {
+      const errMessage =
+        error instanceof Error ? error.message : 'unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error while updating profile location ' + errMessage,
+          code: 'ERROR_UPDATE_PROFILE',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Patch('update-bio')
+  @ApiBody({ type: UpdateBioBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated profile with success',
+    type: GetProfileResponseDto,
+  })
+  async updateBio(@Req() req: Request): Promise<GetProfileResponseDto> {
+    try {
+      const { profileId, bio } = req.body as UpdateBioBodyDto;
+      const result = [profileId, bio].filter(Boolean);
+      if (result.length !== 2) {
+        throw new Error();
+      }
+
+      const updatedProfile = await this.profilesService.updateBio({
+        profileId,
+        bio,
+      });
+
+      return {
+        status: 'success',
+        data: {
+          profile: updatedProfile,
+        },
+      };
+    } catch (error) {
+      const errMessage =
+        error instanceof Error ? error.message : 'unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error while updating profile bio ' + errMessage,
+          code: 'ERROR_UPDATE_PROFILE',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Patch('update-home')
+  @ApiBody({ type: UpdateHomeBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated profile home with success',
+    type: GetProfileResponseDto,
+  })
+  async updateHome(@Req() req: Request): Promise<GetProfileResponseDto> {
+    try {
+      const { profileId, city, country } = req.body as UpdateHomeBodyDto;
+      const result = [profileId, city, country].filter(Boolean);
+      if (result.length !== 3) {
+        throw new Error();
+      }
+
+      const updatedProfile = await this.profilesService.updateHome({
+        profileId,
+        city,
+        country,
+      });
+
+      return {
+        status: 'success',
+        data: {
+          profile: updatedProfile,
+        },
+      };
+    } catch (error) {
+      const errMessage =
+        error instanceof Error ? error.message : 'unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error while updating profile home ' + errMessage,
+          code: 'ERROR_UPDATE_PROFILE',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Patch('update-children')
+  @ApiBody({ type: UpdateChildrenBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated profile home with success',
+    type: GetProfileResponseDto,
+  })
+  async updateChildren(@Req() req: Request): Promise<GetProfileResponseDto> {
+    try {
+      const { profileId, status } = req.body as UpdateChildrenBodyDto;
+      const result = [profileId, status].filter(Boolean);
+      if (result.length !== 2) {
+        throw new Error();
+      }
+
+      const updatedProfile = await this.profilesService.updateChildren({
+        profileId,
+        status,
+      });
+
+      return {
+        status: 'success',
+        data: {
+          profile: updatedProfile,
+        },
+      };
+    } catch (error) {
+      const errMessage =
+        error instanceof Error ? error.message : 'unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error while updating profile children ' + errMessage,
+          code: 'ERROR_UPDATE_PROFILE',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

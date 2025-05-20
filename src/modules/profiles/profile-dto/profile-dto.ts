@@ -148,3 +148,51 @@ export class GetProfileResponseDto {
     profile: ProfileDto;
   };
 }
+
+export class UpdateCoordinatesBodyDto {
+  @ApiProperty({ description: 'Profile longitude' })
+  @IsNotEmpty()
+  longitude: number;
+
+  @ApiProperty({ description: 'Profile latitude' })
+  @IsNotEmpty()
+  latitude: number;
+
+  @ApiProperty({ description: 'Profile id' })
+  @IsNotEmpty()
+  profileId: number;
+}
+
+export class UpdateBioBodyDto {
+  @ApiProperty({ description: 'Profile bio' })
+  @IsNotEmpty()
+  bio: string;
+
+  @ApiProperty({ description: 'Profile id' })
+  @IsNotEmpty()
+  profileId: number;
+}
+
+export class UpdateHomeBodyDto {
+  @ApiProperty({ description: 'Profile city' })
+  @IsNotEmpty()
+  city: string;
+
+  @ApiProperty({ description: 'Profile country' })
+  @IsNotEmpty()
+  country: string;
+
+  @ApiProperty({ description: 'Profile id' })
+  @IsNotEmpty()
+  profileId: number;
+}
+
+export class UpdateChildrenBodyDto {
+  @ApiProperty({ description: 'Profile  has children' })
+  @IsNotEmpty()
+  status: boolean;
+
+  @ApiProperty({ description: 'Profile id' })
+  @IsNotEmpty()
+  profileId: number;
+}
