@@ -29,7 +29,9 @@ import {
   UpdateCoordinatesBodyDto,
   UpdateEducationBodyDto,
   UpdateGenderBodyDto,
+  UpdateHeightBodyDto,
   UpdateHomeBodyDto,
+  UpdateInterestsBodyDto,
 } from '../profile-dto/profile-dto';
 import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
 import { Request } from 'express';
@@ -368,6 +370,90 @@ export class ProfilesController {
         {
           status: 'fail',
           message: 'Error while updating profile gender ' + errMessage,
+          code: 'ERROR_UPDATE_PROFILE',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Patch('update-height')
+  @ApiBody({ type: UpdateHeightBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated profile height with success',
+    type: GetProfileResponseDto,
+  })
+  async updateHeight(@Req() req: Request): Promise<GetProfileResponseDto> {
+    try {
+      const { profileId, height } = req.body as UpdateHeightBodyDto;
+      const result = [profileId, height].filter(Boolean);
+      if (result.length !== 2) {
+        throw new Error();
+      }
+
+      const updatedProfile = await this.profilesService.updateHeight({
+        profileId,
+        height,
+      });
+
+      return {
+        status: 'success',
+        data: {
+          profile: updatedProfile,
+        },
+      };
+    } catch (error) {
+      const errMessage =
+        error instanceof Error ? error.message : 'unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error while updating profile height ' + errMessage,
+          code: 'ERROR_UPDATE_PROFILE',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Patch('update-interests')
+  @ApiBody({ type: UpdateInterestsBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated profile interests with success',
+    type: GetProfileResponseDto,
+  })
+  async updateInterests(@Req() req: Request): Promise<GetProfileResponseDto> {
+    try {
+      const { profileId, interestedIn } = req.body as UpdateInterestsBodyDto;
+      const result = [profileId, interestedIn].filter(Boolean);
+      if (result.length !== 2) {
+        throw new Error(`Missing data for update interest ${result.length}`);
+      }
+
+      const updatedProfile = await this.profilesService.updateInterests({
+        profileId,
+        interestedIn,
+      });
+
+      return {
+        status: 'success',
+        data: {
+          profile: updatedProfile,
+        },
+      };
+    } catch (error) {
+      const errMessage =
+        error instanceof Error ? error.message : 'unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error while updating profile interests ' + errMessage,
           code: 'ERROR_UPDATE_PROFILE',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,

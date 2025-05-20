@@ -7,7 +7,9 @@ import {
   UpdateChildrenBodyDto,
   UpdateEducationBodyDto,
   UpdateGenderBodyDto,
+  UpdateHeightBodyDto,
   UpdateHomeBodyDto,
+  UpdateInterestsBodyDto,
 } from '../profile-dto/profile-dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 
@@ -147,6 +149,35 @@ export class ProfileRepository {
 
     const query = `UPDATE profiles
     SET gender = $1
+    WHERE profiles.id = $2
+    RETURNING *;`;
+    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+      query,
+      values,
+    );
+    return updatedProfile[0];
+  }
+
+  async updateHeight(updatePayload: UpdateHeightBodyDto): Promise<ProfileDto> {
+    const values = [updatePayload.height, updatePayload.profileId];
+
+    const query = `UPDATE profiles
+    SET height = $1
+    WHERE profiles.id = $2
+    RETURNING *;`;
+    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+      query,
+      values,
+    );
+    return updatedProfile[0];
+  }
+
+  async updateInterests(
+    updatePayload: UpdateInterestsBodyDto,
+  ): Promise<ProfileDto> {
+    const values = [updatePayload.interestedIn, updatePayload.profileId];
+    const query = `UPDATE profiles
+    SET interested_in = $1
     WHERE profiles.id = $2
     RETURNING *;`;
     const updatedProfile: ProfileDto[] = await this.dataSource.query(

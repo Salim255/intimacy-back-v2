@@ -25,7 +25,7 @@ exports.up = (pgm) => {
           longitude DOUBLE PRECISION,
           bio TEXT,
           education VARCHAR(100),
-          height INTEGER,
+          height DOUBLE PRECISION,
           children BOOLEAN DEFAULT FALSE,
           interested_in interested_in_enum NOT NULL,
           photos TEXT[] NOT NULL DEFAULT '{}',

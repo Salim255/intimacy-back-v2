@@ -216,3 +216,23 @@ export class UpdateGenderBodyDto {
   @IsNotEmpty()
   profileId: number;
 }
+
+export class UpdateHeightBodyDto {
+  @ApiProperty({ description: 'Profile height' })
+  @IsNotEmpty()
+  height: number;
+
+  @ApiProperty({ description: 'Profile id' })
+  @IsNotEmpty()
+  profileId: number;
+}
+
+export class UpdateInterestsBodyDto {
+  @ApiProperty({ description: 'Profile interest' })
+  @IsNotEmpty()
+  interestedIn: InterestedIn;
+
+  @ApiProperty({ description: 'Profile id' })
+  @IsNotEmpty()
+  profileId: number;
+}
