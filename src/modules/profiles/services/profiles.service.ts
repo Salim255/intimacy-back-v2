@@ -14,6 +14,7 @@ import {
   UpdateHomeBodyDto,
   UpdateInterestsBodyDto,
   UpdateLookingForBodyDto,
+  UpdatePhotosBodyDto,
 } from '../profile-dto/profile-dto';
 
 @Injectable()
@@ -89,6 +90,11 @@ export class ProfilesService {
     updatePayload: UpdateLookingForBodyDto,
   ): Promise<ProfileDto> {
     const result = this.profileRepository.updateLookingFor(updatePayload);
+    return result;
+  }
+
+  async updatePhotos(updatePayload: UpdatePhotosBodyDto): Promise<ProfileDto> {
+    const result = this.profileRepository.updatePhots(updatePayload);
     return result;
   }
 }

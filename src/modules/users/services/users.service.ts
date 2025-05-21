@@ -293,7 +293,7 @@ export class UsersService {
             message: 'Error in update user connection status ',
             code: 'NO_USER_FOUND',
           },
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          HttpStatus.NOT_FOUND,
         );
       }
 
@@ -302,6 +302,9 @@ export class UsersService {
         connection_status: updatedUser.connection_status,
       } as UserDto;
     } catch (error) {
+      console.log(error);
+      if (error instanceof HttpException) throw error;
+
       const errorMessage = error instanceof Error ? error.message : '';
       throw new HttpException(
         {

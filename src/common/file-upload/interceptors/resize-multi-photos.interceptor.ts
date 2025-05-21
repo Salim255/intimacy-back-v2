@@ -17,11 +17,12 @@ export class ResizeMultiPhotosInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const request = context
       .switchToHttp()
-      .getRequest<{ files?: Express.Multer.File }>();
+      .getRequest<{ files?: Express.Multer.File; user: { id: number } }>();
 
     const files = (request.files || []) as Express.Multer.File[];
     if (files.length) {
       // Run all sharp-resize operations in parallel
+      const { id: userId } = request.user as { id: number };
       await Promise.all(
         files.map(async (file) => {
           const buffer = await sharp(file.buffer)
@@ -31,7 +32,7 @@ export class ResizeMultiPhotosInterceptor implements NestInterceptor {
             .toBuffer();
 
           const uniqueSuffix = crypto.randomBytes(8).toString('hex');
-          const filename = `user-${uniqueSuffix}-${Date.now()}.jpeg`;
+          const filename = `user-${userId}-${uniqueSuffix}-${Date.now()}.jpeg`;
           file.buffer = buffer;
           file.filename = filename;
         }),

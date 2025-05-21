@@ -33,6 +33,7 @@ import {
   UpdateHomeBodyDto,
   UpdateInterestsBodyDto,
   UpdateLookingForBodyDto,
+  UpdatePhotosBodyDto,
 } from '../profile-dto/profile-dto';
 import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
 import { Request } from 'express';
@@ -40,6 +41,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { FileUploadService } from 'src/common/file-upload/file-upload.service';
 import { ResizeMultiPhotosInterceptor } from 'src/common/file-upload/interceptors/resize-multi-photos.interceptor';
 import { MultiUploadToS3Interceptor } from 'src/common/file-upload/interceptors/multi-upload-to-s3-interceptor';
+import { RemoveImagesFromToS3Interceptor } from 'src/common/file-upload/interceptors/remove-images-s3-interceptor';
 
 @ApiTags('Profiles')
 @Controller('profiles')
@@ -498,6 +500,62 @@ export class ProfilesController {
         {
           status: 'fail',
           message: 'Error while updating profile looking for ' + errMessage,
+          code: 'ERROR_UPDATE_PROFILE',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @UseInterceptors(
+    FilesInterceptor('photos', 4, new FileUploadService().getMulterOptions()),
+    ResizeMultiPhotosInterceptor,
+    RemoveImagesFromToS3Interceptor,
+    MultiUploadToS3Interceptor,
+  )
+  @Patch('update-photos')
+  @ApiBody({ type: UpdatePhotosBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated profile photos  with success',
+    type: GetProfileResponseDto,
+  })
+  async updatePhotos(@Req() req: Request): Promise<GetProfileResponseDto> {
+    try {
+      const { profileId } = req.body as UpdatePhotosBodyDto;
+      const photos = (req.files as Express.Multer.File[])?.map(
+        (file) => file.filename,
+      );
+      const result = [profileId, photos].filter(Boolean);
+
+      if (result.length !== 2) {
+        throw new Error(`
+          Missing data for update profile update profile  ${result.length}`);
+      }
+
+      const updatedProfile = await this.profilesService.updatePhotos({
+        profileId,
+        photos: (req.files as Express.Multer.File[])?.map(
+          (file) => file.filename,
+        ),
+      });
+
+      return {
+        status: 'success',
+        data: {
+          profile: updatedProfile,
+        },
+      };
+    } catch (error) {
+      console.error(error);
+      const errMessage =
+        error instanceof Error ? error.message : 'unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error while updating profile  photos ' + errMessage,
           code: 'ERROR_UPDATE_PROFILE',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,

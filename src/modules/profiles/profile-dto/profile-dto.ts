@@ -249,3 +249,13 @@ export class UpdateLookingForBodyDto {
   @IsNotEmpty()
   profileId: number;
 }
+
+export class UpdatePhotosBodyDto {
+  @ApiProperty({ description: 'Profile photos ' })
+  @IsNotEmpty()
+  photos: string[];
+
+  @ApiProperty({ description: 'Profile id' })
+  @IsNotEmpty()
+  profileId: number;
+}

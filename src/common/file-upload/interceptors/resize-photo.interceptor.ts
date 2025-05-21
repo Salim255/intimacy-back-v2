@@ -17,11 +17,12 @@ export class ResizePhotoInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const request = context
       .switchToHttp()
-      .getRequest<{ file?: Express.Multer.File }>();
+      .getRequest<{ file?: Express.Multer.File; user: { id: number } }>();
 
     if (request.file) {
+      const { id: userId } = request.user as { id: number };
       const uniqueSuffix = crypto.randomBytes(8).toString('hex');
-      const filename = `user-${uniqueSuffix}-${Date.now()}.jpeg`;
+      const filename = `user-${userId}-${uniqueSuffix}-${Date.now()}.jpeg`;
 
       const buffer = await sharp(request.file.buffer)
         .resize(500, 500)
