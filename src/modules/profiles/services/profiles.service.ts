@@ -13,6 +13,7 @@ import {
   UpdateHeightBodyDto,
   UpdateHomeBodyDto,
   UpdateInterestsBodyDto,
+  UpdateLookingForBodyDto,
 } from '../profile-dto/profile-dto';
 
 @Injectable()
@@ -81,6 +82,13 @@ export class ProfilesService {
     updatePayload: UpdateInterestsBodyDto,
   ): Promise<ProfileDto> {
     const result = this.profileRepository.updateInterests(updatePayload);
+    return result;
+  }
+
+  async updateLookingFor(
+    updatePayload: UpdateLookingForBodyDto,
+  ): Promise<ProfileDto> {
+    const result = this.profileRepository.updateLookingFor(updatePayload);
     return result;
   }
 }

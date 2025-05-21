@@ -32,6 +32,7 @@ import {
   UpdateHeightBodyDto,
   UpdateHomeBodyDto,
   UpdateInterestsBodyDto,
+  UpdateLookingForBodyDto,
 } from '../profile-dto/profile-dto';
 import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
 import { Request } from 'express';
@@ -454,6 +455,49 @@ export class ProfilesController {
         {
           status: 'fail',
           message: 'Error while updating profile interests ' + errMessage,
+          code: 'ERROR_UPDATE_PROFILE',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Patch('update-looking-for')
+  @ApiBody({ type: UpdateLookingForBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated profile looking for with success',
+    type: GetProfileResponseDto,
+  })
+  async updateLookingFor(@Req() req: Request): Promise<GetProfileResponseDto> {
+    try {
+      const { profileId, lookingFor } = req.body as UpdateLookingForBodyDto;
+      const result = [profileId, lookingFor].filter(Boolean);
+      if (result.length !== 2) {
+        throw new Error(`
+          Missing data for update profile looking for ${result.length}`);
+      }
+
+      const updatedProfile = await this.profilesService.updateLookingFor({
+        profileId,
+        lookingFor,
+      });
+
+      return {
+        status: 'success',
+        data: {
+          profile: updatedProfile,
+        },
+      };
+    } catch (error) {
+      const errMessage =
+        error instanceof Error ? error.message : 'unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error while updating profile looking for ' + errMessage,
           code: 'ERROR_UPDATE_PROFILE',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,

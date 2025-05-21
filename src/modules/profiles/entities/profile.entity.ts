@@ -19,6 +19,14 @@ export enum InterestedIn {
   Women = 'women',
   Both = 'both',
 }
+
+export enum LookingFor {
+  Chat = 'chat',
+  Friendship = 'friendship',
+  Casual = 'casual',
+  LongTerm = 'long_term',
+}
+
 @Entity('profile')
 export class Profile {
   @PrimaryGeneratedColumn()
@@ -54,6 +62,14 @@ export class Profile {
 
   @Column('simple-array', { nullable: false })
   photos: string[];
+
+  @Column({
+    type: 'enum',
+    enum: LookingFor,
+    array: true,
+    nullable: true,
+  })
+  looking_for: LookingFor[];
 
   @Column({ type: 'text' })
   bio: string;

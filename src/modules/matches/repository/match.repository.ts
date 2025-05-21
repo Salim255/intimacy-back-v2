@@ -153,8 +153,13 @@ export class MatchRepository {
 
         pr.id AS profile_id,
         pr.name,
+        pr.latitude,
+        pr.longitude,
+        pr.education,
+        pr.children,
+        pr.bio,
+        pr.gender,
         pr.photos,
-        pr.avatar,
         pr.birth_date,
         pr.city,
         pr.country

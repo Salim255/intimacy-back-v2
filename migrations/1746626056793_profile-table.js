@@ -28,6 +28,7 @@ exports.up = (pgm) => {
           height DOUBLE PRECISION,
           children BOOLEAN DEFAULT FALSE,
           interested_in interested_in_enum NOT NULL,
+          looking_for looking_for_enum[] DEFAULT NULL,
           photos TEXT[] NOT NULL DEFAULT '{}',
           created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

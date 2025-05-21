@@ -10,6 +10,7 @@ import {
   UpdateHeightBodyDto,
   UpdateHomeBodyDto,
   UpdateInterestsBodyDto,
+  UpdateLookingForBodyDto,
 } from '../profile-dto/profile-dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 
@@ -66,7 +67,6 @@ export class ProfileRepository {
       coordinates.longitude,
       coordinates.profileId,
     ];
-    console.log(coordinates);
     const query = `UPDATE profiles
     SET latitude = $1,longitude = $2
     WHERE profiles.id = $3
@@ -178,6 +178,21 @@ export class ProfileRepository {
     const values = [updatePayload.interestedIn, updatePayload.profileId];
     const query = `UPDATE profiles
     SET interested_in = $1
+    WHERE profiles.id = $2
+    RETURNING *;`;
+    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+      query,
+      values,
+    );
+    return updatedProfile[0];
+  }
+
+  async updateLookingFor(
+    updatePayload: UpdateLookingForBodyDto,
+  ): Promise<ProfileDto> {
+    const values = [updatePayload.lookingFor, updatePayload.profileId];
+    const query = `UPDATE profiles
+    SET looking_for = $1
     WHERE profiles.id = $2
     RETURNING *;`;
     const updatedProfile: ProfileDto[] = await this.dataSource.query(
