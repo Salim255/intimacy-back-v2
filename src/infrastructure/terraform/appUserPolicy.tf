@@ -11,7 +11,7 @@ resource "aws_iam_policy" "intimacy_user_s3_policy" {
           "s3:GetObject",
           "s3:DeleteObject",
           "s3:ListBucket",
-          "s3:PutObjectAcl"  # Add this to allow modifying ACLs
+          "s3:PutObjectAcl" # Add this to allow modifying ACLs
         ]
         Resource = [
           "arn:aws:s3:::intimacy-s3",
