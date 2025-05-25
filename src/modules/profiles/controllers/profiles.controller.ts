@@ -4,6 +4,7 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
+  Logger,
   Patch,
   Post,
   Req,
@@ -46,6 +47,7 @@ import { RemoveImagesFromToS3Interceptor } from 'src/common/file-upload/intercep
 @ApiTags('Profiles')
 @Controller('profiles')
 export class ProfilesController {
+  private logger = new Logger('ProfilesController');
   constructor(private profilesService: ProfilesService) {}
 
   @Post()

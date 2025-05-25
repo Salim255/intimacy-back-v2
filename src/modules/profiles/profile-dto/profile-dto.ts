@@ -212,6 +212,7 @@ export class UpdateEducationBodyDto {
 
 export class UpdateGenderBodyDto {
   @ApiProperty({ description: 'Profile  has children' })
+  @IsEnum(Gender)
   @IsNotEmpty()
   gender: Gender;
 

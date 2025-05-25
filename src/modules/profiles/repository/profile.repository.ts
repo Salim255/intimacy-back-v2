@@ -88,11 +88,11 @@ export class ProfileRepository {
     WHERE profiles.id = $2
     RETURNING *;`;
 
-    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+    const updatedProfile: ProfileDto[][] = await this.dataSource.query(
       query,
       values,
     );
-    return updatedProfile[0];
+    return updatedProfile[0][0];
   }
 
   async updateHome(updatePayload: UpdateHomeBodyDto): Promise<ProfileDto> {
@@ -106,11 +106,11 @@ export class ProfileRepository {
     SET city = $1, country = $2
     WHERE profiles.id = $3
     RETURNING *;`;
-    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+    const updatedProfile: ProfileDto[][] = await this.dataSource.query(
       query,
       values,
     );
-    return updatedProfile[0];
+    return updatedProfile[0][0];
   }
 
   async updateChildren(
@@ -152,11 +152,11 @@ export class ProfileRepository {
     SET gender = $1
     WHERE profiles.id = $2
     RETURNING *;`;
-    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+    const updatedProfile: ProfileDto[][] = await this.dataSource.query(
       query,
       values,
     );
-    return updatedProfile[0];
+    return updatedProfile[0][0];
   }
 
   async updateHeight(updatePayload: UpdateHeightBodyDto): Promise<ProfileDto> {

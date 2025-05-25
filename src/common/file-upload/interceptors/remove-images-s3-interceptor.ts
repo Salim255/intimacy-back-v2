@@ -13,7 +13,7 @@ import {
   ListObjectsV2Command,
   DeleteObjectsCommand,
 } from '@aws-sdk/client-s3';
-import { catchError, map, mergeMap, switchMap, tap } from 'rxjs/operators';
+import { catchError, mergeMap, switchMap } from 'rxjs/operators';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
