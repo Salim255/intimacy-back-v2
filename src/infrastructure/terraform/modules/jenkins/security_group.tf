@@ -10,7 +10,7 @@ resource "aws_security_group" "jenkins-sg" {
 // Inbound
 resource "aws_vpc_security_group_ingress_rule" "sshfrommyIP" {
   security_group_id = aws_security_group.jenkins-sg.id
-  cidr_ipv4         = "80.11.150.237/32"
+  cidr_ipv4         = "90.110.234.190/32"
   from_port         = 22    // For ssh
   ip_protocol       = "tcp" // ssh protocol
   to_port           = 22
