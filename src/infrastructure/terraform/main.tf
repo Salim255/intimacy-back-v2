@@ -8,3 +8,11 @@ module "s3-images" {
   source        = "./modules/s3-images"
   iam_user_name = aws_iam_user.intimacy_user.name
 }
+
+module "nexus" {
+  source = "./modules/nexus"
+}
+
+module "sonarqube" {
+  source = "./modules/sonarqube"
+}
