@@ -3,36 +3,46 @@ import {
   Controller,
   Get,
   HttpCode,
+  Logger,
   Param,
   Patch,
   Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
-  AcceptMatchResponseDto,
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import {
+  AcceptedMatchResponseDto,
   FetchMatchesResponseDto,
+  FetchPotentialMatchesResponseDto,
   InitiateMatchDto,
   InitiateMatchResponseDto,
-  MatchDto,
+  PotentialMatch,
 } from '../matches-dto/matches-dto';
 import { MatchesService } from '../services/matches.service';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import {
   AcceptMatchPayload,
   InitiateMatchInput,
-  PartnerMatchDetails,
+  MatchDetails,
 } from '../repository/match.repository';
 import { Request } from 'express';
 
 @ApiTags('Matches')
 @Controller('matches')
 export class MatchesController {
+  private logger = new Logger('MatchesController');
   constructor(private readonly matchesService: MatchesService) {}
 
   @Post('initiate-match')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @HttpCode(201)
   @ApiOperation({
     description: 'Initiate a potential match',
@@ -50,7 +60,7 @@ export class MatchesController {
       fromUserId,
     };
 
-    const match: MatchDto =
+    const match: MatchDetails =
       await this.matchesService.initiateMatch(initiateMatchPayload);
     const response: InitiateMatchResponseDto = {
       status: 'Success',
@@ -58,14 +68,16 @@ export class MatchesController {
         match,
       },
     };
+    this.logger.log(response);
     return response;
   }
 
   @Patch(':matchId/accept')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @HttpCode(200)
   @ApiOperation({ description: 'Accepted match request' })
-  @ApiResponse({ type: AcceptMatchResponseDto })
+  @ApiResponse({ type: AcceptedMatchResponseDto })
   async acceptMatch(@Param('matchId') matchId: number, @Req() req: Request) {
     const { id: userId } = req.user as { id: number };
     const acceptMatchPayload: AcceptMatchPayload = {
@@ -82,16 +94,41 @@ export class MatchesController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @HttpCode(200)
   @ApiOperation({ description: `Fetch all current user's matches` })
   @ApiResponse({ type: FetchMatchesResponseDto })
   async fetchMatches(@Req() req: Request) {
     const { id: userId } = req.user as { id: number };
-    const matches: PartnerMatchDetails[] =
+    const matches: MatchDetails[] =
       await this.matchesService.getMatches(userId);
     return {
       status: 'Success',
       data: { matches },
+    };
+  }
+
+  @Get('/discover')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Fetch potential matches' })
+  @ApiResponse({
+    status: 200,
+    description: 'Fetch potential matches with success',
+    type: FetchPotentialMatchesResponseDto,
+  })
+  async getMatchCandidates(
+    @Req() req: Request,
+  ): Promise<FetchPotentialMatchesResponseDto> {
+    const { id: userId } = req.user as { id: number };
+    const profiles: PotentialMatch[] =
+      await this.matchesService.getMatchCandidates(userId);
+    return {
+      status: 'success',
+      data: {
+        profiles,
+      },
     };
   }
 }

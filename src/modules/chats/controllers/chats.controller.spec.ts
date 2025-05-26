@@ -5,6 +5,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { UserKeysService } from '../../user-keys/services/user-keys.service';
 import { CreateChatDto } from '../chat-dto/chat-response.dto';
 import { Request } from 'express';
+import { PartnerConnectionStatus } from 'src/modules/messages/message-dto/message-dto';
 
 const mockChatService = {
   createFullChat: jest.fn(),
@@ -49,6 +50,7 @@ describe('ChatsController', () => {
       from_user_id: 3,
       session_key_receiver: 'R_key',
       session_key_sender: 'S_key',
+      partner_connection_status: PartnerConnectionStatus.ONLINE,
     };
 
     const createdChatDetails = {

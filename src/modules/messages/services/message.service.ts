@@ -1,14 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { MessageRepository } from '../repository/message.repository';
 import { Message } from '../entities/message.entity';
-import { CreatedMessageDto } from '../message-dto/message-dto';
+import {
+  CreatedMessageDto,
+  PartnerConnectionStatus,
+} from '../message-dto/message-dto';
 
 export type CreateMessagePayload = {
   content: string;
-  fromUserId: number;
-  toUserId: number;
-  chatId: number;
-  status: string;
+  from_user_id: number;
+  to_user_id: number;
+  chat_id: number;
+  partner_connection_status: PartnerConnectionStatus;
 };
 
 @Injectable()
@@ -32,6 +35,49 @@ export class MessageService {
           status: 'fail',
           message: 'Failed to create message: ' + messageError,
           code: 'CREATION_MESSAGE_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateAllMessagesToDelivered(userId: number): Promise<Message[]> {
+    try {
+      const messages =
+        await this.messageRepository.markAllMessagesAsDeliveredForUser(userId);
+      return messages;
+    } catch (error) {
+      const messageError =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Failed to update messages: ' + messageError,
+          code: 'UPDATE_MESSAGES_TO_DELIVERED_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateMessagesInActiveChatToDelivered(
+    formUserId: number,
+    toUserId: number,
+  ) {
+    try {
+      const updatedMessages = this.messageRepository.updateMessagesToDelivered(
+        formUserId,
+        toUserId,
+      );
+      return updatedMessages;
+    } catch (error) {
+      const messageError =
+        error instanceof Error ? error.message : 'Unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Failed to update messages: ' + messageError,
+          code: 'UPDATE_MESSAGES_TO_DELIVERED_ERROR',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );

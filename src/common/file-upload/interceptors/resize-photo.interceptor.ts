@@ -17,26 +17,21 @@ export class ResizePhotoInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const request = context
       .switchToHttp()
-      .getRequest<{ file?: Express.Multer.File }>();
+      .getRequest<{ file?: Express.Multer.File; user: { id: number } }>();
 
     if (request.file) {
+      const { id: userId } = request.user as { id: number };
       const uniqueSuffix = crypto.randomBytes(8).toString('hex');
-      const filename = `user-${uniqueSuffix}-${Date.now()}.jpeg`;
+      const filename = `user-${userId}-${uniqueSuffix}-${Date.now()}.jpeg`;
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
       const buffer = await sharp(request.file.buffer)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         .resize(500, 500)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         .toFormat('jpeg')
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         .jpeg({ quality: 90 })
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         .toBuffer();
 
-      request.file.buffer = buffer as Buffer;
+      request.file.buffer = buffer;
       request.file.filename = filename;
-      console.log(request.file.filename, 'Hello');
     }
 
     return next.handle();

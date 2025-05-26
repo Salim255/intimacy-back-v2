@@ -22,7 +22,6 @@
   "include": [
     "src/**/*", 
     "test/**/*.ts",
-    "migrations/**/*.js",
     "test/context.ts",
     "jest.integration.config.js",
  ]

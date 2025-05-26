@@ -1,32 +1,36 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import {
   AcceptMatchPayload,
+  MatchDetails,
   MatchRepository,
-  PartnerMatchDetails,
 } from '../repository/match.repository';
 import { InitiateMatchInput } from '../repository/match.repository';
 import { UserRepository } from '../../users/repository/user.repository';
-import { Match } from '../entities/match.entity';
-import { MatchDto } from '../matches-dto/matches-dto';
+import { PotentialMatch } from '../matches-dto/matches-dto';
 
 @Injectable()
 export class MatchesService {
+  private logger = new Logger('MatchesService');
   constructor(
     private readonly matchRepository: MatchRepository,
     private readonly userRepository: UserRepository,
   ) {}
 
-  async initiateMatch(input: InitiateMatchInput): Promise<MatchDto> {
+  async initiateMatch(input: InitiateMatchInput): Promise<MatchDetails> {
     try {
-      if (input.fromUserId === input.toUserId) {
-        throw new HttpException(
-          {
-            status: 'fail',
-            message: 'Cannot initiate match: users conflict.',
-            code: 'USERS_CONFLICT',
-          },
-          HttpStatus.CONFLICT,
-        );
+      // Check if the user there are initiated match
+      const existMatch = await this.matchRepository.fetchMatchByUsers(
+        input.fromUserId,
+        input.toUserId,
+      );
+
+      if (existMatch) {
+        const match: MatchDetails = await this.matchRepository.acceptMatch({
+          matchId: existMatch.id,
+          userId: existMatch.to_user_id,
+        });
+
+        return match;
       }
       // Check the potential match user is exist
       const existUser = await this.userRepository.getUserById(input.toUserId);
@@ -40,7 +44,10 @@ export class MatchesService {
           HttpStatus.BAD_REQUEST,
         );
       }
-      const match: MatchDto = await this.matchRepository.initiateMatch(input);
+
+      const match: MatchDetails =
+        await this.matchRepository.initiateMatch(input);
+
       if (!match) {
         throw new HttpException(
           {
@@ -68,9 +75,11 @@ export class MatchesService {
     }
   }
 
-  async acceptMatch(acceptMatchPayload: AcceptMatchPayload): Promise<Match> {
+  async acceptMatch(
+    acceptMatchPayload: AcceptMatchPayload,
+  ): Promise<MatchDetails> {
     try {
-      const match: Match =
+      const match: MatchDetails =
         await this.matchRepository.acceptMatch(acceptMatchPayload);
       return match;
     } catch (error) {
@@ -86,9 +95,10 @@ export class MatchesService {
     }
   }
 
-  async getMatches(userId: number): Promise<PartnerMatchDetails[]> {
+  async getMatches(userId: number): Promise<MatchDetails[]> {
     try {
-      const matches: PartnerMatchDetails[] =
+      this.logger.log(userId);
+      const matches: MatchDetails[] =
         await this.matchRepository.fetchMatches(userId);
       return matches;
     } catch (error) {
@@ -98,6 +108,24 @@ export class MatchesService {
           status: 'fail',
           message: `Error in fetch user's matches: ` + errorMessage,
           code: 'GET_MATCHES_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getMatchCandidates(userId: number): Promise<PotentialMatch[]> {
+    try {
+      const result: PotentialMatch[] =
+        await this.matchRepository.findAvailableForMatch(userId);
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error in fetch potential matches ' + errorMessage,
+          code: 'FETCH_POTENTIAL_MATCHES_ERROR',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );

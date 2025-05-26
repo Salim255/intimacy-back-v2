@@ -8,12 +8,12 @@ import {
   Patch,
   Post,
   Req,
-  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from '../services/users.service';
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiOperation,
   ApiParam,
@@ -29,8 +29,8 @@ import { GetUserResponseDto, LoginUserDto } from '../user-dto/login-user-dto';
 import {
   UpdateUserDto,
   UpdatedUserResponseDto,
-  UserDto,
 } from '../user-dto/update-user-dto';
+import { UserDto } from '../user-dto/user-dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { filterObj } from '../../../utils/object-filter';
 import { Request } from 'express';
@@ -54,14 +54,10 @@ export class UsersController {
     type: CreateUserResponseDto,
   })
   async signup(@Body() body: CreateUserDto) {
-    const { email, password, first_name, last_name, private_key, public_key } =
-      body;
-
+    const { email, password, private_key, public_key } = body;
     const response = await this.usersService.signup({
       email,
       password,
-      first_name,
-      last_name,
       private_key,
       public_key,
     });
@@ -90,8 +86,9 @@ export class UsersController {
     };
   }
 
-  @Get(':userId')
+  @Get()
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: `Get user with it's id` })
   @ApiParam({ name: 'userId', description: `User's to fetch id` })
   @ApiResponse({
@@ -113,6 +110,7 @@ export class UsersController {
 
   @Patch('update-me')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
   @UseInterceptors(
     FileInterceptor('photo', new FileUploadService().getMulterOptions()),
     ResizePhotoInterceptor,
@@ -127,7 +125,6 @@ export class UsersController {
   })
   async updateMe(
     @Body() body: UpdateUserDto,
-    @UploadedFile() file: Express.Multer.File,
     @Req() req: Request,
   ): Promise<UpdatedUserResponseDto> {
     try {
@@ -142,7 +139,7 @@ export class UsersController {
       if (req.file) {
         filteredBody.avatar = req.file.filename;
       }
-      const userId = req.user as { id: number };
+      const { id: userId } = req.user as { id: number };
       // Dynamically construct the update query clause
       const values: (string | number)[] = [];
       const fields: string[] = [];
@@ -158,11 +155,11 @@ export class UsersController {
 
       // Build and Add WHERE clause and append ID to the values
       query += `${fields.join(', ')} WHERE id = $${values.length + 1} RETURNING *;`;
-      values.push(userId.id);
+      values.push(userId);
 
       // Update user document
       const updatedUser: UserDto = await this.usersService.updateUser({
-        userId: userId.id,
+        userId: userId,
         query,
         values,
       });
@@ -172,10 +169,7 @@ export class UsersController {
         data: {
           user: {
             id: updatedUser.id,
-            first_name: updatedUser.first_name,
-            last_name: updatedUser.last_name,
             connection_status: updatedUser.connection_status,
-            avatar: updatedUser.avatar,
           },
         },
       };
@@ -193,6 +187,7 @@ export class UsersController {
   }
 
   @Patch(':userId/')
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Disable user' })
   @ApiParam({ name: 'userId', description: `User's to disable id` })
   @ApiResponse({

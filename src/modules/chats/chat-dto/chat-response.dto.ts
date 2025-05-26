@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNotEmpty } from 'class-validator';
+import { Message } from 'src/modules/messages/entities/message.entity';
+import { PartnerConnectionStatus } from 'src/modules/messages/message-dto/message-dto';
 
 export class CreateChatDto {
   @ApiProperty({ description: 'Message content' })
@@ -21,7 +23,17 @@ export class CreateChatDto {
   @ApiProperty({ description: `Receiver Session Key` })
   @IsNotEmpty()
   session_key_receiver: string;
+
+  @ApiProperty({
+    description: 'Receiver connection status',
+    example: 'online',
+    enum: PartnerConnectionStatus,
+  })
+  @IsNotEmpty()
+  @IsEnum(PartnerConnectionStatus)
+  partner_connection_status: PartnerConnectionStatus;
 }
+
 export class LastMessageDto {
   id: number;
   created_at: string;
@@ -34,9 +46,11 @@ export class LastMessageDto {
 
 export class UserInChatDto {
   user_id: number;
-  avatar: string | null;
-  last_name: string;
-  first_name: string;
+  name: string;
+  photos: string[];
+  city: string;
+  country: string;
+  birth_date: Date;
   connection_status: string;
   is_admin: boolean;
 }
@@ -57,7 +71,7 @@ export class ChatWithDetailsDto {
   type: string;
   created_at: string;
   updated_at: string;
-  no_read_messages: number;
+  delivered_messages_count: number;
   encrypted_session_base64: string;
   last_message: LastMessageDto | null;
   users: UserInChatDto[];
@@ -77,21 +91,25 @@ export class CreateChatResponseDto {
         type: 'dual',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        no_read_messages: 1,
+        delivered_messages_count: 1,
         encrypted_session_base64: 'session_key',
         users: [
           {
-            id: 1,
-            avatar: null,
-            last_name: 'Doshka',
-            first_name: 'Doshka',
+            user_id: 1,
+            photos: ['url1', 'url2'],
+            name: 'Doshka',
+            city: 'Lille',
+            country: 'France',
+            birth_date: 'birth_date',
             connection_status: 'offline',
           },
           {
-            id: 2,
-            avatar: null,
-            last_name: 'Salim',
-            first_name: 'Salim',
+            user_id: 2,
+            photos: ['url1', 'url2'],
+            name: 'Mike',
+            city: 'Lille',
+            country: 'France',
+            birth_date: 'birth_date',
             connection_status: 'offline',
           },
         ],
@@ -122,45 +140,6 @@ export class ChatResponse {
   };
 }
 
-export class UpdateChatCounterDto {
-  @ApiProperty({ description: 'Chat ID', example: 3 })
-  @IsNotEmpty()
-  chat_id: number;
-
-  @ApiProperty({ description: 'Update type', example: 'increment' })
-  @IsNotEmpty()
-  update_type: 'increment' | 'reset';
-}
-
-export class UpdateChatCounterResponseDto {
-  @ApiProperty({ description: 'Status of the response', example: 'Success' })
-  @IsNotEmpty()
-  status: string;
-  @ApiProperty({
-    description: 'Updated chat details',
-    type: Object,
-    example: {
-      chat: {
-        id: 3,
-        no_read_messages: 1,
-        updated_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        type: 'dual',
-      },
-    },
-  })
-  @IsNotEmpty()
-  data: {
-    chat: {
-      id: number;
-      no_read_messages: number;
-      updated_at: string;
-      created_at: string;
-      type: string;
-    };
-  };
-}
-
 export class FetchChatsResponseDto {
   @ApiProperty({ description: 'Status of the response', example: 'Success' })
   @IsNotEmpty()
@@ -175,7 +154,7 @@ export class FetchChatsResponseDto {
           type: 'dual',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          no_read_messages: 1,
+          delivered_messages_count: 1,
           encrypted_session_base64: 'session_key',
           users: [
             {
@@ -214,5 +193,74 @@ export class FetchChatsResponseDto {
   @IsNotEmpty()
   data: {
     chats: ChatWithDetailsDto[];
+  };
+}
+
+export class FitchSingleChatWithDetailsResponse {
+  @ApiProperty({ description: 'Status of the response', example: 'Success' })
+  @IsNotEmpty()
+  status: string;
+  @ApiProperty({
+    description: 'Fetched chat details',
+    type: Object,
+    example: {
+      chat: {
+        id: 3,
+        type: 'dual',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        encrypted_session_base64: 'session_key',
+        delivered_messages_count: 1,
+        users: [
+          {
+            id: 1,
+            avatar: null,
+            last_name: 'Doshka',
+            first_name: 'Doshka',
+            connection_status: 'offline',
+            is_admin: false,
+          },
+          {
+            id: 2,
+            avatar: null,
+            last_name: 'Salim',
+            first_name: 'Salim',
+            connection_status: 'offline',
+            is_admin: true,
+          },
+        ],
+        messages: [
+          {
+            id: 4,
+            status: 'sent',
+            chat_id: 3,
+            content: 'Hello',
+            created_at: new Date().toISOString(),
+            to_user_id: 1,
+            updated_at: new Date().toISOString(),
+            from_user_id: 2,
+          },
+        ],
+      },
+    },
+  })
+  @IsNotEmpty()
+  data: {
+    chat: ChatWithDetailsDto;
+  };
+}
+
+export class UpdateActiveChatMessagesToReadResponseDto {
+  @ApiProperty({ description: 'Status of the response', example: 'Success' })
+  status: string;
+
+  @ApiProperty({
+    description: 'Updated messages',
+    example: {
+      messages: [Message],
+    },
+  })
+  data: {
+    messages: Message[];
   };
 }

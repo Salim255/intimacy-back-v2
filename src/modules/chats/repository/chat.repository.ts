@@ -2,47 +2,28 @@ import { DataSource } from 'typeorm';
 import { Chat } from '../entities/chat.entity';
 import { ChatWithDetailsDto } from '../chat-dto/chat-response.dto';
 import { Injectable } from '@nestjs/common';
+import { Message } from 'src/modules/messages/entities/message.entity';
+
+export type UpdateChatMessagesToRead = {
+  chatId: number;
+  senderId: number;
+};
 
 @Injectable()
 export class ChatRepository {
   constructor(private readonly dataSource: DataSource) {}
 
   async insert(): Promise<Chat> {
-    const values = [1];
-    const query = `INSERT INTO chats
-    (no_read_messages)
-    VALUES($1)
-    RETURNING * ;
-    `;
-    const createdChat: Chat[] = await this.dataSource.query(query, values);
+    const query = `INSERT INTO chats DEFAULT VALUES RETURNING *;`;
+    const createdChat: Chat[] = await this.dataSource.query(query);
     return createdChat[0];
   }
 
-  async resetMessageCounter(chatId: number): Promise<Chat> {
-    const values = [chatId, 0];
-    const query = `UPDATE chats
-    SET no_read_messages = $2
-    WHERE id = $1
-    RETURNING *;`;
-    const updatedChat: Chat[][] = await this.dataSource.query(query, values);
-    return updatedChat[0][0];
-  }
-
-  async incrementMessageCounter(chatId: number): Promise<Chat> {
-    const values = [chatId];
-    const query = `UPDATE chats
-    SET no_read_messages = no_read_messages + 1
-    WHERE id = $1
-    RETURNING *;`;
-    const updatedChat: Chat[][] = await this.dataSource.query(query, values);
-    return updatedChat[0][0];
-  }
-
-  async getChatById(chatId: number): Promise<Chat> {
+  async getChatById(chatId: number): Promise<ChatWithDetailsDto> {
     const values = [chatId];
     const query = `SELECT * FROM chats
     WHERE id = $1;`;
-    const chat: Chat = await this.dataSource.query(query, values);
+    const chat: ChatWithDetailsDto = await this.dataSource.query(query, values);
     return chat;
   }
 
@@ -54,7 +35,15 @@ export class ChatRepository {
       chats.type, 
       chats.created_at, 
       chats.updated_at,
-      chats.no_read_messages,
+
+      ----- Calculate the number no read messages that sent to this user ----
+      ( 
+        SELECT COUNT(*) FROM messages AS message
+          WHERE message.chat_id = chats.id 
+            AND message.to_user_id = $1
+            AND message.status = 'delivered' 
+      ) AS delivered_messages_count,
+      ------ ----- End message counter -----------------------------------------
 
        -- Encrypted session key based on sender_id
       CASE 
@@ -68,13 +57,16 @@ export class ChatRepository {
         FROM (
             SELECT
               u.id AS user_id,
-              u.avatar,
-              u.last_name,
-              u.first_name,
               chat_users.is_admin, 
-              u.connection_status
+              u.connection_status,
+              pr.name,
+              pr.photos,
+              pr.city,
+              pr.country,
+              pr.birth_date
             FROM users AS u
             JOIN chat_users ON chat_users.user_id = u.id AND chat_users.chat_id = cu.chat_id
+            JOIN profiles AS pr ON pr.user_id = u.id
         ) AS users_data
     ) AS users,
     ------------------End Users collection------------------
@@ -125,28 +117,38 @@ export class ChatRepository {
       chats.type,
       chats.created_at,
       chats.updated_at,
-      chats.no_read_messages,
+    ----- Calculate the number no read messages that sent to this user ----
+    (SELECT COUNT(*) FROM messages AS message
+      WHERE message.chat_id = chats.id 
+        AND message.to_user_id = $1
+        AND message.status = 'delivered' 
+     ) AS delivered_messages_count,
       
+    ----- End calculating delivered messages -----
+
       -- Encrypted session key based on sender_id
       CASE 
         WHEN sk.sender_id = $1 THEN sk.encrypted_session_for_sender 
         ELSE sk.encrypted_session_for_receiver 
       END AS encrypted_session_base64,
 
-    ------ Get users in the chat ------
+    ------ Get users in the chat ---------------
     (
       SELECT jsonb_agg(user_data)
         FROM (
           SELECT 
             u.id AS user_id, 
-            u.first_name, 
-            u.last_name, 
-            u.avatar, 
             u.connection_status,
+            pr.name,
+            pr.photos,
+            pr.city,
+            pr.country,
+            pr.birth_date,
             cu.is_admin  -- bring the is_admin from chat_users
           FROM chat_users cu
-          JOIN users u ON u.id = uc.user_id
-          WHERE uc.chat_id = $2
+          JOIN users u ON u.id = cu.user_id
+          JOIN profiles AS pr ON pr.user_id = u.id
+          WHERE cu.chat_id = $2
         ) AS user_data
       ) AS users,
  
@@ -158,24 +160,24 @@ export class ChatRepository {
      FROM 
        (
         SELECT * FROM messages
-        WHERE chat_id = uc.chat_id
+        WHERE chat_id = cu.chat_id
         ORDER BY created_at ASC
         ) AS msgs
       ) AS messages
     ------ End messages getter ----------
   
     -----------------------Main table ------
-    FROM chat_users uc
+    FROM chat_users cu
     
     ---------------Join chat by chat id-------------
-    JOIN chats ON uc.chat_id = chats.id
+    JOIN chats ON cu.chat_id = chats.id
     ----------------End join chat---------------------
 
     --------------Join session keys by chat id -------
     LEFT JOIN session_keys sk ON sk.chat_id = chats.id
     --------------End join session keys -----------
 
-    WHERE uc.user_id = $1 AND chats.id = $2
+    WHERE cu.user_id = $1 AND chats.id = $2
     `;
     const chat: ChatWithDetailsDto[] = await this.dataSource.query(
       query,
@@ -189,7 +191,15 @@ export class ChatRepository {
     const query = `
         SELECT 
         c.*,
-
+        ----- Calculate the number no read messages that sent to this user ----
+        ( 
+          SELECT COUNT(*) FROM messages AS message
+            WHERE message.chat_id = chats.id 
+              AND message.to_user_id = $2
+              AND message.status = 'delivered'
+        ) AS delivered_messages_count,
+        ------ ----- End message counter -----------------------------------------
+      
         -- Encrypted session key based on sender_id
         CASE 
             WHEN sk.sender_id = $1 THEN sk.encrypted_session_for_sender 
@@ -198,7 +208,12 @@ export class ChatRepository {
 
         -----------------Users collection------------------------
         ( SELECT jsonb_agg(users) FROM (
-            SELECT u.id AS user_id, u.avatar, u.last_name , u.first_name , u.connection_status FROM users u
+            SELECT 
+                u.id AS user_id,
+                u.avatar,
+                u.last_name,
+                u.first_name,
+                u.connection_status FROM users u
                 WHERE u.id IN (
                 SELECT uc.user_id FROM chat_users uc
                     WHERE uc.chat_id = c.id)
@@ -234,5 +249,21 @@ export class ChatRepository {
         `;
     const chat: Chat[] = await this.dataSource.query(query, values);
     return chat[0];
+  }
+
+  async updateChatMessagesToRead(
+    updateChatMessagePayload: UpdateChatMessagesToRead,
+  ): Promise<Message[]> {
+    const values = [
+      updateChatMessagePayload.chatId,
+      updateChatMessagePayload.senderId,
+    ];
+    const query = `UPDATE messages
+    SET status='read'
+    WHERE (status = 'sent' OR status = 'delivered')
+    AND chat_id = $1 AND from_user_id = $2
+    RETURNING *;`;
+    const messages: Message[][] = await this.dataSource.query(query, values);
+    return messages[0];
   }
 }

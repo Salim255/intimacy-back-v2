@@ -1,19 +1,22 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MessageController } from './controllers/message.controller';
 import { MessageService } from './services/message.service';
 import { MessageRepository } from './repository/message.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Message } from './entities/message.entity';
 import { MessageGateway } from './gateway/message.gateway';
+import { TypingGateway } from './gateway/typing.gateway';
 import { SocketModule } from '../socket/socket.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
+    AuthModule,
     TypeOrmModule.forFeature([Message]), // Add your entities here
-    SocketModule,
+    forwardRef(() => SocketModule),
   ],
   controllers: [MessageController],
-  providers: [MessageService, MessageRepository, MessageGateway],
-  exports: [MessageService, MessageRepository, MessageGateway], // Export the service and repository if needed in other modules
+  providers: [MessageService, MessageRepository, MessageGateway, TypingGateway],
+  exports: [MessageService, MessageRepository, MessageGateway, TypingGateway], // Export the service and repository if needed in other modules
 })
 export class MessagesModule {}

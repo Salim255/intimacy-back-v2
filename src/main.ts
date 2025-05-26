@@ -8,12 +8,23 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   // NestFactory is a class provided by NestJS to create an application instance.
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
   app.setGlobalPrefix((process.env.API_PREFIX ?? 'api') + '/v2'); // Set a global prefix for all routes
   // Swagger setup
   const options = new DocumentBuilder()
     .setTitle('API Documentation') // Set the title of your API
     .setDescription('API description') // Provide a short description
     .setVersion('1.0') // Set the version of your API
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+        name: 'Authorization',
+      },
+      'access-token',
+    )
     .build(); // Create the document options
 
   // Generate the Swagger document

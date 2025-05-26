@@ -15,7 +15,6 @@ export class FileUploadService {
       // The gaol of this function is to test if the uploaded file is an image
       // Then we pass true in cb if all is good or we pass false to cb
       if (file.mimetype.startsWith('image')) {
-        console.log(file.mimetype);
         cb(null, true);
       } else {
         cb(

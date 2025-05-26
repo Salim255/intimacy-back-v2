@@ -1,12 +1,13 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { User } from '../entities/user.entity';
 import { UserRepository } from '../repository/user.repository';
-import { UserDto } from '../user-dto/update-user-dto';
+import { UserDto } from '../user-dto/user-dto';
 import { DataSource } from 'typeorm';
 import { UserKeysService } from '../../user-keys/services/user-keys.service';
 import * as passwordHandler from '../../auth/password-handler';
 import { JwtTokenService, JwtTokenPayload } from '../../auth/jws-token-service';
 import { PasswordComparisonPayload } from '../../auth/password-handler';
+import { DiscoverDto } from '../user-dto/discover-users-dto';
 
 export type UpdateUserPayload = {
   userId: number;
@@ -15,8 +16,6 @@ export type UpdateUserPayload = {
 };
 
 export type CreateUserPayload = {
-  first_name: string;
-  last_name: string;
   email: string;
   password: string;
   private_key: string;
@@ -41,6 +40,7 @@ export type LoginUserResponse = CreateUserResponse;
 
 @Injectable()
 export class UsersService {
+  private logger = new Logger('UsersService');
   constructor(
     private readonly dataSource: DataSource,
     private readonly userKeysService: UserKeysService,
@@ -60,8 +60,6 @@ export class UsersService {
       );
       // Step: 1 - Create the user
       const createdUser: User = await this.userRepository.insert({
-        first_name: createUserPayload.first_name,
-        last_name: createUserPayload.first_name,
         email: createUserPayload.email,
         password: hashedPassword,
       });
@@ -95,6 +93,7 @@ export class UsersService {
       };
       return response;
     } catch (error) {
+      this.logger.log(error);
       // Rollback the transaction in case of error
       await queryRunning.rollbackTransaction();
       // Release the query runner
@@ -187,10 +186,7 @@ export class UsersService {
       }
       const userDto: UserDto = {
         id: user.id,
-        first_name: user.first_name,
-        last_name: user.last_name,
         connection_status: user.connection_status,
-        avatar: user.avatar,
       };
       return userDto;
     } catch (error) {
@@ -269,15 +265,74 @@ export class UsersService {
   async updateUserConnectionStatus(
     userId: number,
     connectionStatus: string,
-  ): Promise<User> {
+  ): Promise<UserDto> {
     try {
-      const updatedUser = await this.userRepository.updateUserConnectionStatus(
-        userId,
-        connectionStatus,
-      );
-      return updatedUser;
+      // 1- Check is user exit
+      const savedUser: UserDto = await this.getUserById(userId);
+      if (!savedUser) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'User not found or no longer exists.',
+            code: 'USER_NOT_FOUND',
+          },
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      const updatedUser: User =
+        await this.userRepository.updateUserConnectionStatus(
+          userId,
+          connectionStatus,
+        );
+
+      if (!updatedUser) {
+        throw new HttpException(
+          {
+            status: 'fail',
+            message: 'Error in update user connection status ',
+            code: 'NO_USER_FOUND',
+          },
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      return {
+        id: updatedUser.id,
+        connection_status: updatedUser.connection_status,
+      } as UserDto;
     } catch (error) {
-      throw new Error(`Error in update user connection status: ${error}`);
+      console.log(error);
+      if (error instanceof HttpException) throw error;
+
+      const errorMessage = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error in update user connection status ' + errorMessage,
+          code: 'UPDATE_STATUS_USERS_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getMatchCandidates(userId: number): Promise<DiscoverDto[]> {
+    try {
+      const result: DiscoverDto[] =
+        await this.userRepository.findAvailableForMatch(userId);
+      return result;
+    } catch (error) {
+      this.logger.log(error);
+      const errorMessage = error instanceof Error ? error.message : '';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error in fetch potential matches ' + errorMessage,
+          code: 'FETCH_POTENTIAL_MATCHES_ERROR',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
