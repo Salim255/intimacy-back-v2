@@ -10,7 +10,10 @@ module "s3-images" {
 }
 
 module "nexus" {
-  source = "./modules/nexus"
+  source                    = "./modules/nexus"
+  zone1                     = var.zone1
+  public_key                = aws_key_pair.intimacy-key.key_name
+  jenkins_security_group_id = module.jenkins.jenkins_security_group_id_output
 }
 
 module "sonarqube" {
