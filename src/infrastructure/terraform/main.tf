@@ -1,0 +1,23 @@
+module "jenkins" {
+  source     = "./modules/jenkins"
+  zone1      = var.zone1 # Pass root var "zone1" to module
+  public_key = aws_key_pair.intimacy-key.key_name
+}
+
+module "s3-images" {
+  source        = "./modules/s3-images"
+  iam_user_name = aws_iam_user.intimacy_user.name
+}
+
+module "nexus" {
+  source = "./modules/nexus"
+}
+
+module "sonarqube" {
+  source = "./modules/sonarqube"
+}
+module "google-kub-engine" {
+  source        = "./modules/g-Kub-engine"
+  google-zone1  = var.google-zone1
+  google-region = var.google-region
+}

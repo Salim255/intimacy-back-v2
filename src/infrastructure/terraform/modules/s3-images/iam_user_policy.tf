@@ -27,24 +27,12 @@ resource "aws_iam_policy" "intimacy_user_s3_policy" {
 
 # Attach the Policy to the IAM User:
 resource "aws_iam_user_policy_attachment" "intimacy_user_policy_attachment" {
-  user       = aws_iam_user.intimacy_user.name
+  user       = var.iam_user_name
   policy_arn = aws_iam_policy.intimacy_user_s3_policy.arn
 }
 
 // Generate access keys that your application can use to authenticate with AWS.
 resource "aws_iam_access_key" "intimacy_user_access_key" {
-  user = aws_iam_user.intimacy_user.name
-}
-
-
-// Output the access key and secret key for your application.
-output "intimacy_user_access_key_id" {
-  value     = aws_iam_access_key.intimacy_user_access_key.id
-  sensitive = true
-}
-
-output "intimacy_user_secret_access_key" {
-  value     = aws_iam_access_key.intimacy_user_access_key.secret
-  sensitive = true
+  user = var.iam_user_name
 }
 
