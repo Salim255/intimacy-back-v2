@@ -16,3 +16,8 @@ module "nexus" {
 module "sonarqube" {
   source = "./modules/sonarqube"
 }
+module "google-kub-engine" {
+  source        = "./modules/g-Kub-engine"
+  google-zone1  = var.google-zone1
+  google-region = var.google-region
+}
