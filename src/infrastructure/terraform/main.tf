@@ -4,8 +4,9 @@ module "jenkins" {
   public_key = aws_key_pair.intimacy-key.key_name
 }
 
-module "s3-images" {
-  source        = "./modules/s3-images"
+module "s3-bucket" {
+  source = "./modules/s3-bucket"
+  //
   iam_user_name = aws_iam_user.intimacy_user.name
 }
 
@@ -17,7 +18,10 @@ module "nexus" {
 }
 
 module "sonarqube" {
-  source = "./modules/sonarqube"
+  source                    = "./modules/sonarqube"
+  zone1                     = var.zone1
+  public_key                = aws_key_pair.intimacy-key.key_name
+  jenkins_security_group_id = module.jenkins.jenkins_security_group_id_output
 }
 module "google-kub-engine" {
   source        = "./modules/g-Kub-engine"

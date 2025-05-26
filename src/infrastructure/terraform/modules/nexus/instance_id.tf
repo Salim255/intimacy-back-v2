@@ -14,5 +14,5 @@ data "aws_ami" "amiID" {
   }
 
   owners = ["099720109477"] // The owner of the AMI
-  
+
 }
