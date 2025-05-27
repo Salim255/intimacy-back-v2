@@ -10,6 +10,11 @@ sudo apt upgrade -y
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt install -y nodejs
 
+sudo mkdir -p /opt/nodejs-20
+sudo ln -s /usr/bin/node /opt/nodejs-20/node
+sudo ln -s /usr/bin/npm /opt/nodejs-20/npm
+# Add Node.js to PATH
+
 # Install Java 17 and 21 (required by Jenkins)
 sudo apt install -y openjdk-17-jdk openjdk-21-jdk
 

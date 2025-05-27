@@ -1,0 +1,97 @@
+pipeline{
+    agent any
+
+    tools {
+        nodejs 'NODE20'
+        jdk 'JDK17'
+    }
+    stages{
+        stage("Fetch code"){
+            steps{
+                git branch: 'develop', url: 'https://github.com/Salim255/intimacy-back-v2.git'
+            }
+            post{
+                always{
+                    echo "========always========"
+                }
+                success{
+                    echo "========A executed successfully========"
+                }
+                failure{
+                    echo "========A execution failed========"
+                }
+            }
+        }
+        stage("Install Dependencies"){
+            steps{
+                sh 'npm install'       // <--- This installs dependencies
+            }
+            post{
+                always{
+                    echo "========always========"
+                }
+                success{
+                    echo "========B executed successfully========"
+                }
+                failure{
+                    echo "========B execution failed========"
+                }
+            }
+        }
+
+        stage("Checkstyle Analysis"){
+            steps{
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    sh 'npm run lint'
+                }
+              
+            }
+            post{
+                always {
+                    archiveArtifacts artifacts: 'eslint-report.json', fingerprint: true
+                }
+                success{
+                    echo "========checkstyle executed successfully========"
+                }
+                failure{
+                    echo "========checkstyle execution failed========"
+                }
+            }
+        }
+        stage("Unit Tests"){
+            steps{
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                   sh 'npm run test'
+                }
+               
+            }
+            post{
+    
+                success{
+                    echo "========Unit Tests executed successfully========"
+                }
+                failure{
+                    echo "========B execution failed========"
+                }
+            }
+        }
+        stage("Build"){
+            steps{
+                sh 'npm run build'
+            }
+            post{
+                always{
+                    echo "========always========"
+                }
+                success{
+                    echo "======== Build executed successfully========"
+                    echo "========Archiving artifact======="
+                    archiveArtifacts artifacts: 'dist/**', fingerprint: true
+                }
+                failure{
+                    echo "========Build execution failed========"
+                }
+            }
+        }
+    }
+}

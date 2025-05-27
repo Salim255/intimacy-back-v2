@@ -4,7 +4,7 @@ data "aws_ami" "amiID" {
   // Search AMI
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"]
+    values = ["al2023-ami-2023.7.20250512.0-kernel-6.1-x86_64"]
   }
 
   // Hardware virtualization type
@@ -13,6 +13,6 @@ data "aws_ami" "amiID" {
     values = ["hvm"]
   }
 
-  owners = ["099720109477"] // The owner of the AMI
+  owners = ["137112412989"] // The owner of the AMI
 
 }
