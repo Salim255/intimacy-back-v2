@@ -65,10 +65,11 @@ export class MessageService {
     toUserId: number,
   ) {
     try {
-      const updatedMessages = this.messageRepository.updateMessagesToDelivered(
-        formUserId,
-        toUserId,
-      );
+      const updatedMessages =
+        await this.messageRepository.updateMessagesToDelivered(
+          formUserId,
+          toUserId,
+        );
       return updatedMessages;
     } catch (error) {
       const messageError =
