@@ -42,7 +42,7 @@ pipeline{
         stage("Checkstyle Analysis"){
             steps{
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                    sh 'npm run lint'
+                    sh 'npm run lint:report'
                 }
               
             }
@@ -58,10 +58,31 @@ pipeline{
                 }
             }
         }
+        stage('SonarQube Analysis') {
+            environment {
+                SONARQUBE_SCANNER_HOME = tool 'sonar7.1' // Ensure you have configured SonarQube scanner in Jenkins
+            }
+            steps {
+                withSonarQubeEnv('sonarserver') { // Ensure you have configured SonarQube server in Jenkins
+                    sh '''
+                        ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=intimacy-back-v2 \
+                        -Dsonar.projectName="Intimacy Backend" \
+                        -D.sonar.projectVersion=1.0 \
+                        -Dsonar.sources=src \
+                        -Dsonar.exclusions=src/infrastructure/**/* \
+                        -D.sonar.sourceEncoding=UTF-8 \
+                        -Dsonar.eslint.reportPaths=eslint-report.json 
+                    '''
+                    // Upload the ESLint report to SonarQube server
+                    echo "========SonarQube Analysis executed successfully========"
+                }
+            }
+        }
         stage("Unit Tests"){
             steps{
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                   sh 'npm run test'
+                   sh 'npm run test:cov'
                 }
                
             }
