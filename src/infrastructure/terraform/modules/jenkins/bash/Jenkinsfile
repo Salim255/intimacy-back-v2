@@ -47,7 +47,15 @@ pipeline{
 
         stage("Build"){
                     steps{
-                        sh 'npm run build'
+                                            script {
+                        try {
+                            sh 'npm install'
+                        } catch (err) {
+                            echo "Install failed: ${err}"
+                            error("Stopping pipeline due to install failure")
+                        }
+                        }
+                        
                     }
                     post{
                         always{
@@ -56,7 +64,7 @@ pipeline{
                         success{
                             echo "======== Build executed successfully========"
                             echo "========Archiving artifact======="
-                            //archiveArtifacts artifacts: 'dist/**', fingerprint: true
+                            archiveArtifacts artifacts: 'dist/**', fingerprint: true
                         }
                         failure{
                             echo "========Build execution failed========"
@@ -162,17 +170,17 @@ pipeline{
             }
         }
 
-        stage('Build & Push Docker Image') {
+        stage('Build Docker Image') {
             steps {
                 script {
                     // Image name, and docker file in our source code
-                    dockerImage = docker.build(imageName + ":$BUILD_NUMBER", "-f src/infrastructure/docker/Dockerfile")
+                    dockerImage = docker.build(imageName + ":$BUILD_NUMBER", "src/infrastructure/docker/")
                 }
             }
         }
 
         stage("Upload App Image"){
-            stage{
+            steps{
                 script{
                     docker.withRegistry(intimacyRegistry, registryCredentials) {
                         dockerImage.push("$BUILD_NUMBER")

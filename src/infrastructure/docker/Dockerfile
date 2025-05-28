@@ -1,17 +1,16 @@
 # ----------- BUILD STAGE -----------
 FROM node:20-alpine AS builder
 
-# Set working directory inside the container
 WORKDIR /app
 
-# Copy package files
-COPY ../../package*.json ./
+# Copy package.json and package-lock.json from the build context root
+COPY package*.json ./
 
 # Install dependencies
 RUN npm ci
 
-# Copy the rest of the app
-COPY ../../ ./
+# Copy rest of the app files (everything in the context)
+COPY . .
 
 # Build the app
 RUN npm run build
@@ -20,16 +19,15 @@ RUN npm run build
 # ----------- PRODUCTION STAGE -----------
 FROM node:20-alpine
 
-# Set working directory in the production image
 WORKDIR /app
 
-# Copy only what's needed
-COPY ../../package*.json ./
+# Copy only the package files needed
+COPY package*.json ./
+
+# Copy built files and node_modules from builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 
-# Expose the NestJS default port
 EXPOSE 3000
 
-# Run the application
 CMD ["node", "dist/main"]
