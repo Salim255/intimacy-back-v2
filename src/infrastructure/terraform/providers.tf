@@ -3,6 +3,6 @@ provider "aws" {
 }
 
 provider "google" {
-  project = "intimacy-dev" # Replace with your GCP project ID
+  project = "sublime-lyceum-461014-k8" # Replace with your GCP project ID
   region  = var.google-region
 }

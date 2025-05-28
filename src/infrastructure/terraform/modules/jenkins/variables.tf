@@ -1,9 +1,9 @@
 variable "zone1" {
-  type =  string
+  type        = string
   description = "The availability zone for Jenkins instance"
 }
 
 variable "public_key" {
-  type =  string
+  type        = string
   description = "The public key string"
 }

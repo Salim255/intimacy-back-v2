@@ -19,7 +19,7 @@ export class RoomGateway {
   private logger = new Logger('RoomGateway');
 
   private generateRoomId(user1: number, user2: number) {
-    return [user1, user2].sort().join('-'); // Sort to ensure consistent room IDs
+    return [user1, user2].sort((a, b) => a - b).join('-'); // Sort to ensure consistent room IDs
   }
   @WebSocketServer()
   server: Server;
