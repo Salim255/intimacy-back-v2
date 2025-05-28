@@ -6,7 +6,7 @@ import {
   JoinColumn,
   OneToOne,
 } from 'typeorm';
-import { Chat } from '../../modules/chats/entities/chat.entity';
+import { Chat } from '../../chats/entities/chat.entity';
 
 @Entity('session_keys')
 export class SessionKeys {
