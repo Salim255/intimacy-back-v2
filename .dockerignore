@@ -1,0 +1,33 @@
+# Node modules - don't send your local node_modules to Docker build context
+node_modules
+**/node_modules
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Git files
+.git
+.gitignore
+
+# Build output folders (you will build fresh inside Docker)
+dist
+build
+
+# Environment config files - keep secrets out of Docker build context
+.env
+.env.local
+.env.*.local
+
+# IDE and editor folders
+.vscode
+.idea
+
+# Other temp or system files
+*.swp
+*.swo

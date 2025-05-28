@@ -174,7 +174,7 @@ pipeline{
             steps {
                 script {
                     // Image name, and docker file in our source code
-                    dockerImage = docker.build(imageName + ":$BUILD_NUMBER", "src/infrastructure/docker/")
+                    dockerImage = docker.build(imageName + ":$BUILD_NUMBER", ".")
                 }
             }
         }
