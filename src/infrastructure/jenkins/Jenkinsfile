@@ -78,21 +78,16 @@ pipeline{
             }
         }
 
-        stage("Unit Tests"){
-            steps{
-                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                   sh 'npm run test'
-                   sh 'npm run test:cov'
-                }
-               
-            }
-            post{
-    
-                success{
-                    echo "========Unit Tests executed successfully========"
-                }
-                failure{
-                    echo "========B execution failed========"
+        stage("Unit Tests") {
+            steps {
+                script {
+                    try {
+                        sh 'npm run test'
+                        sh 'npm run test:cov'
+                    } catch (e) {
+                        echo "Test command failed with: ${e}"
+                        currentBuild.result = 'UNSTABLE'
+                    }
                 }
             }
         }
