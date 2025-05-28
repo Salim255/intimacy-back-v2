@@ -23,8 +23,15 @@ module "sonarqube" {
   public_key                = aws_key_pair.intimacy-key.key_name
   jenkins_security_group_id = module.jenkins.jenkins_security_group_id_output
 }
+
 module "google-kub-engine" {
   source        = "./modules/g-Kub-engine"
+  google-zone1  = var.google-zone1
+  google-region = var.google-region
+}
+
+module "google_artifact_registry" {
+  source        = "./modules/g_artifact_registry"
   google-zone1  = var.google-zone1
   google-region = var.google-region
 }

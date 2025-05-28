@@ -156,5 +156,25 @@ pipeline{
             }
         }
 
+        stage('Build & Push Docker Image') {
+            steps {
+                script {
+                    // Image name, and docker file in our source code
+                    dockerImage = docker.build('intimacyapp-nest','-f src/infrastructure/docker/Dockerfile')
+                }
+            }
+        }
+
+        stage("Upload App Image"){
+            stage{
+                script{
+                    docker.withRegistry('https://index.docker.io/v1/', dockerHubCredentials) {
+                        dockerImage.push("$BUILD_NUMBER")
+                        dockerImage.push("latest")
+                    }
+                    
+                }
+            }
+        }
     }
 }
