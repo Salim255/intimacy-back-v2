@@ -10,6 +10,11 @@ module "s3-bucket" {
   iam_user_name = aws_iam_user.intimacy_user.name
 }
 
+module "ecr-repository" {
+  source        = "./modules/aws-ecr/"
+  iam_user_name = aws_iam_user.intimacy_user.name
+}
+
 module "nexus" {
   source                    = "./modules/nexus"
   zone1                     = var.zone1

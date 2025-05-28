@@ -5,6 +5,12 @@ pipeline{
         nodejs 'NODE20'
         jdk 'JDK17'
     }
+    environment {
+        registryCredentials = "eu-west-3:awscreds"
+        imageName = "961341553126.dkr.ecr.eu-west-3.amazonaws.com/intimacy-repository"
+        intimacyRegistry = "https:961341553126.dkr.ecr.eu-west-3.amazonaws.com"
+    }
+
     stages{
         stage("Fetch code"){
             steps{
@@ -160,7 +166,7 @@ pipeline{
             steps {
                 script {
                     // Image name, and docker file in our source code
-                    dockerImage = docker.build('intimacyapp-nest','-f src/infrastructure/docker/Dockerfile')
+                    dockerImage = docker.build(imageName + ":$BUILD_NUMBER", "-f src/infrastructure/docker/Dockerfile")
                 }
             }
         }
@@ -168,11 +174,10 @@ pipeline{
         stage("Upload App Image"){
             stage{
                 script{
-                    docker.withRegistry('https://index.docker.io/v1/', dockerHubCredentials) {
+                    docker.withRegistry(intimacyRegistry, registryCredentials) {
                         dockerImage.push("$BUILD_NUMBER")
                         dockerImage.push("latest")
                     }
-                    
                 }
             }
         }
