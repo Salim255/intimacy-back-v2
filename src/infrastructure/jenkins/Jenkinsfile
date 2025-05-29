@@ -50,8 +50,6 @@ stage("Force NodeJS Tool") {
             steps{
                 sh 'npm install'       // <--- This installs dependencies
             }
-
-            /////
             post{
                 always{
                     echo "========always========"
@@ -64,7 +62,7 @@ stage("Force NodeJS Tool") {
                 }
             }
         }
-/* 
+
         stage("Build"){
                     steps{
                                             script {
@@ -91,15 +89,15 @@ stage("Force NodeJS Tool") {
                         }
                     }
         }
- */
-        /*  stage('Archive Artifact') {
+
+         stage('Archive Artifact') {
             steps {
                 sh 'tar -czf dist.tar.gz dist' // or use zip if needed
                 archiveArtifacts artifacts: 'dist.tar.gz', fingerprint: true
             }
         }
- */
-       /*  stage("Unit Tests") {
+
+        stage("Unit Tests") {
             steps {
                 script {
                     try {
@@ -112,8 +110,8 @@ stage("Force NodeJS Tool") {
                 }
             }
         }
- */
-       /*  stage("Checkstyle Analysis"){
+
+        stage("Checkstyle Analysis"){
             steps{
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                     sh 'npm run lint:report'
@@ -131,7 +129,7 @@ stage("Force NodeJS Tool") {
                     echo "========checkstyle execution failed========"
                 }
             }
-        } */
+        }
 
         stage('SonarQube Analysis') {
             environment {
@@ -156,16 +154,16 @@ stage("Force NodeJS Tool") {
             }
         }
         
-       /*  stage("Quality Gate") {
+        stage("Quality Gate") {
             steps {
               timeout(time: 1, unit: 'HOURS') {
                 waitForQualityGate abortPipeline: true
               }
                  //jenkins-ci-webhook
             }
-        } */
+        }
 
-       /*  stage("Upload to Nexus") {
+        stage("Upload to Nexus") {
             steps {
                 nexusArtifactUploader(
                     nexusVersion: 'nexus3',
@@ -183,18 +181,18 @@ stage("Force NodeJS Tool") {
                     ]]
                 )
             }
-        } */
+        }
 
-       /*  stage('Build Docker Image') {
+        stage('Build Docker Image') {
             steps {
                 script {
                     // Image name, and docker file in our source code
                     dockerImage = docker.build(imageName + ":$BUILD_NUMBER", ".")
                 }
             }
-        } */
+        }
 
-      /*   stage("Upload App Image"){
+        stage("Upload App Image"){
             steps{
                 script{
                     docker.withRegistry(intimacyRegistry, registryCredentials) {
@@ -203,6 +201,6 @@ stage("Force NodeJS Tool") {
                     }
                 }
             }
-        } */
+        }
     }
 }
