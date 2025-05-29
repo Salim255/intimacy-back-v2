@@ -11,25 +11,6 @@ pipeline{
         intimacyRegistry = "https://961341553126.dkr.ecr.eu-west-3.amazonaws.com"
     }
     stages{
-        stage("Diagnostics") {
-    steps {
-        echo "== Whoami =="
-        sh 'whoami'
-        echo "== Node version =="
-        sh 'which node && node -v'
-        echo "== NPM version =="
-        sh 'which npm && npm -v'
-        echo "== Git status =="
-        sh 'git status && git rev-parse HEAD'
-    }
-}
-stage("Force NodeJS Tool") {
-    steps {
-        withEnv(["PATH+NODE=${tool 'NODE20'}/bin"]) {
-            sh 'node -v && npm -v'
-        }
-    }
-}
         stage("Fetch code"){
             steps{
                 git branch: 'develop', url: 'https://github.com/Salim255/intimacy-back-v2.git'
