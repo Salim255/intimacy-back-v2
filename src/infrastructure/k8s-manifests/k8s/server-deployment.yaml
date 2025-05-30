@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: server-deployment
+  
   #////
 spec:
   replicas: 1
@@ -15,18 +16,4 @@ spec:
     spec:
       containers:
         - name: server
-          image: crawan/server
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: server-service
-spec:
-  selector:
-    app: server
-  ports:
-    - name: server
-      protocol: TCP
-      port: 80
-      targetPort: 80
+          image: crawan/intimacy-api
