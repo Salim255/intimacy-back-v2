@@ -40,3 +40,8 @@ module "google_artifact_registry" {
   google-zone1  = var.google-zone1
   google-region = var.google-region
 }
+
+module "intimacy-eks" {
+  source = "./modules/aws-cluster-eks"
+  region = var.region
+}
