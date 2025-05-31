@@ -142,3 +142,4 @@ intimacykey.pem
 **/intimacykey
 **/*.tfstate
 dovekey*
+**/secrets.yaml

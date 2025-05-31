@@ -15,4 +15,19 @@ spec:
     spec:
       containers:
         - name: client
-          image: crawan/intimacy-client
+          image: crawan/intimacy-client:latest
+    
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: intimacy-client-service
+spec:
+  selector:
+    app: client
+  ports:
+    - name: client
+      protocol: TCP
+      port: 80
+      targetPort: 80
+        

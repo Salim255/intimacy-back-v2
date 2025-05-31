@@ -16,4 +16,20 @@ spec:
     spec:
       containers:
         - name: server
-          image: crawan/intimacy-api
+          image: crawan/intimacy-client:latest
+          envFrom:
+            - secretRef:
+                name: app-env-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: intimacy-server-service
+spec:
+  selector:
+    app: server
+  ports:
+    - name: server
+      protocol: TCP
+      port: 3000
+      targetPort: 3000 
