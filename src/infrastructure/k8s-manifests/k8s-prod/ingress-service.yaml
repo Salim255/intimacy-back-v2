@@ -8,7 +8,7 @@ metadata:
 
 spec:
   rules:
-    - host: intimacy.dev
+    - host: intimacy.com
       http:
         paths:
           # Route to NestJS API (intimacy-server)

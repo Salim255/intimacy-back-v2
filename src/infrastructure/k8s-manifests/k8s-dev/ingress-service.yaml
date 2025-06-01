@@ -8,7 +8,7 @@ metadata:
 
 spec:
   rules:
-    - host: intimacy.dev
+    - host: intimacy.com
       http:
         paths:
           # Route to NestJS API (intimacy-server)
@@ -19,6 +19,15 @@ spec:
                 name:  intimacy-server-service
                 port:
                   number: 3000  # or whatever your API's service port is
+
+           # WebSocket path
+          - path: /socket
+            pathType: Prefix
+            backend:
+              service:
+                name: intimacy-server-service
+                port:
+                  number: 3000
 
           # Route everything else to Angular frontend (intimacy-client)
           - path: /(.*)

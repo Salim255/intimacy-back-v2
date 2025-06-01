@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: server
-          image: crawan/intimacy-client:latest
+          image: crawan/intimacy-server:latest
           envFrom:
             - secretRef:
                 name: app-env-secret

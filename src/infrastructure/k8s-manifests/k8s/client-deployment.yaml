@@ -16,6 +16,8 @@ spec:
       containers:
         - name: client
           image: crawan/intimacy-client:latest
+          ports:
+            - containerPort: 80
     
 ---
 apiVersion: v1
@@ -23,6 +25,7 @@ kind: Service
 metadata:
   name: intimacy-client-service
 spec:
+  type: NodePort  # 👈 This exposes the service on a NodePort
   selector:
     app: client
   ports:
