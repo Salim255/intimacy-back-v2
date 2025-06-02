@@ -36,13 +36,13 @@ import {
   UpdateLookingForBodyDto,
   UpdatePhotosBodyDto,
 } from '../profile-dto/profile-dto';
-import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../modules/auth/jwt-auth.guard';
 import { Request } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { FileUploadService } from 'src/common/file-upload/file-upload.service';
-import { ResizeMultiPhotosInterceptor } from 'src/common/file-upload/interceptors/resize-multi-photos.interceptor';
-import { MultiUploadToS3Interceptor } from 'src/common/file-upload/interceptors/multi-upload-to-s3-interceptor';
-import { RemoveImagesFromToS3Interceptor } from 'src/common/file-upload/interceptors/remove-images-s3-interceptor';
+import { FileUploadService } from '../../../common/file-upload/file-upload.service';
+import { ResizeMultiPhotosInterceptor } from '../../../common/file-upload/interceptors/resize-multi-photos.interceptor';
+import { MultiUploadToS3Interceptor } from '../../../common/file-upload/interceptors/multi-upload-to-s3-interceptor';
+import { RemoveImagesFromToS3Interceptor } from '../../../common/file-upload/interceptors/remove-images-s3-interceptor';
 
 @ApiTags('Profiles')
 @Controller('profiles')
