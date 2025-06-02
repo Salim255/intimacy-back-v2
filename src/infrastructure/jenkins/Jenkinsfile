@@ -112,7 +112,7 @@ pipeline{
         stage('Build Docker Image') {
             steps {
                 script {
-                    dockerImage = docker.build("${imageName}-backend:$BUILD_NUMBER", ".")
+                    dockerImage = docker.build("${imageName}:backend-$BUILD_NUMBER", ".")
                 }
             }
         }
@@ -121,7 +121,7 @@ pipeline{
             steps{
                 script{
                     docker.withRegistry(intimacyRegistry, registryCredentials) {
-                      dockerImage.push("$BUILD_NUMBER")
+                      dockerImage.push("backend-${BUILD_NUMBER}")
                       dockerImage.push("latest")
                     }
                 }
