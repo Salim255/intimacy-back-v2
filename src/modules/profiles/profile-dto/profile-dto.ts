@@ -3,6 +3,27 @@ import { Gender, InterestedIn, LookingFor } from '../entities/profile.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
+export const profileExample = {
+  id: 9,
+  user_id: 1,
+  name: 'BigOne',
+  longitude: 1.33,
+  latitude: 23.4,
+  birth_date: new Date(),
+  gender: Gender.Male,
+  country: 'france',
+  city: 'lille',
+  bio: 'all is good',
+  height: '4.4',
+  children: false,
+  education: 'uni',
+  interested_in: InterestedIn.Both,
+  looking_for: LookingFor.Casual,
+  photos: ['1', '2', '3', '4'],
+  created_at: new Date(),
+  updated_at: new Date(),
+};
+
 export class CreateProfileDto {
   @ApiProperty({ description: 'Profile name' })
   @IsString()
@@ -91,7 +112,7 @@ export class ProfileDto {
   photos: string[];
 
   @ApiProperty({ description: 'Profile created  at' })
-  create_at: Date;
+  created_at: Date;
 
   @ApiProperty({ description: 'Profile updated at' })
   updated_at: Date;
@@ -103,19 +124,7 @@ export class CreatedProfileResponseDto {
   @ApiProperty({
     description: 'Created profile',
     example: {
-      profile: {
-        id: 9,
-        user_id: 1,
-        name: 'BigOne',
-        longitude: 1.33,
-        birth_date: '1995-06-14T22:00:00.000Z',
-        gender: 'male',
-        country: 'france',
-        city: 'lille',
-        interested_in: 'both',
-        created_at: '2025-05-08T01:34:20.921Z',
-        updated_at: '2025-05-08T01:34:20.921Z',
-      },
+      profile: profileExample,
     },
   })
   data: { profile: ProfileDto };
@@ -132,18 +141,7 @@ export class GetProfileResponseDto {
     type: Object,
     example: {
       data: {
-        profile: {
-          id: 9,
-          user_id: 1,
-          name: 'BigOne',
-          birth_date: '1995-06-14T22:00:00.000Z',
-          gender: 'male',
-          country: 'france',
-          city: 'lille',
-          interested_in: 'both',
-          created_at: '2025-05-08T01:34:20.921Z',
-          updated_at: '2025-05-08T01:34:20.921Z',
-        },
+        profile: profileExample,
       },
     },
   })

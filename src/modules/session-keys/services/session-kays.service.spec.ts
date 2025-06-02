@@ -6,7 +6,7 @@ import {
 } from '../session-keys-dto/session-key-dto';
 
 const mockSessionKeysService = {
-  createSessionKey: jest.fn(),
+  createSessionKeys: jest.fn(),
 };
 
 describe('SessionKaysService', () => {
@@ -49,17 +49,15 @@ describe('SessionKaysService', () => {
     };
 
     // Act
-    mockSessionKeysService.createSessionKey.mockResolvedValue(createdKeys);
+    mockSessionKeysService.createSessionKeys.mockResolvedValue(createdKeys);
 
     const result: CreatedSessionResponseDto =
       await service.createSessionKeys(creationPayload);
-
-    console.log(result);
     // Assert
     expect(result).toEqual(createdKeys);
-    expect(mockSessionKeysService.createSessionKey).toHaveBeenCalled();
-    expect(mockSessionKeysService.createSessionKey).toHaveBeenCalledTimes(1);
-    expect(mockSessionKeysService.createSessionKey).toHaveBeenCalledWith(
+    expect(mockSessionKeysService.createSessionKeys).toHaveBeenCalled();
+    expect(mockSessionKeysService.createSessionKeys).toHaveBeenCalledTimes(1);
+    expect(mockSessionKeysService.createSessionKeys).toHaveBeenCalledWith(
       creationPayload,
     );
   });
