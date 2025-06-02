@@ -31,6 +31,9 @@ export class SessionKeys {
   @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
 
+  @CreateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
+
   @OneToOne(() => Chat, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'chat_id' })
   chat: Chat;

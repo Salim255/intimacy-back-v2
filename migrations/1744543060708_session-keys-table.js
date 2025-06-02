@@ -25,6 +25,8 @@ exports.up = (pgm) => {
 
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
 
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+
         -- Foreign Key Only for chat_id (this is necessary)
         CONSTRAINT fk_chat FOREIGN KEY (chat_id) REFERENCES chats(id) ON DELETE CASCADE
     );`);

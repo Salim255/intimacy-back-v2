@@ -1,5 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateSessionDto } from '../session-keys-dto/session-key-dto';
+import {
+  CreatedSessionResponseDto,
+  CreateSessionDto,
+} from '../session-keys-dto/session-key-dto';
 import { SessionKeysRepository } from '../repository/session-keys.repository';
 
 @Injectable()
@@ -8,9 +11,9 @@ export class SessionKaysService {
 
   async createSessionKeys(
     createSessionPayload: CreateSessionDto,
-  ): Promise<CreateSessionDto> {
+  ): Promise<CreatedSessionResponseDto> {
     try {
-      const createdSessionKeys: CreateSessionDto =
+      const createdSessionKeys: CreatedSessionResponseDto =
         await this.sessionKeysRepository.insert(createSessionPayload);
       return createdSessionKeys;
     } catch (error) {

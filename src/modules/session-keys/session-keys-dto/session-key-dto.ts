@@ -5,3 +5,8 @@ export class CreateSessionDto {
   encrypted_session_for_sender: string;
   encrypted_session_for_receiver: string;
 }
+
+export class CreatedSessionResponseDto extends CreateSessionDto {
+  created_at: Date;
+  updated_at: Date;
+}

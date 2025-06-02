@@ -94,7 +94,10 @@ describe('MatchesController', () => {
     const result = await controller.initiateMatch(req, body);
     // Assert
     expect(mockMatchService.initiateMatch).toHaveBeenCalledTimes(1);
-    expect(mockMatchService.initiateMatch).toHaveBeenCalledWith(2, 1);
+    expect(mockMatchService.initiateMatch).toHaveBeenCalledWith({
+      fromUserId: 2,
+      toUserId: 1,
+    });
     expect(result.data.match.match_status).toEqual(
       initiateMatchResponse.data.match.connection_status,
     );
