@@ -1,5 +1,4 @@
 pipeline{
-    agent { label 'minikube' }
 
     tools {
         nodejs 'NODE20'
@@ -129,6 +128,7 @@ pipeline{
         }
 
         stage("Deploy to Cluster"){
+            agent { label 'minikube' }
             steps {
                 script {
                     sh 'pwd'
