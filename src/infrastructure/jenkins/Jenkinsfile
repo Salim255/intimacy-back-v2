@@ -1,5 +1,7 @@
 pipeline{
-    agent any
+    agent { 
+        label 'minikube'
+    }
 
     tools {
         nodejs 'NODE20'
@@ -72,39 +74,18 @@ pipeline{
 
         stage("Unit Tests"){
             steps{
-                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                   sh 'npm run test'
-                   sh 'npm run test:cov'
-                }
-               
-            }
-            post{
-    
-                success{
-                    echo "========Unit Tests executed successfully========"
-                }
-                failure{
-                    echo "========B execution failed========"
-                }
+                sh 'npm run test'
+                sh 'npm run test:cov'
             }
         }
 
         stage("Checkstyle Analysis"){
             steps{
-                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                    sh 'npm run lint:report'
-                }
-              
+                sh 'npm run lint:report'
             }
             post{
                 always {
                     archiveArtifacts artifacts: 'eslint-report.json', fingerprint: true
-                }
-                success{
-                    echo "========checkstyle executed successfully========"
-                }
-                failure{
-                    echo "========checkstyle execution failed========"
                 }
             }
         }
@@ -124,6 +105,14 @@ pipeline{
                       dockerImage.push("backend-${BUILD_NUMBER}")
                       dockerImage.push("latest")
                     }
+                }
+            }
+        }
+
+        stage("Deploy ro Cluster"){
+            stages {
+                script {
+                    sh 'pwd'
                 }
             }
         }
