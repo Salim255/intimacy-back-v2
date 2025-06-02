@@ -21,7 +21,7 @@ export class MessageService {
     createMessagePayload: CreateMessagePayload,
   ): Promise<CreatedMessageDto> {
     try {
-      const createdMessage: Message =
+      const createdMessage: CreatedMessageDto =
         await this.messageRepository.insert(createMessagePayload);
 
       const response: CreatedMessageDto = { ...createdMessage };

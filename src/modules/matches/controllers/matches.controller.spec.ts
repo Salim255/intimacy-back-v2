@@ -99,7 +99,7 @@ describe('MatchesController', () => {
       toUserId: 1,
     });
     expect(result.data.match.match_status).toEqual(
-      initiateMatchResponse.data.match.connection_status,
+      initiateMatchResponse.data.match.match_status,
     );
   });
 

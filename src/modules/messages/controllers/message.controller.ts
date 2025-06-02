@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import {
+  CreatedMessageDto,
   CreateMessageDto,
   CreateMessageResponseDto,
   ToUserIdDto,
@@ -41,8 +42,10 @@ export class MessageController {
     description: 'Message created successfully',
     type: CreateMessageResponseDto,
   })
-  async createMessage(@Body() createMessageDto: CreateMessageDto) {
-    const createdMessage =
+  async createMessage(
+    @Body() createMessageDto: CreateMessageDto,
+  ): Promise<CreateMessageResponseDto> {
+    const createdMessage: CreatedMessageDto =
       await this.messageService.createMessage(createMessageDto);
     return {
       status: 'Success',

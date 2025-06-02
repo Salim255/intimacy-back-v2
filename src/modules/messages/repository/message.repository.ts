@@ -2,13 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Message } from '../entities/message.entity';
 import { CreateMessagePayload } from '../services/message.service';
-import { PartnerConnectionStatus } from '../message-dto/message-dto';
+import {
+  CreatedMessageDto,
+  PartnerConnectionStatus,
+} from '../message-dto/message-dto';
 
 @Injectable()
 export class MessageRepository {
   constructor(private readonly dataSource: DataSource) {}
 
-  async insert(createMessagePayload: CreateMessagePayload): Promise<Message> {
+  async insert(
+    createMessagePayload: CreateMessagePayload,
+  ): Promise<CreatedMessageDto> {
     const messageStatus =
       createMessagePayload.partner_connection_status ===
       PartnerConnectionStatus.InRoom
@@ -29,7 +34,7 @@ export class MessageRepository {
     VALUES
     ($1, $2, $3, $4, $5) RETURNING *;`;
 
-    const createdMessage: Message[] = await this.dataSource.query(
+    const createdMessage: CreatedMessageDto[] = await this.dataSource.query(
       query,
       values,
     );
