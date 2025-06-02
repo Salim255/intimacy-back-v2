@@ -2,7 +2,7 @@ import { DataSource } from 'typeorm';
 import { Chat } from '../entities/chat.entity';
 import { ChatWithDetailsDto } from '../chat-dto/chat-response.dto';
 import { Injectable } from '@nestjs/common';
-import { Message } from 'src/modules/messages/entities/message.entity';
+import { Message } from '../../../modules/messages/entities/message.entity';
 
 export type UpdateChatMessagesToRead = {
   chatId: number;

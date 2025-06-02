@@ -53,6 +53,8 @@ describe('SessionKaysService', () => {
 
     const result: CreatedSessionResponseDto =
       await service.createSessionKeys(creationPayload);
+
+    console.log(result);
     // Assert
     expect(result).toEqual(createdKeys);
     expect(mockSessionKeysService.createSessionKey).toHaveBeenCalled();

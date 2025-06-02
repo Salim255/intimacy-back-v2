@@ -53,7 +53,12 @@ describe('MessageController', () => {
     };
 
     // Act
-    mocMessageController.createMessage.mockResolvedValue(createMessagePayload);
+    mocMessageController.createMessage.mockResolvedValue({
+      data: {
+        message: createdMessage,
+      },
+      status: 'success',
+    });
     const result: CreateMessageResponseDto =
       await controller.createMessage(createMessagePayload);
 
