@@ -129,7 +129,7 @@ pipeline{
         }
 
         stage("Deploy to Cluster"){
-            stages {
+            steps {
                 script {
                     sh 'pwd'
                 }
