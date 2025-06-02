@@ -132,7 +132,7 @@ pipeline{
             steps {
                 script {
                     sh 'pwd'
-                    sh 'kubectl rollout restart deployment intimacy-client'
+                    sh 'kubectl rollout restart deployment client-deployment -n default'
                 }
             }
         }
