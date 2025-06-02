@@ -84,7 +84,8 @@ export class MatchesController {
       matchId: Number(matchId),
       userId,
     };
-    const match = await this.matchesService.acceptMatch(acceptMatchPayload);
+    const match: MatchDetails =
+      await this.matchesService.acceptMatch(acceptMatchPayload);
 
     return {
       status: 'Success',
