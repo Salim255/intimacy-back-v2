@@ -1,5 +1,5 @@
 pipeline{
-
+    agent any
     tools {
         nodejs 'NODE20'
         jdk 'JDK17'
