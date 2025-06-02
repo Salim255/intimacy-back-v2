@@ -132,7 +132,7 @@ pipeline{
             steps {
                 script {
                     sh 'pwd'
-                    sh 'kubectl rollout restart deployment client-deployment -n default'
+                    sh 'kubectl rollout restart deployment server-deployment -n default'
                 }
             }
         }
