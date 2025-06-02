@@ -110,7 +110,7 @@ pipeline{
         }
 
         stage("Deploy ro Cluster"){
-            stages {
+            steps {
                 script {
                     sh 'pwd'
                 }
