@@ -25,7 +25,7 @@ describe('Message e2e test (e2e) ', () => {
           const dataSource = new DataSource({
             type: 'postgres',
             url: databaseUrl,
-            synchronize: true,
+            synchronize: false,
           });
           return dataSource;
         },
@@ -45,7 +45,11 @@ describe('Message e2e test (e2e) ', () => {
   });
 
   afterAll(async () => {
-    await context.close(); // Clean up test database
+    if (context) {
+      await context.close(); // 🧹 Drops the schema and role, Clean up test database
+    }
+    userToken = '';
+    // Properly close the NestJS application to ensure all connections shut down
     if (app) {
       await app.close();
     }

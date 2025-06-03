@@ -5,7 +5,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
-import { PresenceService } from 'src/modules/socket/presence.service';
+import { PresenceService } from '../../../modules/socket/presence.service';
 
 export type MessageNotifierPayloadDto = {
   fromUserId: number;

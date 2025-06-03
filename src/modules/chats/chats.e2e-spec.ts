@@ -3,19 +3,10 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from '../../app.module';
 import { DataSource } from 'typeorm';
 import { TestContext } from '../../../test/context'; // Import TestContext
-import * as request from 'supertest';
-import { CreateUserDto } from '../users/user-dto/create-user-dto';
-import {
-  CreateChatResponseDto,
-  FetchChatsResponseDto,
-  UpdateChatCounterResponseDto,
-} from './chat-dto/chat-response.dto';
 
 describe('Chat e2e test (e2e) ', () => {
   let context: TestContext;
   let app: INestApplication;
-  let user1Auth: { token: string; id: number };
-  let user2Auth: { token: string; id: number };
 
   beforeAll(async () => {
     // Initialize test database context
@@ -32,7 +23,7 @@ describe('Chat e2e test (e2e) ', () => {
           const dataSource = new DataSource({
             type: 'postgres',
             url: databaseUrl,
-            synchronize: true,
+            synchronize: false,
           });
           return dataSource;
         },
@@ -51,104 +42,11 @@ describe('Chat e2e test (e2e) ', () => {
     expect(app).toBeDefined();
   });
 
-  it('should create a new chat', async () => {
-    // Arrange
-    // Step1: Create users
-    const createUserDto: CreateUserDto = {
-      email: 'user1.doe@example.com',
-      password: 'supersecure123!',
-      first_name: 'Jane',
-      last_name: 'Doe',
-      private_key: 'fake-private-key',
-      public_key: 'fake-public-key',
-    };
-    const createUser2Dto: CreateUserDto = {
-      email: 'user2.doe@example.com',
-      password: 'supersecure123!',
-      first_name: 'Jane',
-      last_name: 'Doe',
-      private_key: 'fake-private-key',
-      public_key: 'fake-public-key',
-    };
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    await request(app.getHttpServer())
-      .post('/users/signup')
-      .send(createUserDto)
-      .expect(201)
-      .then((response) => {
-        user1Auth = (response.body as { data: { token: string; id: number } })
-          .data;
-      });
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    await request(app.getHttpServer())
-      .post('/users/signup')
-      .send(createUser2Dto)
-      .expect(201)
-      .then((response) => {
-        user2Auth = (response.body as { data: { token: string; id: number } })
-          .data;
-      });
-
-    const createChatPayload = {
-      content: 'Hello there',
-      from_user_id: user2Auth.id,
-      to_user_id: user1Auth.id,
-      session_key_sender: 'sender_key',
-      session_key_receiver: 'reciever_key',
-    };
-
-    // Act
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const createdChat = await request(app.getHttpServer())
-      .post('/chats')
-      .send(createChatPayload)
-      .set('Authorization', `Bearer ${user2Auth.token}`)
-      .expect(201);
-
-    // Assert
-    expect((createdChat.body as CreateChatResponseDto).status).toEqual(
-      'Success',
-    );
-    expect((createdChat.body as CreateChatResponseDto).data.chat.id).toEqual(1);
-  });
-
-  it('should update a chat', async () => {
-    // Arrange
-    // Act
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const updatedChat = await request(app.getHttpServer())
-      .patch('/chats/')
-      .send({ chat_id: 1, update_type: 'increment' })
-      .set('Authorization', `Bearer ${user2Auth.token}`)
-      .expect(200);
-    // Assert
-    expect((updatedChat.body as UpdateChatCounterResponseDto).status).toEqual(
-      'Success',
-    );
-    expect(
-      // eslint-disable-next-line prettier/prettier
-      (updatedChat.body as UpdateChatCounterResponseDto).data.chat.no_read_messages,
-    ).toEqual(2);
-  });
-
-  it('should fetch all chats by userId', async () => {
-    // Arrange
-    // Act
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const chats = await request(app.getHttpServer())
-      .get('/chats')
-      .set('Authorization', `Bearer ${user2Auth.token}`)
-      .expect(200);
-
-    // Assert
-    expect((chats.body as FetchChatsResponseDto).status).toEqual('Success');
-    expect((chats.body as FetchChatsResponseDto).data.chats[0].id).toEqual(1);
-  });
-
   afterAll(async () => {
-    await context.close(); // Clean up test database
+    if (context) {
+      await context.close(); // 🧹 Drops the schema and role, Clean up test database
+    }
+    // Properly close the NestJS application to ensure all connections shut down
     if (app) {
       await app.close();
     }

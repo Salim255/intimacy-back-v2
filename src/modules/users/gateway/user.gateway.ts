@@ -6,7 +6,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { UsersService } from '../services/users.service';
-import { PresenceService } from 'src/modules/socket/presence.service';
+import { PresenceService } from '../../../modules/socket/presence.service';
 
 // Decorator to declare a WebSocket Gateway
 // Declare this class as a WebSocket Gateway
