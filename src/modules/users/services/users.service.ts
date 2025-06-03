@@ -79,9 +79,6 @@ export class UsersService {
       // Step: 4 - Commit the transaction
       await queryRunning.commitTransaction();
 
-      // Step: 5 - Release the query runner
-      await queryRunning.release();
-
       // Prepare the response
       const response: CreateUserResponse = {
         token,
@@ -96,9 +93,6 @@ export class UsersService {
       this.logger.log(error);
       // Rollback the transaction in case of error
       await queryRunning.rollbackTransaction();
-      // Release the query runner
-      await queryRunning.release();
-
       const messError = error instanceof Error ? error.message : '';
       throw new HttpException(
         {
@@ -108,6 +102,8 @@ export class UsersService {
         },
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
+    } finally {
+      await queryRunning.release();
     }
   }
 
