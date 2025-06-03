@@ -43,7 +43,7 @@ export class TestContext {
       await pool.query(
         format('CREATE SCHEMA %I AUTHORIZATION %I;', roleName, roleName),
       );
-/* 
+      /* 
       // Inject ENUM creation inside the new schema
       await pool.query(
         format(

@@ -63,4 +63,4 @@ async function bootstrap() {
 
 // The function bootstrap() is async because it contains asynchronous
 //  operations (creating the app and starting the server).
-bootstrap();
+void bootstrap();
