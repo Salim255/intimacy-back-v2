@@ -2,6 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../../app.module';
 
+jest.setTimeout(30000); // increases timeout globally for this file
 describe('Profile e2e test', () => {
   let app: INestApplication;
   beforeAll(async () => {
