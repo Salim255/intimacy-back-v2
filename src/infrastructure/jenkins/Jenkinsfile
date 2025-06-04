@@ -8,14 +8,15 @@ pipeline{
         registryCredentials = 'ecr:eu-west-3:awscreds'
         imageName = "961341553126.dkr.ecr.eu-west-3.amazonaws.com/intimacy-repository"
         intimacyRegistry = "https://961341553126.dkr.ecr.eu-west-3.amazonaws.com"
-        JWT_SECRET= "testsecret"
+      
+        WT_SECRET= "testsecret"
         JWT_EXPIRATION = "90d"
-
-        DB_TEST_HOST = "localhost"
+        DB_TEST_HOST = 'localhost'
         DB_TEST_PORT = "5432"
         DB_TEST_DATABASE = "intimacyTest"
         DB_TEST_USER = "salimh"
         DB_TEST_PASSWORD = "myStrongPassword"
+
 
         DATABASE_URL =  credentials('prod-db-url')
         AWS_ACCESS_KEY_ID = credentials('bucket_aws_access_key_id')
@@ -40,7 +41,7 @@ pipeline{
             }
         }
 
-        stage('Start postgresql  DB') {
+        stage('Start Postgresql DB') {
             steps {
                 script {
                 sh 'docker rm -f pg-test || true'
@@ -85,7 +86,7 @@ pipeline{
             }
         }
 
-        stage("Build"){
+        stage("Build App"){
             steps{
                 script { sh 'npm run build'}
             }
@@ -101,13 +102,6 @@ pipeline{
                 failure{
                     echo "========Build execution failed========"
                 }
-            }
-        }
-
-         stage('Archive Artifact') {
-            steps {
-                sh 'tar -czf dist.tar.gz dist' // or use zip if needed
-                archiveArtifacts artifacts: 'dist.tar.gz', fingerprint: true
             }
         }
 
@@ -129,23 +123,8 @@ pipeline{
             }
         }
 
-        stage("Run Integration test"){
-            steps {
-                sh 'npm run test:integration'
-            }
-        }
        
-        stage('Run E2E Tests') {
-             // 👇 This stage depends on DB being up
-            environment {
-                WT_SECRET= "testsecret"
-                JWT_EXPIRATION = "90d"
-                DB_TEST_HOST = 'localhost'
-                DB_TEST_PORT = "5432"
-                DB_TEST_DATABASE = "intimacyTest"
-                DB_TEST_USER = "salimh"
-                DB_TEST_PASSWORD = "myStrongPassword"
-            }
+        stage('E2E Tests') {
             steps {
                 script {
                     sh 'npm run test:e2e'
@@ -153,6 +132,11 @@ pipeline{
             }
         }
         
+        stage("Integration test"){
+            steps {
+                sh 'npm run test:integration'
+            }
+        }
 
         stage("Test coverage"){
             steps {
@@ -178,6 +162,13 @@ pipeline{
                     echo "========checkstyle execution failed========"
                 }
             }
+        }
+
+        stage('Archive Artifact') {
+                    steps {
+                        sh 'tar -czf dist.tar.gz dist' // or use zip if needed
+                        archiveArtifacts artifacts: 'dist.tar.gz', fingerprint: true
+                    }
         }
 
         stage('Build Docker Image') {
