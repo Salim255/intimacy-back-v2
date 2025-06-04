@@ -34,6 +34,35 @@ pipeline{
                 }
             }
         }
+
+        stage('Start postgresql  DB') {
+            steps {
+                script {
+                sh 'docker rm -f pg-test || true'
+                sh 'docker network create test-net || true'
+
+                sh '''
+                    docker run -d --name pg-test --network test-net \
+                    -e POSTGRES_DB=$DB_TEST_DATABASE \
+                    -e POSTGRES_USER=$DB_TEST_USER \
+                    -e POSTGRES_PASSWORD=$DB_TEST_PASSWORD \
+                    -p 5432:5432 \
+                    postgres:14
+                '''
+
+                // ⏳ Your elegant "wait until ready"
+                sh '''
+                    echo "⏳ Waiting for PostgreSQL to be ready..."
+                    until docker exec pg-test psql -U $DB_TEST_USER -d $DB_TEST_DATABASE -c "SELECT 1;" > /dev/null 2>&1; do
+                    echo "Still waiting..."
+                    sleep 2
+                    done
+                    echo "✅ PostgreSQL is ready."
+                '''
+                }
+            }
+        }
+
         stage("Install Dependencies"){
             steps{
                 sh 'npm ci'       // <--- This installs dependencies
@@ -95,40 +124,12 @@ pipeline{
             }
         }
 
-      /*   stage("Integration test"){
+        stage("Run Integration test"){
             steps {
-                 sh 'npm run test'
+                sh 'npm run test:integration'
             }
         }
- */
-        stage('Start Test DB') {
-            steps {
-                script {
-                sh 'docker rm -f pg-test || true'
-                sh 'docker network create test-net || true'
-
-                sh '''
-                    docker run -d --name pg-test --network test-net \
-                    -e POSTGRES_DB=$DB_TEST_DATABASE \
-                    -e POSTGRES_USER=$DB_TEST_USER \
-                    -e POSTGRES_PASSWORD=$DB_TEST_PASSWORD \
-                    -p 5432:5432 \
-                    postgres:14
-                '''
-
-                // ⏳ Your elegant "wait until ready"
-                sh '''
-                    echo "⏳ Waiting for PostgreSQL to be ready..."
-                    until docker exec pg-test psql -U $DB_TEST_USER -d $DB_TEST_DATABASE -c "SELECT 1;" > /dev/null 2>&1; do
-                    echo "Still waiting..."
-                    sleep 2
-                    done
-                    echo "✅ PostgreSQL is ready."
-                '''
-                }
-            }
-        }
-
+       
         stage('Run E2E Tests') {
              // 👇 This stage depends on DB being up
             environment {
