@@ -127,7 +127,7 @@ stage("e2e test") {
         'DB_TEST_USER=salimhassanmohamed',
         'DB_TEST_PASSWORD=yourStrongPassword'
       ]) {
-        sh './run-integration-tests.sh' // Replace with your actual test command
+        sh 'npm run test:e2e' // Replace with your actual test command
       }
 
       // Optionally stop and remove container after tests
