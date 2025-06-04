@@ -163,6 +163,39 @@ pipeline{
                 }
             }
         }
+        
+        stage('SonarQube Analysis') {
+            environment {
+                SONARQUBE_SCANNER_HOME = tool 'sonar7.1' // Ensure you have configured SonarQube scanner in Jenkins
+            }
+            steps {
+                withSonarQubeEnv('sonarserver') { // Ensure you have configured SonarQube server in Jenkins
+                    sh '''
+                        ${SONARQUBE_SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=intimacy-back-v2 \
+                        -Dsonar.projectName="Intimacy Backend" \
+                        -Dsonar.projectVersion=1.0 \
+                        -Dsonar.sources=src \
+                        -Dsonar.exclusions=src/infrastructure/**/* \
+                        -Dsonar.sourceEncoding=UTF-8 \
+                        -Dsonar.eslint.reportPaths=eslint-report.json \
+                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                    '''
+                    
+                    // Upload the ESLint report to SonarQube server
+                    echo "========SonarQube Analysis executed successfully========"
+                }
+            }
+        }
+
+        stage("Quality Gate") {
+            steps {
+              timeout(time: 1, unit: 'HOURS') {
+                waitForQualityGate abortPipeline: true
+              }
+                 //jenkins-ci-webhook
+            }
+        }
 
         stage('Archive Artifact') {
                     steps {
