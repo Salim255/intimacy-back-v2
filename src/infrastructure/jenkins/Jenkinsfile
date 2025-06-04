@@ -110,7 +110,7 @@ pipeline{
                 echo '⏳ Step 2: Wait for database to be ready'
                 sh '''
                     for i in {1..10}; do
-                    docker exec intimacy-test-db pg_isready -U salimhassanmohamed && break
+                    docker exec intimacy-test-db pg_isready -U salimh && break
                     echo "Waiting for DB..."
                     sleep 2
                     done
