@@ -16,6 +16,16 @@ pipeline{
         DB_TEST_DATABASE = "intimacyTest"
         DB_TEST_USER = "salimh"
         DB_TEST_PASSWORD = "myStrongPassword"
+
+        DB_PORT = '5432'
+        DB_HOST = credentials('prod-db-host')
+        DB_DATABASE = credentials('prod-db-name')
+        DB_PASSWORD = credentials('prod-db-password')
+        DB_USER = credentials('prod-db-user')
+
+        AWS_ACCESS_KEY_ID = credentials('bucket_aws_access_key_id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
+        REGION = "eu-west-3"
     }
     stages{
         stage("Fetch code"){
