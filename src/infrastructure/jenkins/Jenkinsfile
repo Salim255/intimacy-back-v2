@@ -87,12 +87,12 @@ pipeline{
             }
         }
 
-        stage("Integration test"){
+      /*   stage("Integration test"){
             steps {
-
+                 sh 'npm run test'
             }
         }
-
+ */
        stage('e2e test') {
             steps {
                 script {
