@@ -93,45 +93,48 @@ pipeline{
             }
         }
  */
-        stage("e2e test") {
-            steps {
-                script {
-                    // Create a Docker network so containers can talk (optional but recommended)
-                    sh 'docker network create test-net || true'
+stage("e2e test") {
+  steps {
+    script {
+      // Remove existing container if it exists, ignore errors if not found
+      sh 'docker rm -f pg-test || true'
 
-                    // Run PostgreSQL container in detached mode on that network
-                    sh '''
-                    docker run -d --name pg-test \
-                    --network test-net \
-                    -e POSTGRES_DB=intimacyTest \
-                    -e POSTGRES_USER=salimhassanmohamed \
-                    -e POSTGRES_PASSWORD=yourStrongPassword \
-                    -p 5432:5432 \
-                    postgres:14
-                    '''
+      // Run new PostgreSQL container
+      sh '''
+        docker network create test-net || true
+        docker run -d --name pg-test --network test-net \
+          -e POSTGRES_DB=intimacyTest \
+          -e POSTGRES_USER=salimhassanmohamed \
+          -e POSTGRES_PASSWORD=yourStrongPassword \
+          -p 5432:5432 \
+          postgres:14
+      '''
 
-                    // Wait for PostgreSQL to be ready (simple wait, or use a retry script)
-                    sh 'sleep 10'
+      // Optionally wait for Postgres to be ready (poll or sleep)
+      sh '''
+        for i in {1..10}; do
+          docker exec pg-test pg_isready && break
+          echo "Waiting for postgres to be ready..."
+          sleep 3
+        done
+      '''
 
-                    // Run tests, passing env vars so your app connects to this DB
-                    // Replace `npm run test:e2e` with your actual test command
-                    sh '''
-                    DB_TEST_HOST=pg-test \
-                    DB_TEST_PORT=5432 \
-                    DB_TEST_DATABASE=intimacyTest \
-                    DB_TEST_USER=salimhassanmohamed \
-                    DB_TEST_PASSWORD=yourStrongPassword \
-                    npm run test:e2e
-                    '''
+      // Run your integration tests here with env vars pointing to the container
+      withEnv([
+        'DB_TEST_HOST=localhost',
+        'DB_TEST_PORT=5432',
+        'DB_TEST_DATABASE=intimacyTest',
+        'DB_TEST_USER=salimhassanmohamed',
+        'DB_TEST_PASSWORD=yourStrongPassword'
+      ]) {
+        sh './run-integration-tests.sh' // Replace with your actual test command
+      }
 
-                    // Cleanup: stop and remove postgres container and network
-                    sh '''
-                    docker rm -f pg-test
-                    docker network rm test-net
-                    '''
-                }
-            }
-        }
+      // Optionally stop and remove container after tests
+      sh 'docker rm -f pg-test'
+    }
+  }
+}
 
 
         stage("Test coverage"){
