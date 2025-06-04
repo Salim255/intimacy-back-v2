@@ -63,7 +63,11 @@ describe('User e2e test (e2e)', () => {
     const response = await request(app.getHttpServer())
       .post('/users/signup')
       .send(createUserDto)
-      .expect(201);
+      .expect(201)
+      .catch((err) => {
+        console.error('Request failed:', err);
+        throw err;
+      });
     expect(response.body).toHaveProperty('data');
     expect(response.body).toHaveProperty('status');
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
