@@ -15,7 +15,7 @@ pipeline{
         DB_TEST_PORT = "5432"
         DB_TEST_DATABASE = "intimacyTest"
         DB_TEST_USER = "salimh"
-        DB_TEST_PASSWORD = "yourStrongPassword"
+        DB_TEST_PASSWORD = "myStrongPassword"
     }
     stages{
         stage("Fetch code"){
@@ -130,11 +130,21 @@ pipeline{
         }
 
         stage('Run E2E Tests') {
-        steps {
-            script {
-            sh 'npm run test:e2e'
+             // 👇 This stage depends on DB being up
+            environment {
+                WT_SECRET= "testsecret"
+                JWT_EXPIRATION = "90d"
+                DB_TEST_HOST = 'localhost'
+                DB_TEST_PORT = "5432"
+                DB_TEST_DATABASE = "intimacyTest"
+                DB_TEST_USER = "salimh"
+                DB_TEST_PASSWORD = "myStrongPassword"
             }
-        }
+            steps {
+                script {
+                    sh 'npm run test:e2e'
+                }
+            }
         }
         
 
