@@ -19,6 +19,8 @@ describe('Database Connection (Integration Test)', () => {
   });
 
   afterAll(async () => {
-    await dataSource.destroy();
+    if (dataSource) {
+      await dataSource.destroy();
+    }
   });
 });
