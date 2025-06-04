@@ -85,8 +85,6 @@ describe('UsersService', () => {
     });
     // Act
     const result = await service.signup({
-      first_name: 'John',
-      last_name: 'Doe',
       email: 'test@example.com',
       password: 'plaintextpassword',
       public_key: 'publickey',
@@ -154,32 +152,6 @@ describe('UsersService', () => {
     expect(disabledUser).toHaveProperty('id', 1);
     expect(disabledUser.is_active).toEqual(false);
     expect(mockUserRepository.disableUser).toHaveBeenCalled();
-  });
-
-  it('should update user ', async () => {
-    // Arrange
-    const query = 'UPDATE users SET first_name = $1 WHERE id = $2 RETURNING *;';
-    const values = ['UpdatedName', 1];
-    mockUserRepository.updateUser.mockResolvedValue({
-      id: 1,
-      first_name: 'UpdatedName',
-      last_name: 'Doe',
-      email: 'test@example.com',
-      password: 'hashedpassword',
-      isStaff: false,
-    });
-
-    // Act
-    const updatedUser = await service.updateUser({
-      userId: 1,
-      query,
-      values,
-    });
-
-    // Assert
-    expect(updatedUser).toHaveProperty('id', 1);
-    expect(updatedUser.first_name).toEqual('UpdatedName');
-    expect(mockUserRepository.updateUser).toHaveBeenCalled();
   });
 
   it('should update user connection status', async () => {

@@ -54,16 +54,12 @@ describe('ChatUsers e2e test (e2e) ', () => {
     const createUserDto: CreateUserDto = {
       email: 'user1.doe@example.com',
       password: 'supersecure123!',
-      first_name: 'Jane',
-      last_name: 'Doe',
       private_key: 'fake-private-key',
       public_key: 'fake-public-key',
     };
     const createUser2Dto: CreateUserDto = {
       email: 'user2.doe@example.com',
       password: 'supersecure123!',
-      first_name: 'Jane',
-      last_name: 'Doe',
       private_key: 'fake-private-key',
       public_key: 'fake-public-key',
     };

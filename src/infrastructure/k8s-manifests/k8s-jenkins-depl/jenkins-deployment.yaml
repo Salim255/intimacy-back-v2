@@ -1,0 +1,163 @@
+# -----------------------------------------
+# ServiceAccount for Jenkins to access K8s API securely
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins
+  namespace: default
+---
+# -----------------------------------------
+
+# Role granting Jenkins permission in default namespace
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: jenkins
+  namespace: default
+rules:
+ # Allow Jenkins to manage pods & services
+  - apiGroups: [""]
+    resources: ["pods", "services"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+
+  # Allow Jenkins to manage deployments (your app)
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+
+  # Allow pod exec (for kubectl exec or docker inside pod)
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create", "get", "list"]
+  
+  # Allow access to pod logs
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get", "list", "watch"]
+
+  # Allow Jenkins to read secrets (e.g. credentials)
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+  
+  # Allow PVC management (for persistent Jenkins storage)
+  - apiGroups: [""]
+    resources: ["persistentvolumeclaims"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+---
+# -----------------------------------------
+
+# Bind the above Role to the Jenkins ServiceAccount
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins
+  namespace: default
+roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: jenkins
+subjects:
+  - kind: ServiceAccount
+    name: jenkins
+    namespace: default
+
+---
+# -----------------------------------------
+# ClusterRole for managing cluster-wide PersistentVolumes
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: jenkins-clusterrole
+rules:
+  - apiGroups: [""]
+    resources: ["persistentvolumes"]
+    verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+
+---
+# -----------------------------------------
+# ClusterRoleBinding to bind Jenkins ServiceAccount to above ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: jenkins-crb
+subjects:
+  - kind: ServiceAccount
+    name: jenkins
+    namespace: default
+roleRef:
+  kind: ClusterRole
+  name: jenkins-clusterrole
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# -----------------------------------------
+# Jenkins Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      serviceAccountName: jenkins  # Use the Jenkins service account
+      containers:
+        - name: jenkins
+          image: crawan/jenkins-image:latest  # Replace with your image path
+          imagePullPolicy: IfNotPresent  # Pull only if not present locally
+          ports:
+            - containerPort: 8080    # Jenkins UI
+              name: http-port
+            - containerPort: 50000   # JNLP agents communication
+              name: jnlp-port
+          env:
+            - name: JAVA_OPTS
+              value: -Djenkins.install.runSetupWizard=false # Skip initial wizard on startup
+
+          volumeMounts:
+            # Jenkins home directory, persists data/config/plugins
+            - name: jenkins-home
+              mountPath: /var/jenkins_home
+            # Mount Docker socket to allow docker commands inside Jenkins container
+            - name: docker-sock-volume
+              mountPath: /var/run/docker.sock
+      volumes:
+        # Persistent storage for Jenkins data (adjust storage class or use PVC if preferred)
+        - name: jenkins-home
+          hostPath:
+            path: /mnt/jenkins-store  # On your node’s filesystem
+            type: DirectoryOrCreate
+        # Docker socket to enable docker commands from inside Jenkins container
+        - name: docker-sock-volume
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
+     
+---
+# -----------------------------------------
+# Service to expose Jenkins UI & agent ports
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+  namespace: default
+spec:
+  type: NodePort  # Accessible externally on node's IP + nodePort
+  selector:
+    app: jenkins
+  ports:
+    - name: ui
+      port: 8080
+      targetPort: 8080
+      nodePort: 31000  # Access Jenkins UI via <node-ip>:31000
+    - name: jnlp
+      port: 50000
+      targetPort: 50000

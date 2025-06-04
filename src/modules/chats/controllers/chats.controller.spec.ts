@@ -5,7 +5,7 @@ import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { UserKeysService } from '../../user-keys/services/user-keys.service';
 import { CreateChatDto } from '../chat-dto/chat-response.dto';
 import { Request } from 'express';
-import { PartnerConnectionStatus } from 'src/modules/messages/message-dto/message-dto';
+import { PartnerConnectionStatus } from '../../../modules/messages/message-dto/message-dto';
 
 const mockChatService = {
   createFullChat: jest.fn(),

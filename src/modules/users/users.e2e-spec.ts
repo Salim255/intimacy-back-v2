@@ -6,7 +6,6 @@ import { Test } from '@nestjs/testing';
 import { DataSource } from 'typeorm';
 import { CreateUserDto } from './user-dto/create-user-dto';
 import { CreateUserResponseDto } from './user-dto/create-user-response-dto';
-import { UpdatedUserResponseDto } from './user-dto/update-user-dto';
 import { GetUserResponseDto } from './user-dto/login-user-dto';
 
 describe('User e2e test (e2e)', () => {
@@ -28,7 +27,7 @@ describe('User e2e test (e2e)', () => {
           const dataSource = new DataSource({
             type: 'postgres',
             url: databaseUrl,
-            synchronize: true,
+            synchronize: false,
           });
           return dataSource;
         },
@@ -56,8 +55,6 @@ describe('User e2e test (e2e)', () => {
     const createUserDto: CreateUserDto = {
       email: 'jane.doe@example.com',
       password: 'supersecure123!',
-      first_name: 'Jane',
-      last_name: 'Doe',
       private_key: 'fake-private-key',
       public_key: 'fake-public-key',
     };
@@ -66,8 +63,11 @@ describe('User e2e test (e2e)', () => {
     const response = await request(app.getHttpServer())
       .post('/users/signup')
       .send(createUserDto)
-      .expect(201);
-
+      .expect(201)
+      .catch((err) => {
+        console.error('Request failed:', err);
+        throw err;
+      });
     expect(response.body).toHaveProperty('data');
     expect(response.body).toHaveProperty('status');
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -101,30 +101,12 @@ describe('User e2e test (e2e)', () => {
     userToken = (response.body as CreateUserResponseDto).data.token;
   });
 
-  it('should update user', async () => {
-    // Arrange
-    const userInput = { last_name: 'Salim' };
-
-    // Act
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    const response = await request(app.getHttpServer())
-      .patch('/users/update-me')
-      .set('Authorization', `Bearer ${userToken}`)
-      .send(userInput)
-      .expect(200);
-
-    // Assert
-    expect(
-      (response.body as UpdatedUserResponseDto).data.user.last_name,
-    ).toEqual('Salim');
-  });
-
   it('should fetch user by id', async () => {
     // Arrange
     // Act
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const response = await request(app.getHttpServer())
-      .get('/users/1')
+      .get('/users')
       .set('Authorization', `Bearer ${userToken}`)
       .expect(200);
 
@@ -134,7 +116,9 @@ describe('User e2e test (e2e)', () => {
   });
 
   afterAll(async () => {
-    await context.close(); // Clean up test database
+    if (context) {
+      await context.close(); // 🧹 Drops the schema and role, Clean up test database
+    }
     userToken = '';
     // Properly close the NestJS application to ensure all connections shut down
     if (app) {

@@ -13,7 +13,7 @@ export type AcceptMatchPayload = {
   userId: number;
 };
 
-enum ConnectionStatus {
+export enum ConnectionStatus {
   Online = 'online',
   Offline = 'offline',
   Away = 'away',

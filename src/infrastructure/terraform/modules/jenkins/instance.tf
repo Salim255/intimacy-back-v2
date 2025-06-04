@@ -1,36 +1,27 @@
 resource "aws_instance" "jenkins" {
-  ami           = data.aws_ami.amiID.id
+  # The ami is the Amazon Machine Image that will be used to create the instance
+  ami = data.aws_ami.amiID.id
+  # The instance type is the type of the instance that will be created
   instance_type = "t2.small"
 
-  key_name               =  var.public_key // They key pair name 
+  # The key pair name is the name of the key pair that will be used to connect to the instance
+  key_name = var.public_key // They key pair name 
+  # The key pair should be defined in the parent module and passed as a variable
+  # to this module. Make sure to define this variable in the parent module
+  # and pass the key pair name when calling this module.
   vpc_security_group_ids = [aws_security_group.jenkins-sg.id] // The security group id
-  availability_zone      = var.zone1
-
+  # The security group should be defined in the parent module and passed as a variable
+  # to this module. Make sure to define this variable in the parent module
+  availability_zone = var.zone1
+  # The availability zone is the zone where the instance will be created
+  # The user_data is the script that will be executed when the instance is created
+  # It is used to install and configure Jenkins
+  # The script should be defined in the parent module and passed as a variable
   user_data = file("${path.module}/bash/jenkins.sh")
 
   tags = {
+    # The tags are used to identify the instance
+    # They can be used to filter instances in the AWS console
     Name = "Jenkins-instance"
   }
-
-  # Copies the myapp.conf file to /etc/myapp.conf
-  /*   provisioner "file" {
-    source      = "jenkins.sh"
-    destination = "/tmp/jenkins.sh"
-  }
- */
-  # Establishes connection to be used by all
-  # generic remote provisioners (i.e. file/remote-exec)
-  /*   connection {
-    type        = "ssh"
-    user        = var.jenkinsUser // Default user of this EC2 instance
-    private_key = file("intimacykey")
-    host        = self.public_ip // The public Ip of this instance
-  }
- */
-  /*   provisioner "remote-exec" {
-    inline = [
-      "chmod +x /tmp/jenkins.sh",
-      "/tmp/jenkins.sh args",
-    ]
-  } */
 }

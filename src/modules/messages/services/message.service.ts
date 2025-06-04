@@ -21,7 +21,7 @@ export class MessageService {
     createMessagePayload: CreateMessagePayload,
   ): Promise<CreatedMessageDto> {
     try {
-      const createdMessage: Message =
+      const createdMessage: CreatedMessageDto =
         await this.messageRepository.insert(createMessagePayload);
 
       const response: CreatedMessageDto = { ...createdMessage };
@@ -65,10 +65,11 @@ export class MessageService {
     toUserId: number,
   ) {
     try {
-      const updatedMessages = this.messageRepository.updateMessagesToDelivered(
-        formUserId,
-        toUserId,
-      );
+      const updatedMessages =
+        await this.messageRepository.updateMessagesToDelivered(
+          formUserId,
+          toUserId,
+        );
       return updatedMessages;
     } catch (error) {
       const messageError =

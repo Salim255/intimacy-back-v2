@@ -6,7 +6,7 @@ import {
   JoinColumn,
   OneToOne,
 } from 'typeorm';
-import { Chat } from '../../modules/chats/entities/chat.entity';
+import { Chat } from '../../chats/entities/chat.entity';
 
 @Entity('session_keys')
 export class SessionKeys {
@@ -30,6 +30,9 @@ export class SessionKeys {
 
   @CreateDateColumn({ type: 'timestamp' })
   created_at: Date;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
 
   @OneToOne(() => Chat, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'chat_id' })

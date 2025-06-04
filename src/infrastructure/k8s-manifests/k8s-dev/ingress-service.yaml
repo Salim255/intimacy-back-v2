@@ -2,34 +2,38 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: ingress-service
-  #This entire annotation section is what's going to help the ingress controller understand that we are trying to feed it some routing rules, so the ingress controller going to scan continuously all the different objects or all the different config files. So we are throwing into our cluster and it's going to try to find one that has this exact annotation
   annotations:
     kubernetes.io/ingress.class: nginx
-    #spec.ingressClassName: nginx
-    ##We need to add this to use regular expressions
     nginx.ingress.kubernetes.io/use-regex: "true"
-    #ingressclass.kubernetes.io/is-default-class: "true"
-
+  
 spec:
-  #Rules is going to have all the different routing rules that we want to apply to teach the ingress controller how to take the incoming traffic and route them off to our different pods
   rules:
-    #This first routing rule is going to take the incoming traffic and send it off to our post service
-    - host: intimacy.dev
-      #Ingress engine assuming that we might be hosting many different apps at different domains. So that's what this host property here all about
+    - host: intimacy.com
       http:
         paths:
-          
-          #This is the path that we want to match against the incoming traffic
-          #The path is going to be a regular expression, so we can use the regex syntax here
-          #The path is going to be a prefix, so we can use the Prefix path type
-          - path: /?(.*)
+          # Route to NestJS API (intimacy-server)
+          - path: /api/v2(/|$)(.*)
             pathType: ImplementationSpecific
             backend:
-              #The service of posts
               service:
-                name: server-service
-                #The port of posts service
+                name:  intimacy-server-service
+                port:
+                  number: 3000  # or whatever your API's service port is
 
+           # WebSocket path
+          - path: /socket
+            pathType: Prefix
+            backend:
+              service:
+                name: intimacy-server-service
+                port:
+                  number: 3000
+
+          # Route everything else to Angular frontend (intimacy-client)
+          - path: /(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: intimacy-client-service
                 port:
                   number: 80
-# Just  a text to trigger infra

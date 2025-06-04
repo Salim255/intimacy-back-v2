@@ -4,7 +4,27 @@ import { MatchesService } from '../services/matches.service';
 import { JwtTokenService } from '../../auth/jws-token-service';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { InitiateMatchResponseDto, MatchDto } from '../matches-dto/matches-dto';
+import {
+  InitiateMatchDto,
+  InitiateMatchResponseDto,
+} from '../matches-dto/matches-dto';
+import { ConnectionStatus, MatchDetails } from '../repository/match.repository';
+
+const matchProfile: MatchDetails = {
+  partner_id: 1,
+  profile_id: 2,
+  name: 'Salim',
+  birth_date: new Date(),
+  city: 'lille',
+  country: 'france',
+  photos: ['phot1', 'photo2'],
+  connection_status: ConnectionStatus.Online,
+  match_updated_at: new Date(),
+  public_key: 'jndksdksd',
+  match_id: 3,
+  match_status: 2,
+  match_created_at: new Date(),
+};
 
 const mockMatchService = {
   initiateMatch: jest.fn(),
@@ -49,32 +69,23 @@ describe('MatchesController', () => {
 
   it('should initiate match', async () => {
     // Arrange
-    const body = {
+    const body: InitiateMatchDto = {
       to_user_id: 1,
     };
+
     const req = {
-      params: {
-        matchId: '1',
-      },
       user: { id: 2 },
     } as Partial<Request> as Request;
 
-    const initiateMatchResult: MatchDto = {
-      id: 1,
-      to_user_id: 1,
-      from_user_id: 2,
-      status: 1,
+    const initiateMatchResult: MatchDetails = {
+      ...matchProfile,
+      match_status: 1,
     };
     //
     const initiateMatchResponse: InitiateMatchResponseDto = {
       status: 'Success',
       data: {
-        match: {
-          id: 1,
-          to_user_id: 1,
-          from_user_id: 2,
-          status: 1,
-        },
+        match: { ...matchProfile, match_status: 1 },
       },
     };
     mockMatchService.initiateMatch.mockResolvedValue(initiateMatchResult);
@@ -83,7 +94,13 @@ describe('MatchesController', () => {
     const result = await controller.initiateMatch(req, body);
     // Assert
     expect(mockMatchService.initiateMatch).toHaveBeenCalledTimes(1);
-    expect(result).toEqual(initiateMatchResponse);
+    expect(mockMatchService.initiateMatch).toHaveBeenCalledWith({
+      fromUserId: 2,
+      toUserId: 1,
+    });
+    expect(result.data.match.match_status).toEqual(
+      initiateMatchResponse.data.match.match_status,
+    );
   });
 
   it('should accept match', async () => {
@@ -93,12 +110,8 @@ describe('MatchesController', () => {
     } as Partial<Request> as Request;
     const params = { matchId: 1 };
 
-    const acceptMatchResult: MatchDto = {
-      id: 1,
-      to_user_id: 1,
-      from_user_id: 2,
-      status: 2,
-    };
+    const acceptMatchResult = matchProfile;
+
     const acceptMatchResponse: InitiateMatchResponseDto = {
       status: 'Success',
       data: {

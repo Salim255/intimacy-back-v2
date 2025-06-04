@@ -8,9 +8,7 @@ export type JwtTokenPayload = {
 
 @Injectable()
 export class JwtTokenService {
-  constructor(private jwtService: JwtService) {
-    console.log('✅ JwtTokenService constructed');
-  }
+  constructor(private jwtService: JwtService) {}
 
   createToken(userId: number): string {
     return this.jwtService.sign({ id: userId });

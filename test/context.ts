@@ -9,7 +9,7 @@ import { PoolOptions } from '../src/config/pool';
 
 // Default connection settings
 const DEFAULT_OPTS: PoolOptions = {
-  host: process.env.DB_TEST_HOST ?? '',
+  host: process.env.DB_TEST_HOST ?? 'localhost',
   port: Number(process.env.DB_TEST_PORT),
   database: process.env.DB_TEST_DATABASE ?? '',
   user: process.env.DB_TEST_USER ?? '',
@@ -43,7 +43,29 @@ export class TestContext {
       await pool.query(
         format('CREATE SCHEMA %I AUTHORIZATION %I;', roleName, roleName),
       );
+      /* 
+      // Inject ENUM creation inside the new schema
+      await pool.query(
+        format(
+          `
+        SET search_path TO %I;
 
+        DO $$
+        BEGIN
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'gender_enum') THEN
+            CREATE TYPE gender_enum AS ENUM ('male', 'female', 'other');
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'interested_in_enum') THEN
+            CREATE TYPE interested_in_enum AS ENUM ('men', 'women', 'both');
+          END IF;
+          IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'looking_for_enum') THEN
+            CREATE TYPE looking_for_enum AS ENUM ('chat', 'friendship', 'casual', 'long_term');
+          END IF;
+        END$$;
+      `,
+          roleName,
+        ),
+      ); */
       // Close the initial pool
       // or Disconnect from PG
       await pool.close();
@@ -62,7 +84,7 @@ export class TestContext {
           user: roleName,
           password: roleName,
         },
-        migrationsTable: 'migrations', // Add the migrationsTable property
+        migrationsTable: 'migrations', // The migrationsTable property
       });
 
       // Connect again with the new role and schema

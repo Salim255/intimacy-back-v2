@@ -1,0 +1,211 @@
+pipeline{
+    agent any
+    tools {
+        nodejs 'NODE20'
+        jdk 'JDK17'
+    }
+    environment {
+        registryCredentials = 'ecr:eu-west-3:awscreds'
+        imageName = "961341553126.dkr.ecr.eu-west-3.amazonaws.com/intimacy-repository"
+        intimacyRegistry = "https://961341553126.dkr.ecr.eu-west-3.amazonaws.com"
+      
+        JWT_SECRET = "testsecret"
+        JWT_EXPIRATION = "90d"
+        DB_TEST_HOST = 'localhost'
+        DB_TEST_PORT = "5432"
+        DB_TEST_DATABASE = "intimacyTest"
+        DB_TEST_USER = "salimh"
+        DB_TEST_PASSWORD = "myStrongPassword"
+
+
+        DATABASE_URL =  credentials('prod-db-url')
+        AWS_ACCESS_KEY_ID = credentials('bucket_aws_access_key_id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
+        REGION = "eu-west-3"
+    }
+    stages{
+        stage("Fetch code"){
+            steps{
+                git branch: 'develop', url: 'https://github.com/Salim255/intimacy-back-v2.git'
+            }
+            post{
+                always{
+                    echo "========always========"
+                }
+                success{
+                    echo "========A executed successfully========"
+                }
+                failure{
+                    echo "========A execution failed========"
+                }
+            }
+        }
+
+        stage('Start Postgresql DB') {
+            steps {
+                script {
+                sh 'docker rm -f pg-test || true'
+                sh 'docker network create test-net || true'
+
+                sh '''
+                    docker run -d --name pg-test --network test-net \
+                    -e POSTGRES_DB=$DB_TEST_DATABASE \
+                    -e POSTGRES_USER=$DB_TEST_USER \
+                    -e POSTGRES_PASSWORD=$DB_TEST_PASSWORD \
+                    -p 5432:5432 \
+                    postgres:14
+                '''
+
+                // ⏳ Your elegant "wait until ready"
+                sh '''
+                    echo "⏳ Waiting for PostgreSQL to be ready..."
+                    until docker exec pg-test psql -U $DB_TEST_USER -d $DB_TEST_DATABASE -c "SELECT 1;" > /dev/null 2>&1; do
+                    echo "Still waiting..."
+                    sleep 2
+                    done
+                    echo "✅ PostgreSQL is ready."
+                '''
+                }
+            }
+        }
+
+        stage("Install Dependencies"){
+            steps{
+                sh 'npm ci'       // <--- This installs dependencies
+            }
+            post{
+                always{
+                    echo "========always========"
+                }
+                success{
+                    echo "========B executed successfully========"
+                }
+                failure{
+                    echo "========B execution failed========"
+                }
+            }
+        }
+
+        stage("Build App"){
+            steps{
+                script { sh 'npm run build'}
+            }
+            post{
+                always{
+                    echo "========always========"
+                }
+                success{
+                    echo "======== Build executed successfully========"
+                    echo "========Archiving artifact======="
+                    archiveArtifacts artifacts: 'dist/**', fingerprint: true
+                }
+                failure{
+                    echo "========Build execution failed========"
+                }
+            }
+        }
+
+        stage("Unit Tests"){
+            steps{
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                   sh 'npm run test'
+                }
+               
+            }
+            post{
+    
+                success{
+                    echo "========Unit Tests executed successfully========"
+                }
+                failure{
+                    echo "========B execution failed========"
+                }
+            }
+        }
+
+       
+        stage('E2E Tests') {
+            steps {
+                script {
+                    sh 'npm run test:e2e'
+                }
+            }
+        }
+        
+        stage("Integration test"){
+            steps {
+                sh 'npm run test:integration'
+            }
+        }
+
+        stage("Test coverage"){
+            steps {
+                sh 'npm run test:cov'
+            }
+        }
+
+        stage("Checkstyle Analysis"){
+            steps{
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    sh 'npm run lint:report'
+                }
+              
+            }
+            post{
+                always {
+                    archiveArtifacts artifacts: 'eslint-report.json', fingerprint: true
+                }
+                success{
+                    echo "========checkstyle executed successfully========"
+                }
+                failure{
+                    echo "========checkstyle execution failed========"
+                }
+            }
+        }
+
+        stage('Archive Artifact') {
+                    steps {
+                        sh 'tar -czf dist.tar.gz dist' // or use zip if needed
+                        archiveArtifacts artifacts: 'dist.tar.gz', fingerprint: true
+                    }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    dockerImage = docker.build("${imageName}:backend-$BUILD_NUMBER", ".")
+                }
+            }
+        }
+
+        stage("Upload App Image"){
+            steps{
+                script{
+                    docker.withRegistry(intimacyRegistry, registryCredentials) {
+                      dockerImage.push("backend-${BUILD_NUMBER}")
+                      dockerImage.push("latest")
+                    }
+                }
+            }
+        }
+
+        stage("Deploy to Cluster"){
+            agent { label 'minikube' }
+            steps {
+                script {
+                    sh 'pwd'
+                    sh 'kubectl rollout restart deployment server-deployment -n default'
+                }
+            }
+        }
+    }
+
+
+  post {
+    always {
+      echo "🧹 Cleaning up test database container"
+      sh 'docker rm -f pg-test || true'
+    }
+  }
+}

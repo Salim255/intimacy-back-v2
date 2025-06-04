@@ -7,10 +7,10 @@ import { Chat } from '../entities/chat.entity';
 import { ChatWithDetailsDto } from '../chat-dto/chat-response.dto';
 import { MessageService } from '../../messages/services/message.service';
 import { ChatUsersService } from '../../chat-users/services/chat-users.service';
-import { SessionKaysService } from 'src/session-keys/services/session-kays.service';
+import { SessionKaysService } from '../../session-keys/services/session-kays.service';
 import { DataSource } from 'typeorm';
-import { PartnerConnectionStatus } from 'src/modules/messages/message-dto/message-dto';
-import { Message } from 'src/modules/messages/entities/message.entity';
+import { PartnerConnectionStatus } from '../../../modules/messages/message-dto/message-dto';
+import { Message } from '../../../modules/messages/entities/message.entity';
 
 export type CreateChatPayload = {
   content: string;

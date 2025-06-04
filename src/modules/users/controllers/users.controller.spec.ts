@@ -8,8 +8,6 @@ import {
 } from '../user-dto/create-user-response-dto';
 import { LoginUserDto } from '../user-dto/login-user-dto';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { UpdateUserDto, UserDto } from '../user-dto/update-user-dto';
-import { Request } from 'express';
 import { FileUploadModule } from '../../../common/file-upload/file-upload.module';
 import { UploadToS3Interceptor } from '../../../common/file-upload/interceptors/upload-to-s3.interceptor';
 
@@ -56,8 +54,6 @@ describe('UsersController', () => {
     it('should return created user response', async () => {
       // Arrange: Set up the necessary data and mocks
       const createUserDto: CreateUserDto = {
-        first_name: 'John',
-        last_name: 'Doe',
         password: 'password123',
         email: 'user@example.com',
         public_key: 'publicKeyHere',
@@ -131,32 +127,6 @@ describe('UsersController', () => {
     expect(mockUsersService.login).toHaveBeenCalledTimes(1);
     expect(result).toEqual(userLoggingResponse);
     expect(result.status).toEqual('success');
-  });
-
-  it('should update user', async () => {
-    // Arrange
-    const userInput: UpdateUserDto = { last_name: 'Harron' };
-    const updatedUser: UserDto = {
-      id: 1,
-      last_name: 'Harron',
-      first_name: 'Hassan',
-      avatar: 'avatar',
-      connection_status: 'online',
-    };
-    mockUsersService.updateUser.mockResolvedValue(updatedUser);
-    mockUsersService.getUserById.mockResolvedValue(UpdateUserDto);
-    const req = {
-      user: { id: 1 },
-    } as Partial<Request> as Request;
-
-    const file = undefined as unknown as Express.Multer.File;
-    // Act
-    const result = await controller.updateMe(userInput, file, req);
-
-    // Assert
-    expect(mockUsersService.updateUser).toHaveBeenCalledTimes(1);
-    expect(result.status).toEqual('success');
-    expect(result.data.user.id).toEqual(updatedUser.id);
   });
 
   afterEach(() => {

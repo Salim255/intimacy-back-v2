@@ -29,7 +29,7 @@ import {
 import { ChatsService } from '../services/chats.service';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
-import { Message } from 'src/modules/messages/entities/message.entity';
+import { Message } from '../../../modules/messages/entities/message.entity';
 
 @ApiTags('Chats')
 @Controller('chats')
@@ -57,7 +57,6 @@ export class ChatsController {
   async createChat(
     @Body() createChatDto: CreateChatDto,
   ): Promise<CreateChatResponseDto> {
-    console.log(createChatDto);
     //1 Create chat Logic to create a new chat
     const result = await this.chatsService.createFullChat({
       ...createChatDto,

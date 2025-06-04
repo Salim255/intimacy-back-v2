@@ -9,7 +9,7 @@ import { MessagesModule } from '../messages/messages.module';
 import { AuthModule } from '../auth/auth.module';
 import { ChatGateway } from './gateway/chat.gateway';
 import { SocketModule } from '../socket/socket.module';
-import { SessionKeysModule } from 'src/session-keys/session-keys.module';
+import { SessionKeysModule } from '../session-keys/session-keys.module';
 import { RoomGateway } from './gateway/room.gateway';
 
 @Module({

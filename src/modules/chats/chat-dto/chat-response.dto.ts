@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty } from 'class-validator';
-import { Message } from 'src/modules/messages/entities/message.entity';
-import { PartnerConnectionStatus } from 'src/modules/messages/message-dto/message-dto';
+import { Message } from '../../../modules/messages/entities/message.entity';
+import { PartnerConnectionStatus } from '../../../modules/messages/message-dto/message-dto';
 
 export class CreateChatDto {
   @ApiProperty({ description: 'Message content' })
