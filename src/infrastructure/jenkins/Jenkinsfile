@@ -73,7 +73,6 @@ pipeline{
             steps{
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
                    sh 'npm run test'
-                   sh 'npm run test:cov'
                 }
                
             }
@@ -85,6 +84,62 @@ pipeline{
                 failure{
                     echo "========B execution failed========"
                 }
+            }
+        }
+
+        stage("Integration test"){
+            steps {
+
+            }
+        }
+
+       stage('e2e test') {
+            steps {
+                script {
+                echo '🛠 Step 1: Create PostgreSQL container'
+                sh '''
+                    docker run --rm -d \
+                    --name intimacy-test-db \
+                    -e POSTGRES_DB=intimacyTest \
+                    -e POSTGRES_USER=salimh \
+                    -e POSTGRES_PASSWORD=test123 \
+                    -p 5433:5432 \
+                    postgres:14
+                '''
+
+                echo '⏳ Step 2: Wait for database to be ready'
+                sh '''
+                    for i in {1..10}; do
+                    docker exec intimacy-test-db pg_isready -U salimhassanmohamed && break
+                    echo "Waiting for DB..."
+                    sleep 2
+                    done
+                '''
+                }
+
+                echo '🧪 Step 3: Run integration tests'
+                withEnv([
+                'DB_TEST_HOST=127.0.0.1',
+                'DB_TEST_PORT=5433',
+                'DB_TEST_DATABASE=intimacyTest',
+                'DB_TEST_USER=salimh',
+                'DB_TEST_PASSWORD=test123'
+                ]) {
+                sh 'npm run test:e2e'
+                }
+            }
+
+            post {
+                always {
+                echo '🧹 Cleaning up: stopping PostgreSQL container'
+                sh 'docker stop intimacy-test-db || true'
+                }
+            }
+        }
+
+        stage("Test coverage"){
+            steps {
+                sh 'npm run test:cov'
             }
         }
 
