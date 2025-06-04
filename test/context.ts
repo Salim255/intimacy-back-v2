@@ -9,7 +9,7 @@ import { PoolOptions } from '../src/config/pool';
 
 // Default connection settings
 const DEFAULT_OPTS: PoolOptions = {
-  host: process.env.DB_TEST_HOST ?? '',
+  host: process.env.DB_TEST_HOST ?? 'localhost',
   port: Number(process.env.DB_TEST_PORT),
   database: process.env.DB_TEST_DATABASE ?? '',
   user: process.env.DB_TEST_USER ?? '',
