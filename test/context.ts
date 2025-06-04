@@ -22,10 +22,6 @@ export class TestContext {
   private connectionString: string;
   constructor(roleName: string) {
     this.roleName = roleName;
-    console.log(
-      process.env.DB_TEST_PASSWORD,
-      typeof process.env.DB_TEST_PASSWORD,
-    );
     this.connectionString = `postgresql://${roleName}:${roleName}@${DEFAULT_OPTS.host}:${DEFAULT_OPTS.port}/${DEFAULT_OPTS.database}`;
   }
 
