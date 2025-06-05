@@ -27,6 +27,7 @@ pipeline{
         stage("Fetch code"){
             steps{
                 git branch: 'develop', url: 'https://github.com/Salim255/intimacy-back-v2.git'
+               
             }
             post{
                 always{
@@ -163,7 +164,7 @@ pipeline{
                 }
             }
         }
-        
+
         stage('SonarQube Analysis') {
             environment {
                 SONARQUBE_SCANNER_HOME = tool 'sonar7.1' // Ensure you have configured SonarQube scanner in Jenkins

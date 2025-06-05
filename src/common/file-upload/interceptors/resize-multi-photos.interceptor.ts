@@ -26,6 +26,7 @@ export class ResizeMultiPhotosInterceptor implements NestInterceptor {
       await Promise.all(
         files.map(async (file) => {
           const buffer = await sharp(file.buffer)
+            .rotate() // Auto-orient based on EXIF
             .resize(500, 500)
             .toFormat('jpeg')
             .jpeg({ quality: 90 })
