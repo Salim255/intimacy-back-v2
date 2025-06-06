@@ -51,6 +51,14 @@ export class CreateProfileDto {
   @IsNotEmpty()
   city: string;
 
+  @ApiProperty({ description: 'Profile longitude' })
+  @IsNotEmpty()
+  longitude: number;
+
+  @ApiProperty({ description: 'Profile latitude' })
+  @IsNotEmpty()
+  latitude: number;
+
   @ApiProperty({ description: 'User interest in' })
   @IsEnum(InterestedIn)
   @IsNotEmpty()

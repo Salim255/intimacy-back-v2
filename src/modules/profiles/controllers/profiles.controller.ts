@@ -43,6 +43,7 @@ import { FileUploadService } from '../../../common/file-upload/file-upload.servi
 import { ResizeMultiPhotosInterceptor } from '../../../common/file-upload/interceptors/resize-multi-photos.interceptor';
 import { MultiUploadToS3Interceptor } from '../../../common/file-upload/interceptors/multi-upload-to-s3-interceptor';
 import { RemoveImagesFromToS3Interceptor } from '../../../common/file-upload/interceptors/remove-images-s3-interceptor';
+import { GoogleHomeInterceptor } from '../../../common/file-upload/interceptors/google-home-interceptor';
 
 @ApiTags('Profiles')
 @Controller('profiles')
@@ -57,6 +58,7 @@ export class ProfilesController {
     FilesInterceptor('photos', 4, new FileUploadService().getMulterOptions()),
     ResizeMultiPhotosInterceptor,
     MultiUploadToS3Interceptor,
+    GoogleHomeInterceptor,
   )
   @ApiConsumes('multipart/form-data')
   @HttpCode(201)
@@ -70,8 +72,16 @@ export class ProfilesController {
   async createProfile(@Req() req: Request): Promise<CreatedProfileResponseDto> {
     try {
       // 1) Pull your DTO-like fields from req.body
-      const { name, birthDate, gender, country, city, interestedIn } =
-        req.body as CreateProfileDto;
+      const {
+        name,
+        birthDate,
+        gender,
+        country,
+        city,
+        interestedIn,
+        latitude,
+        longitude,
+      } = req.body as CreateProfileDto;
 
       const payload: CreateProfileDto = {
         name,
@@ -80,6 +90,8 @@ export class ProfilesController {
         country,
         city,
         interestedIn,
+        latitude,
+        longitude,
         photos: (req.files as Express.Multer.File[])?.map(
           (file) => file.filename,
         ),
@@ -129,6 +141,7 @@ export class ProfilesController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @Patch('update-location')
+  @UseInterceptors(GoogleHomeInterceptor)
   @ApiBody({ type: UpdateCoordinatesBodyDto })
   @ApiResponse({
     status: 200,
@@ -140,7 +153,6 @@ export class ProfilesController {
       const { profileId, latitude, longitude } =
         req.body as UpdateCoordinatesBodyDto;
       const result = [profileId, latitude, longitude].filter(Boolean);
-      console.log(result);
       if (result.length !== 3) {
         throw new Error();
       }
