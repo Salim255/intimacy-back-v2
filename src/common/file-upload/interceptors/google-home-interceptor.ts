@@ -19,12 +19,10 @@ export class GoogleHomeInterceptor implements NestInterceptor {
   ): Promise<Observable<any>> {
     const req = context.switchToHttp().getRequest<Request>();
 
-    const { latitude, longitude, city, country } = req.body as CreateProfileDto;
-
-    if ((!city || !country) && latitude && longitude) {
+    const { latitude, longitude } = req.body as CreateProfileDto;
+    if (latitude && longitude) {
       const location: { city: string; country: string } | null =
         await this.locationService.reverseGeocode(latitude, longitude);
-
       if (location) {
         Object.assign(req.body, {
           city: location.city,

@@ -96,6 +96,8 @@ export class ProfilesController {
           (file) => file.filename,
         ),
       };
+
+      console.log(payload);
       const { id: userId } = req.user as { id: number };
       const createdProfile: ProfileDto =
         await this.profilesService.createProfile(payload, userId);

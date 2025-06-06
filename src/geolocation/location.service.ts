@@ -39,9 +39,26 @@ export class LocationService {
         this.httpService.axiosRef as AxiosInstance
       ).get<GoogleGeocodeResponse>(url);
       const data = res.data;
-
       if (!data || !data.results?.length) return null;
 
+      // Prefer plus_code if available
+      if (data.plus_code?.compound_code) {
+        const compound = data.plus_code.compound_code;
+
+        // Remove the plus code (first word) — e.g., 'J2M7+2CH'
+        const parts = compound.split(' ');
+        parts.shift(); // remove 'J2M7+2CH'
+
+        const locationString = parts.join(' '); // "Babyntsi, Kyiv Oblast, Ukraine"
+        const segments = locationString.split(',').map((s) => s.trim());
+
+        const country = segments.pop(); // remove and store the last part as country
+        const city = segments.join(', '); // rest is the "city"
+
+        return city && country ? { city, country } : null;
+      }
+
+      // Fallback to address_components if no plus_code
       const components = data.results[0].address_components;
 
       const city = components.find(
@@ -53,6 +70,7 @@ export class LocationService {
       const country = components.find((c) =>
         c.types.includes('country'),
       )?.long_name;
+
       return city && country ? { city, country } : null;
     } catch (error: any) {
       const errMessage =
