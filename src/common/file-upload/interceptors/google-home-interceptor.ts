@@ -23,6 +23,7 @@ export class GoogleHomeInterceptor implements NestInterceptor {
     if (latitude && longitude) {
       const location: { city: string; country: string } | null =
         await this.locationService.reverseGeocode(latitude, longitude);
+      console.log(location);
       if (location) {
         Object.assign(req.body, {
           city: location.city,

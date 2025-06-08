@@ -33,6 +33,9 @@ exports.up = (pgm) => {
           children BOOLEAN DEFAULT FALSE,
           interested_in interested_in_enum NOT NULL,
           looking_for looking_for_enum[] DEFAULT NULL,
+          min_age INTEGER NOT NULL DEFAULT 18,    -- Added min_age with default
+          max_age INTEGER NOT NULL DEFAULT 100,   -- Added max_age with default
+          max_distance_km INTEGER NOT NULL DEFAULT 100000,
           photos TEXT[] NOT NULL DEFAULT '{}',
           created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

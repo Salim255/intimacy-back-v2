@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { AxiosInstance } from 'axios';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
 
@@ -35,9 +34,8 @@ export class LocationService {
     const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`;
 
     try {
-      const res = await (
-        this.httpService.axiosRef as AxiosInstance
-      ).get<GoogleGeocodeResponse>(url);
+      const res =
+        await this.httpService.axiosRef.get<GoogleGeocodeResponse>(url);
       const data = res.data;
       if (!data || !data.results?.length) return null;
 
