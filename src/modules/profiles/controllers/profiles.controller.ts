@@ -29,6 +29,7 @@ import {
   UpdateBioBodyDto,
   UpdateChildrenBodyDto,
   UpdateCoordinatesBodyDto,
+  UpdateDistanceRangeBodyDto,
   UpdateEducationBodyDto,
   UpdateGenderBodyDto,
   UpdateHeightBodyDto,
@@ -617,6 +618,52 @@ export class ProfilesController {
         {
           status: 'fail',
           message: 'Error while updating profile age range ' + errMessage,
+          code: 'ERROR_UPDATE_PROFILE',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Patch('update-distance-range')
+  @ApiBody({ type: UpdateDistanceRangeBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated profile with success',
+    type: GetProfileResponseDto,
+  })
+  async updateDistanceRange(
+    @Req() req: Request,
+  ): Promise<GetProfileResponseDto> {
+    try {
+      const { profileId, distanceRange } =
+        req.body as UpdateDistanceRangeBodyDto;
+      const result = [profileId, distanceRange].filter(Boolean);
+      if (result.length !== 2) {
+        throw new Error(`
+          Missing data for update profile update profile  ${result.length}`);
+      }
+
+      const updatedProfile = await this.profilesService.updateDistanceRange({
+        profileId,
+        distanceRange,
+      });
+
+      return {
+        status: 'success',
+        data: {
+          profile: updatedProfile,
+        },
+      };
+    } catch (error) {
+      const errMessage =
+        error instanceof Error ? error.message : 'unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error while updating profile distance range ' + errMessage,
           code: 'ERROR_UPDATE_PROFILE',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,

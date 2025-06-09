@@ -9,6 +9,7 @@ import {
   UpdateAgeRangeBodyDto,
   UpdateBioBodyDto,
   UpdateChildrenBodyDto,
+  UpdateDistanceRangeBodyDto,
   UpdateEducationBodyDto,
   UpdateGenderBodyDto,
   UpdateHeightBodyDto,
@@ -142,6 +143,17 @@ export class ProfilesService {
 
   async updatePhotos(updatePayload: UpdatePhotosBodyDto): Promise<ProfileDto> {
     const result = await this.profileRepository.updatePhots(updatePayload);
+    if (typeof result.looking_for === 'string') {
+      result.looking_for = this.convertToLookingFor(result.looking_for);
+    }
+    return result;
+  }
+
+  async updateDistanceRange(
+    distancePayload: UpdateDistanceRangeBodyDto,
+  ): Promise<ProfileDto> {
+    const result =
+      await this.profileRepository.updateDistanceRange(distancePayload);
     if (typeof result.looking_for === 'string') {
       result.looking_for = this.convertToLookingFor(result.looking_for);
     }

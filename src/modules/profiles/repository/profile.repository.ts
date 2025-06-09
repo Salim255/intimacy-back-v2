@@ -6,6 +6,7 @@ import {
   UpdateAgeRangeBodyDto,
   UpdateBioBodyDto,
   UpdateChildrenBodyDto,
+  UpdateDistanceRangeBodyDto,
   UpdateEducationBodyDto,
   UpdateGenderBodyDto,
   UpdateHeightBodyDto,
@@ -234,5 +235,20 @@ export class ProfileRepository {
       values,
     );
     return updatedProfile[0];
+  }
+
+  async updateDistanceRange(
+    updatePayload: UpdateDistanceRangeBodyDto,
+  ): Promise<ProfileDto> {
+    const values = [updatePayload.distanceRange, updatePayload.profileId];
+    const query = `UPDATE profiles
+    SET max_distance_km = $1
+    WHERE profiles.id = $2
+    RETURNING *;`;
+    const updatedProfile: ProfileDto[][] = await this.dataSource.query(
+      query,
+      values,
+    );
+    return updatedProfile[0][0];
   }
 }

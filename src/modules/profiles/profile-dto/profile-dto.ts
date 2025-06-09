@@ -280,3 +280,13 @@ export class UpdateAgeRangeBodyDto {
   @IsNotEmpty()
   profileId: number;
 }
+
+export class UpdateDistanceRangeBodyDto {
+  @ApiProperty({ description: 'Profile distance range ...' })
+  @IsNotEmpty()
+  distanceRange: number;
+
+  @ApiProperty({ description: 'Profile id' })
+  @IsNotEmpty()
+  profileId: number;
+}
