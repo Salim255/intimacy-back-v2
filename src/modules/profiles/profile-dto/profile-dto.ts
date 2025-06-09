@@ -18,7 +18,7 @@ export const profileExample = {
   children: false,
   education: 'uni',
   interested_in: InterestedIn.Both,
-  looking_for: LookingFor.Casual,
+  looking_for: [LookingFor.Casual],
   photos: ['1', '2', '3', '4'],
   created_at: new Date(),
   updated_at: new Date(),
@@ -114,7 +114,7 @@ export class ProfileDto {
   interested_in: InterestedIn;
 
   @ApiProperty({ description: 'User looking for' })
-  looking_for: LookingFor;
+  looking_for: LookingFor[];
 
   @ApiProperty({ description: 'User photos' })
   photos: string[];
@@ -261,6 +261,20 @@ export class UpdatePhotosBodyDto {
   @ApiProperty({ description: 'Profile photos ' })
   @IsNotEmpty()
   photos: string[];
+
+  @ApiProperty({ description: 'Profile id' })
+  @IsNotEmpty()
+  profileId: number;
+}
+
+export class UpdateAgeRangeBodyDto {
+  @ApiProperty({ description: 'Profile maxAge range ...' })
+  @IsNotEmpty()
+  maxAge: number;
+
+  @ApiProperty({ description: 'Profile minAge range ...' })
+  @IsNotEmpty()
+  minAge: number;
 
   @ApiProperty({ description: 'Profile id' })
   @IsNotEmpty()

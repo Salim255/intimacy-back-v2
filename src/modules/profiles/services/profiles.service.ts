@@ -6,6 +6,7 @@ import {
 import {
   CreateProfileDto,
   ProfileDto,
+  UpdateAgeRangeBodyDto,
   UpdateBioBodyDto,
   UpdateChildrenBodyDto,
   UpdateEducationBodyDto,
@@ -16,6 +17,7 @@ import {
   UpdateLookingForBodyDto,
   UpdatePhotosBodyDto,
 } from '../profile-dto/profile-dto';
+import { LookingFor } from '../entities/profile.entity';
 
 @Injectable()
 export class ProfilesService {
@@ -29,72 +31,130 @@ export class ProfilesService {
       data,
       userId,
     );
+    if (typeof createdProfile.looking_for === 'string') {
+      createdProfile.looking_for = this.convertToLookingFor(
+        createdProfile.looking_for,
+      );
+    }
     return createdProfile;
   }
 
   async getProfileById(userId: number): Promise<ProfileDto> {
     const fetchedProfile: ProfileDto =
       await this.profileRepository.getProfile(userId);
+    if (typeof fetchedProfile.looking_for === 'string') {
+      fetchedProfile.looking_for = this.convertToLookingFor(
+        fetchedProfile.looking_for,
+      );
+    }
     return fetchedProfile;
   }
 
   async updateProfileLocation(
     locationPayload: UpdateCoordinatesPayload,
   ): Promise<ProfileDto> {
-    const result = this.profileRepository.updateLocation(locationPayload);
+    const result = await this.profileRepository.updateLocation(locationPayload);
+    if (typeof result.looking_for === 'string') {
+      result.looking_for = this.convertToLookingFor(result.looking_for);
+    }
     return result;
   }
 
   async updateBio(updateBio: UpdateBioBodyDto): Promise<ProfileDto> {
-    const result = this.profileRepository.updateBio(updateBio);
+    const result = await this.profileRepository.updateBio(updateBio);
+    if (typeof result.looking_for === 'string') {
+      result.looking_for = this.convertToLookingFor(result.looking_for);
+    }
     return result;
   }
 
   async updateHome(homeData: UpdateHomeBodyDto): Promise<ProfileDto> {
-    const result = this.profileRepository.updateHome(homeData);
+    const result = await this.profileRepository.updateHome(homeData);
+    if (typeof result.looking_for === 'string') {
+      result.looking_for = this.convertToLookingFor(result.looking_for);
+    }
+    return result;
+  }
+
+  async updateAgeRange(agePayload: UpdateAgeRangeBodyDto): Promise<ProfileDto> {
+    const result = await this.profileRepository.updateAgeRange(agePayload);
+    if (typeof result.looking_for === 'string') {
+      result.looking_for = this.convertToLookingFor(result.looking_for);
+    }
     return result;
   }
 
   async updateChildren(
     updatePayload: UpdateChildrenBodyDto,
   ): Promise<ProfileDto> {
-    const result = this.profileRepository.updateChildren(updatePayload);
+    const result = await this.profileRepository.updateChildren(updatePayload);
+    if (typeof result.looking_for === 'string') {
+      result.looking_for = this.convertToLookingFor(result.looking_for);
+    }
     return result;
   }
 
   async updateEducation(
     updatePayload: UpdateEducationBodyDto,
   ): Promise<ProfileDto> {
-    const result = this.profileRepository.updateEducation(updatePayload);
+    const result = await this.profileRepository.updateEducation(updatePayload);
+    if (typeof result.looking_for === 'string') {
+      result.looking_for = this.convertToLookingFor(result.looking_for);
+    }
     return result;
   }
 
   async updateGender(updatePayload: UpdateGenderBodyDto): Promise<ProfileDto> {
-    const result = this.profileRepository.updateGender(updatePayload);
+    const result = await this.profileRepository.updateGender(updatePayload);
+    if (typeof result.looking_for === 'string') {
+      result.looking_for = this.convertToLookingFor(result.looking_for);
+    }
     return result;
   }
 
   async updateHeight(updatePayload: UpdateHeightBodyDto): Promise<ProfileDto> {
-    const result = this.profileRepository.updateHeight(updatePayload);
+    const result = await this.profileRepository.updateHeight(updatePayload);
+    if (typeof result.looking_for === 'string') {
+      result.looking_for = this.convertToLookingFor(result.looking_for);
+    }
     return result;
   }
 
   async updateInterests(
     updatePayload: UpdateInterestsBodyDto,
   ): Promise<ProfileDto> {
-    const result = this.profileRepository.updateInterests(updatePayload);
+    const result = await this.profileRepository.updateInterests(updatePayload);
+    if (typeof result.looking_for === 'string') {
+      result.looking_for = this.convertToLookingFor(result.looking_for);
+    }
     return result;
   }
 
   async updateLookingFor(
     updatePayload: UpdateLookingForBodyDto,
   ): Promise<ProfileDto> {
-    const result = this.profileRepository.updateLookingFor(updatePayload);
+    const result = await this.profileRepository.updateLookingFor(updatePayload);
+    if (typeof result.looking_for === 'string') {
+      result.looking_for = this.convertToLookingFor(result.looking_for);
+    }
     return result;
   }
 
   async updatePhotos(updatePayload: UpdatePhotosBodyDto): Promise<ProfileDto> {
-    const result = this.profileRepository.updatePhots(updatePayload);
+    const result = await this.profileRepository.updatePhots(updatePayload);
+    if (typeof result.looking_for === 'string') {
+      result.looking_for = this.convertToLookingFor(result.looking_for);
+    }
     return result;
+  }
+
+  convertToLookingFor(lookingFor: string): LookingFor[] {
+    let lookingForList: string[] = [];
+    const lookingForStr = lookingFor;
+    lookingForList = lookingForStr
+      .replace(/[{}]/g, '') // Remove { and }
+      .split(',')
+      .map((item: string) => item.trim());
+    return lookingForList as LookingFor[];
   }
 }

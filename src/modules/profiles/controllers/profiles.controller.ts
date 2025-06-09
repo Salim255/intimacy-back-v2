@@ -25,6 +25,7 @@ import {
   CreateProfileDto,
   GetProfileResponseDto,
   ProfileDto,
+  UpdateAgeRangeBodyDto,
   UpdateBioBodyDto,
   UpdateChildrenBodyDto,
   UpdateCoordinatesBodyDto,
@@ -572,6 +573,50 @@ export class ProfilesController {
         {
           status: 'fail',
           message: 'Error while updating profile  photos ' + errMessage,
+          code: 'ERROR_UPDATE_PROFILE',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Patch('update-age-range')
+  @ApiBody({ type: UpdateAgeRangeBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated profile with success',
+    type: GetProfileResponseDto,
+  })
+  async updateAgeRange(@Req() req: Request): Promise<GetProfileResponseDto> {
+    try {
+      const { profileId, minAge, maxAge } = req.body as UpdateAgeRangeBodyDto;
+      const result = [profileId, minAge, maxAge].filter(Boolean);
+      if (result.length !== 3) {
+        throw new Error(`
+          Missing data for update profile update profile  ${result.length}`);
+      }
+
+      const updatedProfile = await this.profilesService.updateAgeRange({
+        profileId,
+        minAge,
+        maxAge,
+      });
+
+      return {
+        status: 'success',
+        data: {
+          profile: updatedProfile,
+        },
+      };
+    } catch (error) {
+      const errMessage =
+        error instanceof Error ? error.message : 'unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error while updating profile age range ' + errMessage,
           code: 'ERROR_UPDATE_PROFILE',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,

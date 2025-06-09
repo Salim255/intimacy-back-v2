@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import {
   CreateProfileDto,
   ProfileDto,
+  UpdateAgeRangeBodyDto,
   UpdateBioBodyDto,
   UpdateChildrenBodyDto,
   UpdateEducationBodyDto,
@@ -196,11 +197,30 @@ export class ProfileRepository {
     SET looking_for = $1
     WHERE profiles.id = $2
     RETURNING *;`;
-    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+    const updatedProfile: ProfileDto[][] = await this.dataSource.query(
       query,
       values,
     );
-    return updatedProfile[0];
+    return updatedProfile[0][0];
+  }
+
+  async updateAgeRange(
+    updatePayload: UpdateAgeRangeBodyDto,
+  ): Promise<ProfileDto> {
+    const values = [
+      updatePayload.minAge,
+      updatePayload.maxAge,
+      updatePayload.profileId,
+    ];
+    const query = `UPDATE profiles
+    SET min_age = $1, max_age = $2
+    WHERE profiles.id = $3
+    RETURNING *;`;
+    const updatedProfile: ProfileDto[][] = await this.dataSource.query(
+      query,
+      values,
+    );
+    return updatedProfile[0][0];
   }
 
   async updatePhots(updatePayload: UpdatePhotosBodyDto): Promise<ProfileDto> {
