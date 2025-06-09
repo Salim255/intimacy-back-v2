@@ -27,6 +27,19 @@ export enum LookingFor {
   LongTerm = 'long_term',
 }
 
+export enum SexOrientation {
+  Straight = 'straight',
+  Heterosexual = 'heterosexual',
+  Gay = 'gay',
+  Lesbian = 'lesbian',
+  Bisexual = 'bisexual',
+  Asexual = 'asexual',
+  Pansexual = 'pansexual',
+  Queer = 'queer',
+  Questioning = 'questioning',
+  Demisexual = 'demisexual',
+}
+
 @Entity('profile')
 export class Profile {
   @PrimaryGeneratedColumn()
@@ -88,6 +101,14 @@ export class Profile {
 
   @Column({ type: 'double precision', nullable: true })
   longitude: number;
+
+  @Column({
+    type: 'enum',
+    enum: SexOrientation,
+    array: true,
+    nullable: true,
+  })
+  sexual_orientation: SexOrientation;
 
   @CreateDateColumn({
     type: 'timestamp with time zone',

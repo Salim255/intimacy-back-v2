@@ -14,6 +14,7 @@ import {
   UpdateInterestsBodyDto,
   UpdateLookingForBodyDto,
   UpdatePhotosBodyDto,
+  UpdateSexOrientationBodyDto,
 } from '../profile-dto/profile-dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 
@@ -243,6 +244,21 @@ export class ProfileRepository {
     const values = [updatePayload.distanceRange, updatePayload.profileId];
     const query = `UPDATE profiles
     SET max_distance_km = $1
+    WHERE profiles.id = $2
+    RETURNING *;`;
+    const updatedProfile: ProfileDto[][] = await this.dataSource.query(
+      query,
+      values,
+    );
+    return updatedProfile[0][0];
+  }
+
+  async updateSexOrientation(
+    updatePayload: UpdateSexOrientationBodyDto,
+  ): Promise<ProfileDto> {
+    const values = [updatePayload.sexOrientation, updatePayload.profileId];
+    const query = `UPDATE profiles
+    SET sexual_orientation = $1
     WHERE profiles.id = $2
     RETURNING *;`;
     const updatedProfile: ProfileDto[][] = await this.dataSource.query(

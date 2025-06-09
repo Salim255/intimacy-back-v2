@@ -1,5 +1,10 @@
 import { IsArray, IsDate, IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { Gender, InterestedIn, LookingFor } from '../entities/profile.entity';
+import {
+  Gender,
+  InterestedIn,
+  LookingFor,
+  SexOrientation,
+} from '../entities/profile.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -115,6 +120,9 @@ export class ProfileDto {
 
   @ApiProperty({ description: 'User looking for' })
   looking_for: LookingFor[];
+
+  @ApiProperty({ description: 'User sex orientation' })
+  sexual_orientation: SexOrientation;
 
   @ApiProperty({ description: 'User photos' })
   photos: string[];
@@ -285,6 +293,16 @@ export class UpdateDistanceRangeBodyDto {
   @ApiProperty({ description: 'Profile distance range ...' })
   @IsNotEmpty()
   distanceRange: number;
+
+  @ApiProperty({ description: 'Profile id' })
+  @IsNotEmpty()
+  profileId: number;
+}
+
+export class UpdateSexOrientationBodyDto {
+  @ApiProperty({ description: 'Profile sex orientation' })
+  @IsNotEmpty()
+  sexOrientation: SexOrientation;
 
   @ApiProperty({ description: 'Profile id' })
   @IsNotEmpty()

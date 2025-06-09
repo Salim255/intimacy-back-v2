@@ -37,6 +37,7 @@ import {
   UpdateInterestsBodyDto,
   UpdateLookingForBodyDto,
   UpdatePhotosBodyDto,
+  UpdateSexOrientationBodyDto,
 } from '../profile-dto/profile-dto';
 import { JwtAuthGuard } from '../../../modules/auth/jwt-auth.guard';
 import { Request } from 'express';
@@ -664,6 +665,52 @@ export class ProfilesController {
         {
           status: 'fail',
           message: 'Error while updating profile distance range ' + errMessage,
+          code: 'ERROR_UPDATE_PROFILE',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('access-token')
+  @Patch('update-sex-orientation')
+  @ApiBody({ type: UpdateSexOrientationBodyDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Updated profile with success',
+    type: GetProfileResponseDto,
+  })
+  async updateSexOrientation(
+    @Req() req: Request,
+  ): Promise<GetProfileResponseDto> {
+    try {
+      const { profileId, sexOrientation } =
+        req.body as UpdateSexOrientationBodyDto;
+      const result = [profileId, sexOrientation].filter(Boolean);
+      if (result.length !== 2) {
+        throw new Error(`
+          Missing data for update profile update profile  ${result.length}`);
+      }
+
+      const updatedProfile = await this.profilesService.updateSexOrientation({
+        profileId,
+        sexOrientation,
+      });
+
+      return {
+        status: 'success',
+        data: {
+          profile: updatedProfile,
+        },
+      };
+    } catch (error) {
+      const errMessage =
+        error instanceof Error ? error.message : 'unknown error';
+      throw new HttpException(
+        {
+          status: 'fail',
+          message: 'Error while updating profile sex orientation ' + errMessage,
           code: 'ERROR_UPDATE_PROFILE',
         },
         HttpStatus.INTERNAL_SERVER_ERROR,

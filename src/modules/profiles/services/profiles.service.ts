@@ -17,6 +17,7 @@ import {
   UpdateInterestsBodyDto,
   UpdateLookingForBodyDto,
   UpdatePhotosBodyDto,
+  UpdateSexOrientationBodyDto,
 } from '../profile-dto/profile-dto';
 import { LookingFor } from '../entities/profile.entity';
 
@@ -154,6 +155,17 @@ export class ProfilesService {
   ): Promise<ProfileDto> {
     const result =
       await this.profileRepository.updateDistanceRange(distancePayload);
+    if (typeof result.looking_for === 'string') {
+      result.looking_for = this.convertToLookingFor(result.looking_for);
+    }
+    return result;
+  }
+
+  async updateSexOrientation(
+    distancePayload: UpdateSexOrientationBodyDto,
+  ): Promise<ProfileDto> {
+    const result =
+      await this.profileRepository.updateSexOrientation(distancePayload);
     if (typeof result.looking_for === 'string') {
       result.looking_for = this.convertToLookingFor(result.looking_for);
     }
