@@ -150,7 +150,10 @@ export class MatchRepository {
           SELECT 
             latitude, 
             longitude, 
-            max_distance_km 
+            max_distance_km,
+            interested_in,
+            max_age,
+            min_age
           FROM profiles 
           WHERE user_id = $1
       )
@@ -177,14 +180,15 @@ export class MatchRepository {
         
   
       FROM users AS us
-  
+      CROSS JOIN host_user
+      
       LEFT JOIN matches AS ms 
         ON ms.to_user_id = $1 AND ms.from_user_id = us.id
       
       LEFT JOIN profiles AS pr
-        ON pr.user_id = us.id AND pr.user_id <> $1
+        ON pr.user_id = us.id 
+        AND pr.user_id <> $1
       
-
       -- Exclude users already matched
       WHERE us.id <> $1
 
@@ -198,13 +202,23 @@ export class MatchRepository {
 
       -- Distance filtering: Fetch users within the max distance set by the searching user
       AND 
-        -- Fetch the searching user's max_distance_km for the distance comparison
+       ( -- Fetch the searching user's max_distance_km for the distance comparison
         (SELECT max_distance_km FROM host_user) >= 120 -- Global match condition
 
         OR earth_distance(
           ll_to_earth(pr.latitude, pr.longitude),
-          ll_to_earth( (SELECT latitude FROM host_user), (SELECT longitude FROM host_user) ) -- host_user's latitude & longitude
-        ) <= (SELECT max_distance_km FROM host_user) * 1000
+          ll_to_earth( host_user.latitude, host_user.longitude ) -- host_user's latitude & longitude
+        ) <= host_user.max_distance_km  * 1000
+      )
+      
+      -- Filter based on interested_in
+      AND (
+        host_user.interested_in = 'both'
+        OR (host_user.interested_in = 'men' AND pr.gender = 'male')
+        OR (host_user.interested_in = 'women' AND pr.gender = 'female')
+      )
+
+      AND EXTRACT(YEAR FROM AGE(pr.birth_date)) BETWEEN host_user.min_age AND host_user.max_age;
       `;
     const result: PotentialMatch[] = await this.dataSource.query(query, [
       userId,
