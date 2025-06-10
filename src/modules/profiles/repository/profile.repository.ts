@@ -71,16 +71,17 @@ export class ProfileRepository {
       coordinates.longitude,
       coordinates.profileId,
     ];
+
     const query = `UPDATE profiles
     SET latitude = $1,longitude = $2
     WHERE profiles.id = $3
     RETURNING *;`;
 
-    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+    const updatedProfile: ProfileDto[][] = await this.dataSource.query(
       query,
       values,
     );
-    return updatedProfile[0];
+    return updatedProfile[0][0];
   }
 
   async updateBio(updatePayload: UpdateBioBodyDto): Promise<ProfileDto> {
@@ -120,16 +121,15 @@ export class ProfileRepository {
     updatePayload: UpdateChildrenBodyDto,
   ): Promise<ProfileDto> {
     const values = [updatePayload.status, updatePayload.profileId];
-
     const query = `UPDATE profiles
     SET children = $1
     WHERE profiles.id = $2
     RETURNING *;`;
-    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+    const updatedProfile: ProfileDto[][] = await this.dataSource.query(
       query,
       values,
     );
-    return updatedProfile[0];
+    return updatedProfile[0][0];
   }
 
   async updateEducation(
@@ -141,11 +141,11 @@ export class ProfileRepository {
     SET education = $1
     WHERE profiles.id = $2
     RETURNING *;`;
-    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+    const updatedProfile: ProfileDto[][] = await this.dataSource.query(
       query,
       values,
     );
-    return updatedProfile[0];
+    return updatedProfile[0][0];
   }
 
   async updateGender(updatePayload: UpdateGenderBodyDto): Promise<ProfileDto> {
@@ -169,11 +169,11 @@ export class ProfileRepository {
     SET height = $1
     WHERE profiles.id = $2
     RETURNING *;`;
-    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+    const updatedProfile: ProfileDto[][] = await this.dataSource.query(
       query,
       values,
     );
-    return updatedProfile[0];
+    return updatedProfile[0][0];
   }
 
   async updateInterests(
@@ -184,11 +184,11 @@ export class ProfileRepository {
     SET interested_in = $1
     WHERE profiles.id = $2
     RETURNING *;`;
-    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+    const updatedProfile: ProfileDto[][] = await this.dataSource.query(
       query,
       values,
     );
-    return updatedProfile[0];
+    return updatedProfile[0][0];
   }
 
   async updateLookingFor(
@@ -231,11 +231,11 @@ export class ProfileRepository {
     SET photos = $1
     WHERE profiles.id = $2
     RETURNING *;`;
-    const updatedProfile: ProfileDto[] = await this.dataSource.query(
+    const updatedProfile: ProfileDto[][] = await this.dataSource.query(
       query,
       values,
     );
-    return updatedProfile[0];
+    return updatedProfile[0][0];
   }
 
   async updateDistanceRange(

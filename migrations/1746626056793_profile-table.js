@@ -49,7 +49,7 @@ exports.up = (pgm) => {
           sexual_orientation sexual_orientation_enum DEFAULT null,
           min_age INTEGER NOT NULL DEFAULT 18,    -- Added min_age with default
           max_age INTEGER NOT NULL DEFAULT 100,   -- Added max_age with default
-          max_distance_km INTEGER NOT NULL DEFAULT 100000,
+          max_distance_km INTEGER NOT NULL DEFAULT 40075,
           photos TEXT[] NOT NULL DEFAULT '{}',
           created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
           updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

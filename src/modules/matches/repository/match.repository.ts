@@ -145,7 +145,17 @@ export class MatchRepository {
   }
 
   async findAvailableForMatch(userId: number): Promise<PotentialMatch[]> {
-    const query = `SELECT 
+    const query = `
+      WITH host_user AS (
+          SELECT 
+            latitude, 
+            longitude, 
+            max_distance_km 
+          FROM profiles 
+          WHERE user_id = $1
+      )
+
+      SELECT 
         us.id AS user_id,
         us.connection_status,
         ms.status AS match_status,
@@ -162,7 +172,8 @@ export class MatchRepository {
         pr.photos,
         pr.birth_date,
         pr.city,
-        pr.country
+        pr.country,
+        pr.max_distance_km
         
   
       FROM users AS us
@@ -171,15 +182,29 @@ export class MatchRepository {
         ON ms.to_user_id = $1 AND ms.from_user_id = us.id
       
       LEFT JOIN profiles AS pr
-        ON pr.user_id = us.id
+        ON pr.user_id = us.id AND pr.user_id <> $1
       
+
+      -- Exclude users already matched
       WHERE us.id <> $1
-        AND NOT EXISTS (
-          SELECT 1 FROM matches m
-          WHERE m.from_user_id = $1 
-          AND m.to_user_id = us.id
-        )
-        AND (ms.status IS NULL OR ms.status <> 2);
+
+      AND NOT EXISTS (
+        SELECT 1 FROM matches m
+        WHERE m.from_user_id = $1 
+        AND m.to_user_id = us.id
+      )
+        -- Filter based on match status
+      AND (ms.status IS NULL OR ms.status <> 2)
+
+      -- Distance filtering: Fetch users within the max distance set by the searching user
+      AND 
+        -- Fetch the searching user's max_distance_km for the distance comparison
+        (SELECT max_distance_km FROM host_user) >= 120 -- Global match condition
+
+        OR earth_distance(
+          ll_to_earth(pr.latitude, pr.longitude),
+          ll_to_earth( (SELECT latitude FROM host_user), (SELECT longitude FROM host_user) ) -- host_user's latitude & longitude
+        ) <= (SELECT max_distance_km FROM host_user) * 1000
       `;
     const result: PotentialMatch[] = await this.dataSource.query(query, [
       userId,

@@ -9,6 +9,12 @@ exports.shorthands = undefined;
  * @returns {Promise<void> | void}
  */
 exports.up = (pgm) => {
+  pgm.sql(
+    `
+    CREATE EXTENSION IF NOT EXISTS cube;
+    CREATE EXTENSION IF NOT EXISTS earthdistance;`
+  );
+
   pgm.sql(`
     CREATE TABLE matches (
       id SERIAL PRIMARY KEY,

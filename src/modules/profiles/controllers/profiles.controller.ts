@@ -285,7 +285,7 @@ export class ProfilesController {
   async updateChildren(@Req() req: Request): Promise<GetProfileResponseDto> {
     try {
       const { profileId, status } = req.body as UpdateChildrenBodyDto;
-      const result = [profileId, status].filter(Boolean);
+      const result = [profileId, status];
       if (result.length !== 2) {
         throw new Error();
       }
